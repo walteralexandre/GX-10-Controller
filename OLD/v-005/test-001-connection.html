@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOSS GX-10 - Teste de Conexão MIDI (Test-001)</title>
+    <style>
+        :root {
+            --bg-color: #12141c;
+            --container-bg: #1c1f2b;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-blue: #3b82f6;
+            --border-color: #2e354f;
+            --btn-hover: #2d334a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 600px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        header {
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 16px;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            color: var(--text-main);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        header .subtitle {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .status-card {
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .status-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background-color: var(--accent-red);
+            box-shadow: 0 0 10px var(--accent-red);
+            transition: all 0.3s ease;
+        }
+
+        .status-dot.connected {
+            background-color: var(--accent-green);
+            box-shadow: 0 0 12px var(--accent-green);
+        }
+
+        .status-label {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .status-text {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 2px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background-color: var(--btn-hover);
+        }
+
+        .btn-connect {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .btn-connect:hover {
+            background-color: rgba(16, 185, 129, 0.1);
+        }
+
+        .btn-disconnect {
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        .btn-disconnect:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .btn-full {
+            grid-column: span 2;
+        }
+
+        .console-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .btn-clear {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .btn-clear:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+        }
+
+        .console-log {
+            background-color: #0b0c10;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            height: 200px;
+            overflow-y: auto;
+            padding: 12px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .log-entry {
+            margin-bottom: 6px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            padding-bottom: 4px;
+        }
+
+        .log-time {
+            color: var(--text-muted);
+            margin-right: 6px;
+        }
+
+        .log-info {
+            color: var(--accent-blue);
+        }
+
+        .log-success {
+            color: var(--accent-green);
+        }
+
+        .log-error {
+            color: var(--accent-red);
+        }
+
+        .log-warn {
+            color: #f59e0b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>🎛️ BOSS GX-10</h1>
+            <div class="subtitle">Módulo de Teste de Conexão MIDI (Test-001)</div>
+        </header>
+
+        <div class="status-card">
+            <div>
+                <div class="status-label">Status da Conexão</div>
+                <div id="status-device" class="status-text">Dispositivo Desconectado</div>
+            </div>
+            <div class="status-info">
+                <div id="status-indicator" class="status-dot"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="btn-connect" class="btn btn-connect">Conectar</button>
+            <button id="btn-disconnect" class="btn btn-disconnect">Desconectar</button>
+            <button id="btn-status" class="btn btn-full">Verificar Status da Conexão</button>
+        </div>
+
+        <div>
+            <div class="console-header">
+                <span>Histórico de Eventos (Log)</span>
+                <button id="btn-clear-log" class="btn-clear">Limpar Log</button>
+            </div>
+            <div id="console-log" class="console-log">
+                <!-- Log inicial -->
+                <div class="log-entry"><span class="log-time">[SISTEMA]</span> <span class="log-info">Interface pronta. Clique em "Conectar" para iniciar.</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carrega a classe de forma tradicional para evitar bloqueios de CORS ao executar offline via file:// -->
+    <script src="js/gx10.class.js"></script>
+    <script>
+        // Instancia a classe principal (carregada globalmente de js/gx10.class.js)
+        const pedal = new GX10();
+
+        // Referências dos Elementos da UI
+        const btnConnect = document.getElementById('btn-connect');
+        const btnDisconnect = document.getElementById('btn-disconnect');
+        const btnStatus = document.getElementById('btn-status');
+        const btnClearLog = document.getElementById('btn-clear-log');
+        const consoleLog = document.getElementById('console-log');
+        const statusIndicator = document.getElementById('status-indicator');
+        const statusDeviceName = document.getElementById('status-device');
+
+        /**
+         * Adiciona uma nova mensagem de log na janela de console.
+         * @param {string} text - Texto a ser impresso.
+         * @param {string} type - Tipo da mensagem (info, success, error, warn).
+         */
+        function addLog(text, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'log-time';
+            timeSpan.textContent = `[${timestamp}]`;
+            
+            const msgSpan = document.createElement('span');
+            msgSpan.className = `log-${type}`;
+            msgSpan.textContent = text;
+            
+            entry.appendChild(timeSpan);
+            entry.appendChild(msgSpan);
+            consoleLog.appendChild(entry);
+            
+            // Rola automaticamente para o fim do log
+            consoleLog.scrollTop = consoleLog.scrollHeight;
+        }
+
+        /**
+         * Atualiza os indicadores visuais de conexão no card principal.
+         */
+        function updateConnectionUI() {
+            const connected = pedal.isConnected();
+            if (connected) {
+                statusIndicator.classList.add('connected');
+                statusDeviceName.textContent = `Conectado a: ${pedal.getDeviceName()}`;
+            } else {
+                statusIndicator.classList.remove('connected');
+                statusDeviceName.textContent = 'Dispositivo Desconectado';
+            }
+        }
+
+        // --- Configuração dos Eventos e Ações ---
+
+        // Escuta mudanças de hardware (cabo conectado ou desconectado)
+        pedal.onStateChange(({ isConnected, reason, deviceName }) => {
+            addLog(`Mudança física: ${reason}`, 'warn');
+            if (deviceName) {
+                addLog(`Dispositivo afetado: ${deviceName}`, 'info');
+            }
+            updateConnectionUI();
+        });
+
+        // Botão CONECTAR
+        btnConnect.addEventListener('click', async () => {
+            addLog('Solicitando acesso MIDI com suporte a SysEx...', 'info');
+            
+            const result = await pedal.connect();
+            
+            if (result.success) {
+                addLog(result.message, 'success');
+            } else {
+                addLog(result.error, 'error');
+            }
+            updateConnectionUI();
+        });
+
+        // Botão DESCONECTAR
+        btnDisconnect.addEventListener('click', () => {
+            const result = pedal.disconnect();
+            
+            if (result.success) {
+                addLog(result.message, 'success');
+            } else {
+                addLog(result.error, 'warn');
+            }
+            updateConnectionUI();
+        });
+
+        // Botão VERIFICAR STATUS
+        btnStatus.addEventListener('click', () => {
+            const connected = pedal.isConnected();
+            if (connected) {
+                const name = pedal.getDeviceName();
+                addLog(`[STATUS] Ativo e Conectado ao dispositivo: ${name}`, 'success');
+            } else {
+                addLog('[STATUS] Nenhuma conexão ativa detectada.', 'warn');
+            }
+            updateConnectionUI();
+        });
+
+        // Botão LIMPAR LOG
+        btnClearLog.addEventListener('click', () => {
+            consoleLog.innerHTML = '';
+            addLog('Histórico de log limpo.', 'info');
+        });
+    </script>
+</body>
+</html>
