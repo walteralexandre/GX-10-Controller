@@ -61,7 +61,7 @@ class GX10 {
      * @returns {Promise<{entradas: Array, saidas: Array}>}
      */
     async listPorts() {
-        if (!navigator.requestMIDIAccess) throw new Error("A Web MIDI API não é suportada por este navegador.");
+        if (!navigator.requestMIDIAccess) throw new Error("The Web MIDI API is not supported by this browser.");
         if (!this.#midiAccess) this.#midiAccess = await navigator.requestMIDIAccess({ sysex: true });
         const mapear = p => ({ id: p.id, nome: p.name, fabricante: p.manufacturer || "", estado: p.state });
         return {
@@ -82,7 +82,7 @@ class GX10 {
             if (!navigator.requestMIDIAccess) {
                 return {
                     success: false,
-                    error: "A Web MIDI API não é suportada por este navegador. Use o Chrome, Edge ou Opera."
+                    error: "The Web MIDI API is not supported by this browser. Use Chrome, Edge or Opera."
                 };
             }
 
@@ -109,7 +109,7 @@ class GX10 {
             if (!input || !output) {
                 return {
                     success: false,
-                    error: "Dispositivo BOSS GX-10 não encontrado. Verifique se ele está conectado via USB e ligado."
+                    error: "BOSS GX-10 not found. Check that it is plugged in over USB and switched on."
                 };
             }
 
@@ -128,7 +128,7 @@ class GX10 {
             return {
                 success: true,
                 deviceName: input.name,
-                message: `Conectado com sucesso ao dispositivo: ${input.name} (modo editor ligado)`
+                message: `Connected to ${input.name} (editor mode on)`
             };
 
         } catch (error) {
@@ -161,20 +161,20 @@ class GX10 {
             if (this.#onStateChangeCallback) {
                 this.#onStateChangeCallback({
                     isConnected: false,
-                    reason: "Desconexão manual solicitada pelo usuário",
+                    reason: "Disconnected by the user",
                     deviceName: deviceName
                 });
             }
 
             return {
                 success: true,
-                message: "Desconectado com sucesso da BOSS GX-10."
+                message: "Disconnected from the BOSS GX-10."
             };
         }
 
         return {
             success: false,
-            error: "Nenhuma conexão ativa encontrada para desconectar."
+            error: "There is no active connection to close."
         };
     }
 
@@ -225,7 +225,7 @@ class GX10 {
                 if (this.#onStateChangeCallback) {
                     this.#onStateChangeCallback({
                         isConnected: false,
-                        reason: "Dispositivo USB desconectado fisicamente",
+                        reason: "USB device unplugged",
                         deviceName: prevDeviceName
                     });
                 }
@@ -236,7 +236,7 @@ class GX10 {
             if (this.#onStateChangeCallback) {
                 this.#onStateChangeCallback({
                     isConnected: false,
-                    reason: "Dispositivo BOSS GX-10 detectado. Pronto para conectar.",
+                    reason: "BOSS GX-10 detected. Ready to connect.",
                     deviceName: port.name
                 });
             }
@@ -361,7 +361,7 @@ class GX10 {
     requestData(endereco, tamanho, tempoLimite = 1500) {
         return new Promise((resolve, reject) => {
             if (!this.isConnected()) {
-                reject(new Error("GX-10 não está conectada."));
+                reject(new Error("The GX-10 is not connected."));
                 return;
             }
 
@@ -372,7 +372,7 @@ class GX10 {
                 reject,
                 temporizador: setTimeout(() => {
                     this.#pendentes = this.#pendentes.filter(p => p !== pedido);
-                    reject(new Error(`A pedaleira não respondeu em ${tempoLimite} ms (endereço ${endereco.map(b => b.toString(16).padStart(2, "0")).join(" ")}).`));
+                    reject(new Error(`The pedal did not answer within ${tempoLimite} ms (address ${endereco.map(b => b.toString(16).padStart(2, "0")).join(" ")}).`));
                 }, tempoLimite)
             };
 
@@ -381,7 +381,7 @@ class GX10 {
             if (!this.sendMidi(this.buildRQ1(endereco, tamanho))) {
                 clearTimeout(pedido.temporizador);
                 this.#pendentes = this.#pendentes.filter(p => p !== pedido);
-                reject(new Error("Falha ao enviar o pedido de leitura."));
+                reject(new Error("Could not send the read request."));
             }
         });
     }
