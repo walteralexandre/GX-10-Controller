@@ -7,7 +7,7 @@ This project is a work in progress. **Use it at your own risk.**
 - No installation or configuration required.
 - No account required.
 - Your browser must support Web MIDI.
-- If your current browser does not support Web MIDI, please use another browser.
+  - If your current browser does not support Web MIDI, please use another browser.
 
 ## Notes
 
