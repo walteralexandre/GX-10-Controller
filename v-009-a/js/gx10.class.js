@@ -151,8 +151,7 @@ class GX10 {
 
             // Devolve a pedaleira ao estado normal, como o BOSS Tone Studio faz ao sair.
             // Em try/catch: se o cabo já saiu, o envio falha e não pode derrubar o resto.
-            const viva = portas.output && portas.output.state === "connected";
-            try { if (this.#modoEditor && viva) this.setEditorMode(false); } catch (e) { /* porta já foi embora */ }
+            try { if (this.#modoEditor) this.setEditorMode(false); } catch (e) { /* porta já foi embora */ }
             this.#modoEditor = false;
 
             this.#descartaPendentes("Connection closed.");
@@ -221,17 +220,16 @@ class GX10 {
         if (port.state === "disconnected") {
             if (this.#connection && (this.#connection.input === port || this.#connection.output === port)) {
                 const prevDeviceName = port.name;
+                const portas = this.#connection;
 
-                // O aparelho SUMIU. Aqui não se chama nada da porta — nem close(),
-                // nem send(), nem mexer no onmidimessage. Fechar uma porta que já foi
-                // embora é o que trava o navegador no Windows (e não adianta nada: o
-                // identificador já morreu junto com o aparelho). Só largamos as
-                // referências e deixamos o navegador recolher o que é dele.
+                // O aparelho sumiu: largar tudo o que ficou preso nele. Sem isso o
+                // navegador continua segurando a porta aberta e pode travar ao fechar a aba.
                 this.stopActiveSensing();
                 this.#modoEditor = false;
                 this.#bufferSysEx = [];
                 this.#descartaPendentes("The GX-10 was unplugged.");
                 this.#connection = null;
+                this.#fechaPortas(portas);
                 
                 if (this.#onStateChangeCallback) {
                     this.#onStateChangeCallback({
@@ -440,14 +438,12 @@ class GX10 {
     #fechaPortas(portas) {
         if (!portas) return;
         [portas.input, portas.output].forEach(porta => {
-            // Porta que já não está "connected" NÃO se fecha: o aparelho se foi e
-            // chamar close() nela é justamente o que pendura o navegador.
-            if (!porta || porta.state !== "connected") return;
+            if (!porta) return;
             try {
                 if (porta.onmidimessage !== undefined) porta.onmidimessage = null;
                 const r = porta.close && porta.close();
-                if (r && typeof r.catch === "function") r.catch(() => { /* já foi */ });
-            } catch (e) { /* já foi */ }
+                if (r && typeof r.catch === "function") r.catch(() => { /* porta já sumiu */ });
+            } catch (e) { /* porta já sumiu */ }
         });
     }
 

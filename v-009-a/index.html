@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en-US">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOSS GX-10 - Cadeia de Efeitos (Test-003 Chain FX)</title>
+    <title>BOSS GX-10 Controller</title>
     <style>
         :root {
             --bg-color: #12141c; --container-bg: #1c1f2b; --text-main: #f3f4f6; --text-muted: #9ca3af;
@@ -14,54 +14,62 @@
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
                background-color: var(--bg-color); color: var(--text-main); padding: 20px; }
         .container { background-color: var(--container-bg); border: 1px solid var(--border-color);
-                     border-radius: 12px; width: 100%; max-width: 1180px; margin: 0 auto; padding: 24px; }
-        header { margin-bottom: 18px; border-bottom: 1px solid var(--border-color); padding-bottom: 14px; }
-        header h1 { font-size: 1.4rem; display: flex; align-items: center; gap: 10px; }
-        header .subtitle { font-size: .85rem; color: var(--text-muted); margin-top: 4px; }
-        .aviso { background: rgba(245,158,11,.1); border: 1px solid var(--accent-amber); border-radius: 8px;
-                 padding: 10px 12px; margin-bottom: 16px; font-size: .8rem; color: #fde68a; line-height: 1.5; }
-        .status-card { background: rgba(255,255,255,.03); border: 1px solid var(--border-color); border-radius: 8px;
-                       padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
-        .status-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--accent-red);
-                      box-shadow: 0 0 10px var(--accent-red); transition: all .3s ease; }
+                     border-radius: 12px; width: 100%; max-width: 1180px; margin: 0 auto; padding: 24px; position: relative; }
+        header { margin-bottom: 18px; border-bottom: 1px solid var(--border-color); padding-bottom: 14px;
+                 display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        header h1 { font-size: 1.4rem; display: flex; align-items: center; gap: 12px; }
+        .status-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--accent-red); flex: none;
+                      box-shadow: 0 0 10px var(--accent-red); transition: all .3s ease; cursor: help; }
         .status-dot.connected { background: var(--accent-green); box-shadow: 0 0 12px var(--accent-green); }
-        .status-text { color: var(--text-muted); font-size: .8rem; margin-top: 2px; }
-        .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; align-items: center; }
+
+        /* ============ Options menu ============ */
+        .menu-wrap { position: relative; }
+        .btn-menu { width: 38px; height: 38px; border-radius: 9px; border: 1px solid var(--border-color);
+                    background: rgba(255,255,255,.05); color: var(--text-main); cursor: pointer;
+                    font-size: 1.1rem; line-height: 1; display: flex; align-items: center; justify-content: center; }
+        .btn-menu:hover { background: var(--btn-hover); }
+        .menu { position: absolute; right: 0; top: 46px; min-width: 210px; background: var(--container-bg);
+                border: 1px solid var(--border-color); border-radius: 10px; padding: 6px; display: none;
+                box-shadow: 0 14px 34px rgba(0,0,0,.5); z-index: 40; }
+        .menu.aberto { display: block; }
+        .menu button { display: block; width: 100%; text-align: left; padding: 9px 12px; font-size: .85rem;
+                       background: none; border: none; color: var(--text-main); border-radius: 7px; cursor: pointer; }
+        .menu button:hover:not(:disabled) { background: var(--btn-hover); }
+        .menu button:disabled { opacity: .35; cursor: not-allowed; }
+        .menu .risca { height: 1px; background: var(--border-color); margin: 6px 4px; }
+        .menu .marca { float: right; color: var(--accent-green); font-size: .75rem; }
+
         .btn { padding: 9px 14px; font-size: .85rem; font-weight: 600; border: 1px solid var(--border-color);
                border-radius: 8px; cursor: pointer; background: rgba(255,255,255,.05); color: var(--text-main); }
         .btn:hover:not(:disabled) { background: var(--btn-hover); }
-        .btn:disabled { opacity: .4; cursor: not-allowed; }
-        .btn-connect { border-color: var(--accent-green); color: var(--accent-green); }
-        .btn-disconnect { border-color: var(--accent-red); color: var(--accent-red); }
-        .btn-read { border-color: var(--accent-blue); color: var(--accent-blue); }
+        .btn-remove { border-color: var(--accent-red); color: var(--accent-red); }
         h2 { font-size: .95rem; margin: 16px 0 10px; }
 
-        /* ============ Palco da cadeia ============ */
+        /* ============ Chain stage ============ */
         .palco { background: var(--palco); border: 1px solid var(--border-color); border-radius: 12px;
                  padding: 22px 18px; overflow-x: auto; }
-        .cadeia { display: flex; align-items: center; min-height: 120px; }
+        .cadeia { display: flex; align-items: center; min-height: 110px; }
         .trilha { display: flex; align-items: center; }
-        .bloco { width: 78px; height: 78px; border-radius: 14px; display: flex; flex-direction: column;
+        .bloco { width: 64px; height: 64px; border-radius: 13px; display: flex; flex-direction: column;
                  align-items: center; justify-content: center; gap: 2px; cursor: grab; position: relative;
-                 font-weight: 800; letter-spacing: .01em; text-align: center; padding: 5px;
+                 font-weight: 800; letter-spacing: .01em; text-align: center; padding: 4px;
                  border: 2px solid transparent; flex: none; user-select: none; transition: transform .12s ease; }
         .bloco:hover { transform: translateY(-2px); }
-        .bloco .abrev { line-height: 1.1; overflow-wrap: anywhere; hyphens: none; }
-        .bloco .num { font-size: .55rem; font-weight: 600; opacity: .65; }
+        .bloco .abrev { line-height: 1.1; overflow-wrap: anywhere; }
+        .bloco .num { font-size: .5rem; font-weight: 600; opacity: .65; }
         .bloco.desligado { opacity: .38; }
         .bloco.selecionado { outline: 3px solid #fff; outline-offset: 2px; }
         .bloco.arrastando { opacity: .35; }
-        .bloco .fechar { position: absolute; top: -8px; right: -8px; width: 20px; height: 20px; border-radius: 50%;
-                         background: var(--accent-red); color: #fff; border: 2px solid var(--palco); font-size: .7rem;
+        .bloco .fechar { position: absolute; top: -7px; right: -7px; width: 19px; height: 19px; border-radius: 50%;
+                         background: var(--accent-red); color: #fff; border: 2px solid var(--palco); font-size: .68rem;
                          line-height: 1; display: none; align-items: center; justify-content: center; cursor: pointer;
                          font-weight: 700; padding: 0; }
-        .bloco:hover .fechar, .bloco.selecionado .fechar { display: flex; }
-        .bloco.mestre { cursor: pointer; margin-left: 34px; position: relative; }
+        .bloco:hover .fechar { display: flex; }
+        .bloco.mestre { cursor: pointer; margin-left: 34px; }
         .bloco.mestre::before { content: ""; position: absolute; left: -34px; width: 34px; height: 2px;
                                 background: repeating-linear-gradient(90deg, #4b5368 0 5px, transparent 5px 10px); }
 
-        /* faixa entre blocos: é o fio e também o lugar de soltar / somar */
-        .alvo { width: 26px; height: 78px; display: flex; align-items: center; justify-content: center;
+        .alvo { width: 26px; height: 64px; display: flex; align-items: center; justify-content: center;
                 position: relative; flex: none; }
         .alvo .fio { position: absolute; left: 0; right: 0; height: 2px; background: #3a4258; }
         .alvo .mais { position: relative; width: 20px; height: 20px; border-radius: 6px; border: none;
@@ -73,17 +81,16 @@
         .alvo.ponta { width: 44px; }
         .alvo.ponta .mais { opacity: .75; width: 26px; height: 26px; font-size: .95rem; }
 
-        /* bifurcação Divider / Mixer */
         .ramo { display: flex; align-items: center; }
         .canais { display: flex; flex-direction: column; gap: 12px; position: relative; padding: 0 6px; }
         .canal { display: flex; align-items: center; }
         .canal .etiqueta { font-size: .6rem; font-weight: 800; color: var(--text-muted); width: 16px;
                            text-align: center; flex: none; }
         .canais::before, .canais::after { content: ""; position: absolute; width: 2px; background: #3a4258; }
-        .canais::before { left: 0; top: 39px; bottom: 39px; }
-        .canais::after { right: 0; top: 39px; bottom: 39px; }
+        .canais::before { left: 0; top: 32px; bottom: 32px; }
+        .canais::after { right: 0; top: 32px; bottom: 32px; }
 
-        /* ============ Escolha de efeito ============ */
+        /* ============ Dialogs ============ */
         .cortina { position: fixed; inset: 0; background: rgba(0,0,0,.65); display: none;
                    align-items: center; justify-content: center; padding: 20px; z-index: 50; }
         .cortina.aberta { display: flex; }
@@ -96,38 +103,60 @@
         .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 8px; overflow-y: auto; padding-right: 4px; }
         .ficha { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,.04); border: 1px solid var(--border-color);
                  border-radius: 8px; padding: 7px 9px; cursor: pointer; font-size: .74rem; text-align: left; color: var(--text-main); }
-        .ficha:hover { background: var(--btn-hover); }
+        .ficha:hover:not(:disabled) { background: var(--btn-hover); }
         .ficha:disabled { opacity: .35; cursor: not-allowed; }
-        .ficha .selo { width: 26px; height: 26px; border-radius: 7px; flex: none; font-size: .5rem; font-weight: 800;
+        .ficha .selo { width: 26px; height: 26px; border-radius: 7px; flex: none; font-weight: 800;
                        display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1; }
+        .legenda-lista { display: grid; gap: 8px; margin-top: 6px; }
+        .legenda-lista div { display: flex; align-items: center; gap: 10px; font-size: .82rem; }
+        .legenda-lista .amostra { font-family: "Courier New", monospace; font-weight: 700; min-width: 92px; }
 
-        /* ============ Painel de parâmetros ============ */
+        /* ============ Parameters ============ */
         .painel { margin-top: 16px; border: 1px solid var(--border-color); border-radius: 10px; padding: 16px;
                   background: rgba(255,255,255,.02); }
-        .painel .cabeca { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-        .painel h3 { font-size: 1rem; margin-bottom: 4px; }
-        .painel .sub { font-size: .75rem; color: var(--text-muted); font-family: "Courier New", monospace; margin-bottom: 14px; }
+        .painel .cabeca { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+        .painel h3 { font-size: 1rem; }
         .param { display: grid; grid-template-columns: 210px 1fr 130px; gap: 12px; align-items: center;
                  padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,.04); }
         .param:last-child { border-bottom: none; }
-        .param .rotulo { font-size: .82rem; }
-        .param .rotulo small { display: block; color: var(--text-muted); font-size: .68rem; font-family: "Courier New", monospace; }
+        .param .rotulo { font-size: .85rem; cursor: help; }
         .param .valor { font-size: .82rem; font-weight: 600; text-align: right; font-family: "Courier New", monospace; }
-        .param.alerta .rotulo { color: #fde68a; }
         .param.travado { opacity: .5; }
         .param.piscou { background: rgba(16,185,129,.16); border-radius: 6px; transition: background .5s ease; }
         input[type=range] { width: 100%; accent-color: var(--accent-blue); cursor: pointer; }
         input[type=range]:disabled { cursor: not-allowed; }
         .vazio { color: var(--text-muted); font-size: .85rem; padding: 8px 0; }
 
-        .console-log { background: #0b0c10; border: 1px solid var(--border-color); border-radius: 8px; height: 170px;
+        /* ============ Log ============ */
+        #secao-log[hidden] { display: none; }
+        .console-log { background: #0b0c10; border: 1px solid var(--border-color); border-radius: 8px; height: 180px;
                        overflow-y: auto; padding: 10px; font-family: "Courier New", monospace; font-size: .75rem; line-height: 1.45; }
         .log-entry { margin-bottom: 4px; }
         .log-time { color: var(--text-muted); margin-right: 6px; }
         .log-info { color: var(--accent-blue); } .log-success { color: var(--accent-green); }
         .log-error { color: var(--accent-red); } .log-warn { color: var(--accent-amber); } .log-raw { color: #c4b5fd; }
-        .console-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;
-                          font-size: .8rem; color: var(--text-muted); }
+        .log-titulo { display: flex; align-items: center; gap: 8px; }
+        .btn-info { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--border-color);
+                    background: none; color: var(--text-muted); font-size: .72rem; font-weight: 700; cursor: pointer;
+                    line-height: 1; display: flex; align-items: center; justify-content: center; }
+        .btn-info:hover { color: var(--text-main); border-color: var(--text-main); }
+        .log-barra { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+                     gap: 12px; margin-bottom: 8px; font-size: .78rem; color: var(--text-muted); }
+        .log-barra label { display: flex; align-items: center; gap: 6px; }
+        /* ============ Tooltip ============ */
+        .dica-flutuante { position: fixed; z-index: 90; max-width: 320px; pointer-events: none;
+                          background: #0b0d14; color: var(--text-main); border: 1px solid var(--border-color);
+                          border-radius: 8px; padding: 8px 11px; font-size: .78rem; line-height: 1.45;
+                          box-shadow: 0 10px 26px rgba(0,0,0,.55); opacity: 0; transform: translateY(4px);
+                          transition: opacity .13s ease, transform .13s ease; }
+        .dica-flutuante.aberta { opacity: 1; transform: translateY(0); }
+        [data-tip] { cursor: help; }
+        .bloco[data-tip], button[data-tip] { cursor: inherit; }
+
+        .sobre p { font-size: .85rem; line-height: 1.6; color: var(--text-main); }
+        .sobre dl { display: grid; grid-template-columns: 90px 1fr; gap: 6px 12px; margin-top: 14px; font-size: .83rem; }
+        .sobre dt { color: var(--text-muted); }
+
         .btn-clear { font-size: .7rem; padding: 2px 8px; background: none; border: 1px solid var(--border-color);
                      color: var(--text-muted); cursor: pointer; border-radius: 4px; }
     </style>
@@ -135,65 +164,86 @@
 <body>
     <div class="container">
         <header>
-            <h1>🎛️ BOSS GX-10 — Cadeia de Efeitos</h1>
-            <div class="subtitle">Test-003 Chain FX: veja a cadeia, arraste para reordenar, clique para editar</div>
+            <h1>🎛️ BOSS GX-10 Controller
+                <span id="status-indicator" class="status-dot" data-tip="Device disconnected"></span>
+            </h1>
+            <div class="menu-wrap">
+                <button id="btn-menu" class="btn-menu" data-tip="Options" aria-label="Options">☰</button>
+                <div id="menu" class="menu">
+                    <button id="btn-connect">Connect</button>
+                    <button id="btn-disconnect">Disconnect</button>
+                    <button id="btn-read">Reload chain</button>
+                    <div class="risca"></div>
+                    <button id="btn-debug">Debug mode <span id="marca-debug" class="marca"></span></button>
+                    <button id="btn-sobre">About</button>
+                </div>
+            </div>
         </header>
 
-        <div class="aviso">
-            <strong>Só mexe na memória temporária</strong> (o patch em edição). Clique num bloco para abrir os parâmetros dele.
-            Arraste para mudar a ordem. O <strong>+</strong> entre dois blocos acrescenta um efeito naquele ponto; o
-            <strong>×</strong> no canto do bloco tira ele da cadeia. Entre o <strong>DIV</strong> e o <strong>MIX</strong> a
-            cadeia se abre em dois caminhos: a linha de cima é o canal A, a de baixo é o canal B.
-        </div>
-
-        <div class="status-card">
-            <div>
-                <div style="font-weight:600;font-size:.9rem;">Status da Conexão</div>
-                <div id="status-device" class="status-text">Dispositivo Desconectado</div>
-            </div>
-            <div id="status-indicator" class="status-dot"></div>
-        </div>
-
-        <div class="controls">
-            <button id="btn-connect" class="btn btn-connect">Conectar</button>
-            <button id="btn-disconnect" class="btn btn-disconnect">Desconectar</button>
-            <button id="btn-read" class="btn btn-read" disabled>Reler a cadeia</button>
-            <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--text-muted);">
-                <input type="checkbox" id="chk-espiao"> registrar tudo que a pedaleira envia
-            </label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--text-muted);">
-                <input type="checkbox" id="chk-espelho" checked> espelhar mudanças feitas na pedaleira
-            </label>
-        </div>
-
-        <div class="palco"><div id="cadeia" class="cadeia"><div class="vazio">Conecte a pedaleira para ver a cadeia.</div></div></div>
+        <div class="palco"><div id="cadeia" class="cadeia"><div class="vazio">Connecting to the pedal…</div></div></div>
 
         <div id="painel"></div>
 
-        <h2>Registro</h2>
-        <div class="console-header">
-            <span>Mensagens e bytes trocados</span>
-            <button id="btn-clear-log" class="btn-clear">Limpar</button>
-        </div>
-        <div id="console-log" class="console-log"></div>
+        <section id="secao-log" hidden>
+            <h2 class="log-titulo">Log <button id="btn-legenda" class="btn-info" data-tip="What the colours mean" aria-label="What the colours mean">i</button></h2>
+            <div class="log-barra">
+                <div style="display:flex;flex-wrap:wrap;gap:14px;">
+                    <label><input type="checkbox" id="chk-espiao"> log everything the pedal sends</label>
+                    <label><input type="checkbox" id="chk-espelho" checked> mirror changes made on the pedal</label>
+                </div>
+                <button id="btn-clear-log" class="btn-clear">Clear</button>
+            </div>
+            <div id="console-log" class="console-log"></div>
+        </section>
     </div>
 
     <div id="cortina" class="cortina">
         <div class="escolha">
-            <h3>Acrescentar efeito</h3>
+            <h3>Add an effect</h3>
             <div id="escolha-onde" class="dica"></div>
-            <input type="search" id="busca" placeholder="filtrar pelo nome…" autocomplete="off">
+            <input type="search" id="busca" placeholder="filter by name…" autocomplete="off">
             <div id="grade" class="grade"></div>
+        </div>
+    </div>
+
+    <div id="cortina-sobre" class="cortina">
+        <div class="escolha sobre" style="max-width:460px;">
+            <h3>BOSS GX-10 Controller</h3>
+            <div class="dica">Editor for the BOSS GX-10 guitar processor.</div>
+            <p>Edits the memory you have open on the pedal, straight from the browser over USB MIDI:
+               build the effect chain, drag the blocks around and adjust every parameter. What you change
+               on the pedal shows up here on its own.</p>
+            <dl>
+                <dt>Pedal</dt><dd>BOSS GX-10 · firmware 1.06.0068</dd>
+                <dt>Author</dt><dd>Walter Alexandre</dd>
+                <dt>Version</dt><dd id="sobre-versao"></dd>
+                <dt>Tables</dt><dd id="sobre-tabelas"></dd>
+            </dl>
+        </div>
+    </div>
+
+    <div id="cortina-legenda" class="cortina">
+        <div class="escolha" style="max-width:520px;">
+            <h3>Log colours</h3>
+            <div class="dica">What each colour in the message log means.</div>
+            <div class="legenda-lista">
+                <div><span class="amostra log-info">Blue</span><span>Something the page is about to do (reading, connecting).</span></div>
+                <div><span class="amostra log-success">Green</span><span>Finished and confirmed by the pedal.</span></div>
+                <div><span class="amostra log-warn">Amber</span><span>Worth noticing: refused action, pedal unplugged, change made on the pedal.</span></div>
+                <div><span class="amostra log-error">Red</span><span>Error: the message failed or the pedal did not accept it.</span></div>
+                <div><span class="amostra log-raw">Purple</span><span>Raw MIDI bytes sent and received.</span></div>
+                <div><span class="amostra" style="color:var(--text-muted);">Grey</span><span>Time the line was logged.</span></div>
+            </div>
         </div>
     </div>
 
     <script src="js/gx10.class.js"></script>
     <script src="js/gx10.modules.js"></script>
     <script>
-        // ================== Endereços (memória temporária) ==================
+        // ================== Addresses (temporary memory) ==================
         const END_CADEIA = [0x10, 0x00, 0x0F, 0x0C];   // CHAIN TOP + NEXT ITEM0..48
         const TAM_CADEIA = 50;
-        const END_EFCT = [0x10, 0x00, 0x0F, 0x00];     // [MemoryEfct]: Master + cadeia
+        const END_EFCT = [0x10, 0x00, 0x0F, 0x00];     // [MemoryEfct]: Master + chain
         const TAM_EFCT_MASTER = 11;
         const END_FX_ITEM_1 = [0x10, 0x00, 0x11, 0x00];
         const PASSO_FX_ITEM = 0x100;
@@ -201,9 +251,13 @@
         const FIM_DA_CADEIA = -1;
         const DESLOC_NIBBLE = 32768;
 
-        // Divider, Splitter e Mixer são um conjunto: entram e saem juntos, e só cabe um.
+        // Divider, Splitter and Mixer work as one set: they come and go together, only one per chain.
         const TIPO_DIVIDER = 29, TIPO_SPLITTER = 30, TIPO_MIXER = 31;
         const TIPOS_DO_GRUPO = [TIPO_DIVIDER, TIPO_SPLITTER, TIPO_MIXER];
+
+        const DEBUG = /[?&]debug=(true|1)(&|$)/i.test(location.search);
+        const APP_VERSAO = "0.9.0";
+        const APP_DATA = "October 2, 2026";
 
         const pedal = new GX10();
         let cadeia = null, itens = [], ordem = [], selecionado = null;
@@ -235,22 +289,22 @@
 
         const enderecoDoItem = slot => GX10.addrAdd(END_FX_ITEM_1, slot * PASSO_FX_ITEM);
 
-        /** Abreviações vão de 2 a 13 letras: a letra encolhe para caber no quadrado. */
-        function tamanhoDaLetra(texto) {
-            const maiorPalavra = Math.max(...texto.split(" ").map(p => p.length));
-            if (texto.length <= 6 && maiorPalavra <= 6) return ".74rem";
-            if (maiorPalavra <= 7) return ".64rem";
-            return ".56rem";
-        }
-
-        /** Texto preto ou branco, conforme o fundo do bloco. */
+        /** Black or white text, depending on how light the block colour is. */
         function corDoTexto(fundo) {
             const n = parseInt(fundo.slice(1), 16);
             const luz = (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
             return luz > 0.6 ? "#11131a" : "#ffffff";
         }
 
-        // ================== Conversão de valores ==================
+        /** Short names run from 2 to 13 letters: the type shrinks so it fits the square. */
+        function tamanhoDaLetra(texto) {
+            const maiorPalavra = Math.max(...texto.split(" ").map(p => p.length));
+            if (texto.length <= 6 && maiorPalavra <= 6) return ".66rem";
+            if (maiorPalavra <= 7) return ".57rem";
+            return ".5rem";
+        }
+
+        // ================== Value conversion ==================
         function nibblesParaValor(n) {
             return ((n[0] << 12) | (n[1] << 8) | (n[2] << 4) | n[3]) - DESLOC_NIBBLE;
         }
@@ -258,7 +312,7 @@
             const bruto = v + DESLOC_NIBBLE;
             return [(bruto >> 12) & 0x0F, (bruto >> 8) & 0x0F, (bruto >> 4) & 0x0F, bruto & 0x0F];
         }
-        // O Master usa 2 ou 4 nibbles; os efeitos, sempre 4.
+        // The Master uses 2 or 4 nibbles; effect parameters always use 4.
         function valorParaNibblesSemDeslocamento(v, quantos = 4) {
             const n = [];
             for (let i = quantos - 1; i >= 0; i--) n.push((v >> (i * 4)) & 0x0F);
@@ -273,7 +327,7 @@
                 return op ? op.label : "? (" + v + ")";
             }
             if (p.notes && p.notesStart !== undefined && v >= p.notesStart) {
-                return p.notes[v - p.notesStart] || "nota ?";
+                return p.notes[v - p.notesStart] || "note ?";
             }
             if (p.offLabel && v === 0) return p.offLabel;
             if (p.format === "balance") {
@@ -284,12 +338,12 @@
             return num + (p.unit ? " " + p.unit : "");
         }
 
-        // ================== Leitura ==================
+        // ================== Reading ==================
         function ordemDaCadeia() {
             const o = [];
             let atual = cadeia.topo, guarda = 0;
             while (atual !== FIM_DA_CADEIA && guarda++ < 60) {
-                if (o.includes(atual)) { addLog("A cadeia tem um laço (id " + atual + "). Leitura interrompida.", "error"); break; }
+                if (o.includes(atual)) { addLog("The chain loops back on itself (id " + atual + "). Stopped reading.", "error"); break; }
                 o.push(atual);
                 atual = cadeia.proximos[atual] ?? FIM_DA_CADEIA;
             }
@@ -299,7 +353,7 @@
         async function lerCadeia() {
             lendo++;
             try {
-                addLog("Lendo a cadeia...", "info");
+                addLog("Reading the chain…", "info");
                 const brutos = await pedal.requestData(END_CADEIA, TAM_CADEIA);
                 cadeia = { topo: brutos[0] - 1, proximos: brutos.slice(1).map(b => b - 1) };
 
@@ -309,16 +363,15 @@
                     itens.push({ slot, typeId: d[0], ligado: d[1] === 1 });
                 }
                 ordem = ordemDaCadeia();
-                addLog("Cadeia: " + ordem.map(id => nomeDoBloco(id)).join(" > "), "raw");
+                addLog("Chain: " + ordem.map(id => nomeDoBloco(id)).join(" > "), "raw");
                 desenhaCadeia();
-                addLog("Cadeia lida.", "success");
+                addLog("Chain loaded.", "success");
             } catch (erro) {
                 addLog(erro.message, "error");
             } finally {
                 lendo--;
             }
 
-            // Reabre o painel do que estava selecionado, se ainda existir
             if (selecionado === ID_MASTER) await abrirMaster();
             else if (selecionado !== null && ordem.includes(selecionado)) await abrirBloco(selecionado);
             else { painelEl.innerHTML = ""; selecionado = null; }
@@ -331,7 +384,7 @@
             return mod ? mod.name : "id " + id;
         }
 
-        // ================== Desenho da cadeia ==================
+        // ================== Drawing the chain ==================
         let arrastando = null;
 
         function idsDoGrupo(lista) {
@@ -342,24 +395,21 @@
         }
         function temGrupo(lista) { return idsDoGrupo(lista).length > 0; }
 
-        /** O que se move junto: um bloco do conjunto carrega o trecho Divider→Mixer inteiro. */
+        /** What moves together: a block of the set carries the whole Divider→Mixer stretch. */
         function unidadeDoBloco(id) {
             const doGrupo = idsDoGrupo(ordem);
             if (!doGrupo.includes(id)) return [id];
             return ordem.slice(ordem.indexOf(doGrupo[0]), ordem.indexOf(doGrupo[doGrupo.length - 1]) + 1);
         }
 
-        /** Quebra a ordem em: antes do DIV, canal A, canal B, depois do MIX. */
+        /** Splits the chain into: before DIV, channel A, channel B, after MIX. */
         function fatiaCadeia() {
             const porTipo = t => ordem.find(id => itens[id] && itens[id].typeId === t);
             const div = porTipo(TIPO_DIVIDER), spl = porTipo(TIPO_SPLITTER), mix = porTipo(TIPO_MIXER);
-            if (div === undefined || spl === undefined || mix === undefined) {
-                return { linear: ordem };
-            }
+            if (div === undefined || spl === undefined || mix === undefined) return { linear: ordem };
             const iD = ordem.indexOf(div), iS = ordem.indexOf(spl), iM = ordem.indexOf(mix);
             return {
-                antes: ordem.slice(0, iD),
-                div, spl, mix,
+                antes: ordem.slice(0, iD), div, spl, mix,
                 canalA: ordem.slice(iD + 1, iS),
                 canalB: ordem.slice(iS + 1, iM),
                 depois: ordem.slice(iM + 1)
@@ -374,7 +424,7 @@
             div.className = "bloco" + (item && !item.ligado ? " desligado" : "") + (selecionado === id ? " selecionado" : "");
             div.style.background = cor;
             div.style.color = corDoTexto(cor);
-            div.title = (mod ? mod.name : "tipo desconhecido") + " · Fx Item " + (id + 1) + " · " + (item && item.ligado ? "ON" : "OFF");
+            div.dataset.tip = (mod ? mod.name : "unknown type") + " · Fx Item " + (id + 1) + " · " + (item && item.ligado ? "ON" : "OFF");
             div.draggable = true;
 
             const abrev = document.createElement("div");
@@ -389,7 +439,7 @@
             const fechar = document.createElement("button");
             fechar.className = "fechar";
             fechar.textContent = "×";
-            fechar.title = TIPOS_DO_GRUPO.includes(item ? item.typeId : -1) ? "Remover o conjunto Divider/Mixer" : "Remover este bloco";
+            fechar.dataset.tip = TIPOS_DO_GRUPO.includes(item ? item.typeId : -1) ? "Remove the Divider/Mixer set" : "Remove this block";
             fechar.onclick = e => { e.stopPropagation(); removerBloco(id); };
             div.appendChild(fechar);
 
@@ -403,7 +453,7 @@
             return div;
         }
 
-        /** Faixa entre blocos: fio, lugar de soltar e botão de somar. `depoisDe` = -1 é o começo. */
+        /** Gap between blocks: the wire, the drop zone and the add button. `depoisDe` = -1 is the start. */
         function criaAlvo(depoisDe, ponta) {
             const alvo = document.createElement("div");
             alvo.className = "alvo" + (ponta ? " ponta" : "");
@@ -412,7 +462,7 @@
             const mais = document.createElement("button");
             mais.className = "mais";
             mais.textContent = "+";
-            mais.title = "Acrescentar um efeito aqui";
+            mais.dataset.tip = "Add an effect here";
             mais.onclick = e => { e.stopPropagation(); abreEscolha(depoisDe); };
             alvo.append(fio, mais);
 
@@ -429,7 +479,6 @@
             return alvo;
         }
 
-        /** Sequência "fio, bloco, fio, bloco…" de um trecho da cadeia. */
         function montaTrilha(lista, antesDe) {
             const trilha = document.createElement("div");
             trilha.className = "trilha";
@@ -443,8 +492,9 @@
         }
 
         function desenhaCadeia() {
+            escondeDica();
             cadeiaEl.innerHTML = "";
-            if (!cadeia) { cadeiaEl.innerHTML = '<div class="vazio">Conecte a pedaleira para ver a cadeia.</div>'; return; }
+            if (!cadeia) { cadeiaEl.innerHTML = '<div class="vazio">Not connected to the pedal.</div>'; return; }
 
             const f = fatiaCadeia();
 
@@ -476,12 +526,12 @@
                 cadeiaEl.appendChild(montaTrilha(f.depois, f.mix));
             }
 
-            // Master: sempre no fim, fora da cadeia, sem arrastar e sem faixa depois dele
+            // Master: always last, outside the chain, no dragging and no drop zone after it
             const mestre = document.createElement("div");
             mestre.className = "bloco mestre" + (selecionado === ID_MASTER ? " selecionado" : "");
             mestre.style.background = MASTER.color;
             mestre.style.color = corDoTexto(MASTER.color);
-            mestre.title = "Master — ajustes da memória inteira. Sempre no fim.";
+            mestre.dataset.tip = "Master — settings for the whole memory. Always last.";
             mestre.draggable = false;
             const ab = document.createElement("div");
             ab.className = "abrev";
@@ -492,13 +542,14 @@
             cadeiaEl.appendChild(mestre);
         }
 
-        // ================== Escolha de efeito (o "+") ==================
+        // ================== Add an effect (the "+") ==================
         let ondeInserir = FIM_DA_CADEIA;
 
         function abreEscolha(depoisDe) {
             ondeInserir = depoisDe;
-            const nome = depoisDe === FIM_DA_CADEIA ? "no começo da cadeia" : "depois de " + nomeDoBloco(depoisDe);
-            $("escolha-onde").textContent = "O efeito entra " + nome + ".";
+            $("escolha-onde").textContent = depoisDe === FIM_DA_CADEIA
+                ? "The effect goes in at the start of the chain."
+                : "The effect goes in right after " + nomeDoBloco(depoisDe) + ".";
             $("busca").value = "";
             montaGrade("");
             $("cortina").classList.add("aberta");
@@ -512,17 +563,17 @@
             const alvo = filtro.trim().toLowerCase();
             const livres = itens.filter(i => !ordem.includes(i.slot)).length;
 
-            const ficha = (rotulo, abrev, cor, aoClicar, impedido, dica) => {
+            const ficha = (rotulo, abrev, cor, aoClicar, impedido) => {
                 const b = document.createElement("button");
                 b.className = "ficha";
                 b.disabled = !!impedido;
-                b.title = impedido || dica || rotulo;
+                b.dataset.tip = impedido || rotulo;
                 const selo = document.createElement("span");
                 selo.className = "selo";
                 selo.style.background = cor;
                 selo.style.color = corDoTexto(cor);
-                selo.textContent = abrev;
                 selo.style.fontSize = abrev.length > 8 ? ".38rem" : ".5rem";
+                selo.textContent = abrev;
                 const txt = document.createElement("span");
                 txt.textContent = rotulo;
                 b.append(selo, txt);
@@ -530,24 +581,24 @@
                 grade.appendChild(b);
             };
 
-            if (!alvo || "divider mixer conjunto bifurcação canais".includes(alvo)) {
-                ficha("Divider/Mixer (2 canais)", "DIV", "#6b7280", () => adicionar("grupo"),
-                      temGrupo(ordem) ? "Só cabe um conjunto Divider/Mixer por cadeia." :
-                      livres < 3 ? "Precisa de 3 blocos livres." : null);
+            if (!alvo || "divider mixer split channels".includes(alvo)) {
+                ficha("Divider/Mixer (2 channels)", "DIV", "#d2d4d6", () => adicionar("grupo"),
+                      temGrupo(ordem) ? "Only one Divider/Mixer set fits in a chain." :
+                      livres < 3 ? "Needs 3 free blocks." : null);
             }
             modulos.filter(m => !TIPOS_DO_GRUPO.includes(m.typeId))
                    .filter(m => !alvo || m.name.toLowerCase().includes(alvo) || m.abbr.toLowerCase().includes(alvo))
                    .forEach(m => ficha(m.name, m.abbr, m.color, () => adicionar(m.typeId),
-                                       livres < 1 ? "Não há bloco livre: a pedaleira tem 20 no total." : null));
+                                       livres < 1 ? "No free block left: the pedal has 20 in total." : null));
 
-            if (!grade.children.length) grade.innerHTML = '<div class="vazio">Nada com esse nome.</div>';
+            if (!grade.children.length) grade.innerHTML = '<div class="vazio">Nothing by that name.</div>';
         }
 
-        // ================== Gravação da cadeia ==================
+        // ================== Writing the chain ==================
         async function gravarCadeia() {
             const bytes = [cadeia.topo + 1, ...cadeia.proximos.map(v => v + 1)];
-            addLog("Gravando a cadeia (DT1 em " + hex(END_CADEIA) + "): " + hex(bytes), "raw");
-            if (!pedal.sendData(END_CADEIA, bytes)) throw new Error("Falha ao enviar a cadeia.");
+            addLog("Writing the chain (DT1 at " + hex(END_CADEIA) + "): " + hex(bytes), "raw");
+            if (!pedal.sendData(END_CADEIA, bytes)) throw new Error("Could not send the chain.");
             await new Promise(r => setTimeout(r, 120));
 
             lendo++;
@@ -556,10 +607,10 @@
             finally { lendo--; }
 
             const diferentes = bytes.map((b, i) => ({ i, b, l: lidos[i] })).filter(d => d.b !== d.l);
-            if (!diferentes.length) { addLog("Confirmado: a pedaleira gravou a cadeia.", "success"); return true; }
-            addLog("A PEDALEIRA NÃO ACEITOU " + diferentes.length + " byte(s):", "error");
+            if (!diferentes.length) { addLog("Confirmed: the pedal stored the chain.", "success"); return true; }
+            addLog("THE PEDAL REFUSED " + diferentes.length + " byte(s):", "error");
             diferentes.slice(0, 6).forEach(d => addLog("   " + (d.i === 0 ? "CHAIN TOP" : "NEXT ITEM" + (d.i - 1)) +
-                                                       ": enviei " + d.b + ", ficou " + d.l, "error"));
+                                                       ": sent " + d.b + ", kept " + d.l, "error"));
             return false;
         }
 
@@ -572,16 +623,16 @@
 
         async function moverBlocos(movidos, depoisDe) {
             try {
-                if (movidos.includes(depoisDe)) { addLog("Não dá para soltar um bloco dentro dele mesmo.", "warn"); return; }
+                if (movidos.includes(depoisDe)) { addLog("A block cannot be dropped inside itself.", "warn"); return; }
                 const nova = ordem.filter(id => !movidos.includes(id));
                 if (depoisDe === FIM_DA_CADEIA) nova.unshift(...movidos);
                 else {
                     const i = nova.indexOf(depoisDe);
-                    if (i === -1) { addLog("Destino inválido.", "warn"); return; }
+                    if (i === -1) { addLog("Invalid drop position.", "warn"); return; }
                     nova.splice(i + 1, 0, ...movidos);
                 }
                 if (nova.join() === ordem.join()) return;
-                addLog("Nova ordem: " + nova.map(id => nomeDoBloco(id)).join(" > "), "info");
+                addLog("New order: " + nova.map(id => nomeDoBloco(id)).join(" > "), "info");
                 await aplicarOrdem(nova);
             } catch (erro) {
                 addLog(erro.message, "error");
@@ -593,14 +644,14 @@
             try {
                 const tipos = escolha === "grupo" ? TIPOS_DO_GRUPO : [Number(escolha)];
                 const livres = itens.filter(i => !ordem.includes(i.slot)).map(i => i.slot);
-                if (escolha === "grupo" && temGrupo(ordem)) { addLog("Só cabe um conjunto Divider/Mixer.", "warn"); return; }
-                if (livres.length < tipos.length) { addLog("Faltam blocos livres: preciso de " + tipos.length + ".", "warn"); return; }
+                if (escolha === "grupo" && temGrupo(ordem)) { addLog("Only one Divider/Mixer set fits in a chain.", "warn"); return; }
+                if (livres.length < tipos.length) { addLog("Not enough free blocks: " + tipos.length + " needed.", "warn"); return; }
 
                 const usados = livres.slice(0, tipos.length);
                 for (let i = 0; i < tipos.length; i++) {
                     const end = enderecoDoItem(usados[i]);
-                    if (!pedal.sendData(end, [tipos[i], 1])) throw new Error("Falha ao gravar o tipo do bloco.");
-                    addLog("Fx Item " + (usados[i] + 1) + " vira " + moduloPorTipo.get(tipos[i]).name + " (DT1 " + hex(end) + ").", "raw");
+                    if (!pedal.sendData(end, [tipos[i], 1])) throw new Error("Could not write the block type.");
+                    addLog("Fx Item " + (usados[i] + 1) + " becomes " + moduloPorTipo.get(tipos[i]).name + " (DT1 " + hex(end) + ").", "raw");
                     await new Promise(r => setTimeout(r, 80));
                     itens[usados[i]] = { slot: usados[i], typeId: tipos[i], ligado: true };
                 }
@@ -611,7 +662,7 @@
 
                 selecionado = usados[0];
                 await aplicarOrdem(nova);
-                addLog(tipos.length > 1 ? "Conjunto Divider/Mixer acrescentado." : "Efeito acrescentado.", "success");
+                addLog(tipos.length > 1 ? "Divider/Mixer set added." : "Effect added.", "success");
             } catch (erro) {
                 addLog(erro.message, "error");
             }
@@ -622,22 +673,25 @@
                 const doGrupo = idsDoGrupo(ordem);
                 const remover = doGrupo.includes(id) ? doGrupo : [id];
                 addLog(remover.length > 1
-                    ? "Removendo o conjunto Divider/Mixer. Os efeitos dos canais continuam na cadeia, em linha."
-                    : "Removendo " + nomeDoBloco(id) + " (Fx Item " + (id + 1) + ").", "info");
+                    ? "Removing the Divider/Mixer set. The effects that were in the channels stay in the chain, in line."
+                    : "Removing " + nomeDoBloco(id) + " (Fx Item " + (id + 1) + ").", "info");
 
                 const nova = ordem.filter(i => !remover.includes(i));
-                // Fora da cadeia, cada bloco aponta para si mesmo (padrão da pedaleira)
+                // Outside the chain every block points to itself (the pedal's own convention)
                 remover.forEach(i => { cadeia.proximos[i] = i; });
                 if (remover.includes(selecionado)) { selecionado = null; painelEl.innerHTML = ""; }
                 await aplicarOrdem(nova);
-                addLog("Removido.", "success");
+                addLog("Removed.", "success");
             } catch (erro) {
                 addLog(erro.message, "error");
             }
         }
 
-        // ================== Painel de parâmetros ==================
-        const controles = new Map();   // "p:<paramIndex>", "onoff", "bpm", "m:<nome>"
+        // ================== Parameter panel ==================
+        const controles = new Map();   // "p:<paramIndex>", "onoff", "bpm", "m:<name>"
+
+        const P_ONOFF = { name: "On/Off", description: "Turns this effect on and off.", min: 0, max: 1,
+                          options: [{ value: 0, label: "OFF" }, { value: 1, label: "ON" }] };
 
         async function abrirBloco(id) {
             lendo++;
@@ -647,7 +701,7 @@
 
                 const item = itens[id];
                 const mod = moduloPorTipo.get(item.typeId);
-                if (!mod) { painelEl.innerHTML = '<div class="painel"><div class="vazio">Não há tabela para o tipo ' + item.typeId + '.</div></div>'; return; }
+                if (!mod) { painelEl.innerHTML = '<div class="painel"><div class="vazio">No parameter table for type ' + item.typeId + '.</div></div>'; return; }
 
                 const base = enderecoDoItem(id);
                 const proprios = Object.entries(mod.parameters).filter(([, p]) => p.paramIndex);
@@ -658,29 +712,26 @@
                 controles.clear();
                 const painel = document.createElement("div");
                 painel.className = "painel";
-                painel.append(cabecaDoPainel(mod.name,
-                    "Fx Item " + (id + 1) + " · tipo " + mod.typeId + " · " + hex(base) + " · " + proprios.length + " parâmetros",
-                    () => removerBloco(id)));
+                painel.append(cabecaDoPainel(mod.name, () => removerBloco(id)));
 
                 if (mod.usesBpm) {
                     try { painel.appendChild(await criaControleBpm()); }
-                    catch (e) { addLog("Não consegui ler o BPM: " + e.message, "warn"); }
+                    catch (e) { addLog("Could not read the BPM: " + e.message, "warn"); }
                 }
 
                 painel.appendChild(criaControle({
-                    nome: "ON/OFF", endereco: GX10.addrAdd(base, 0x01), umByte: true,
-                    p: { name: "OnOff", label: "Efeito ligado", min: 0, max: 1, options: [{ value: 0, label: "OFF" }, { value: 1, label: "ON" }] },
+                    endereco: GX10.addrAdd(base, 0x01), umByte: true, p: P_ONOFF,
                     valor: item.ligado ? 1 : 0, chave: "onoff"
                 }));
 
                 proprios.sort((a, b) => a[1].paramIndex - b[1].paramIndex).forEach(([chave, p]) => {
                     const n = dados.slice((p.paramIndex - 1) * 4, (p.paramIndex - 1) * 4 + 4);
-                    painel.appendChild(criaControle({ nome: p.name || chave, endereco: GX10.addrAdd(base, p.offset),
-                                                      p, valor: nibblesParaValor(n), chave: "p:" + p.paramIndex }));
+                    painel.appendChild(criaControle({ endereco: GX10.addrAdd(base, p.offset), p,
+                                                      valor: nibblesParaValor(n), chave: "p:" + p.paramIndex }));
                 });
 
                 painelEl.appendChild(painel);
-                addLog("Parâmetros de " + mod.name + " carregados.", "success");
+                addLog(mod.name + " parameters loaded.", "success");
             } catch (erro) {
                 addLog(erro.message, "error");
             } finally {
@@ -688,21 +739,17 @@
             }
         }
 
-        function cabecaDoPainel(titulo, subtitulo, aoRemover) {
+        function cabecaDoPainel(titulo, aoRemover) {
             const cabeca = document.createElement("div");
             cabeca.className = "cabeca";
-            const esquerda = document.createElement("div");
             const h = document.createElement("h3");
             h.textContent = titulo;
-            const sub = document.createElement("div");
-            sub.className = "sub";
-            sub.textContent = subtitulo;
-            esquerda.append(h, sub);
-            cabeca.appendChild(esquerda);
+            cabeca.appendChild(h);
             if (aoRemover) {
                 const btn = document.createElement("button");
-                btn.className = "btn btn-disconnect";
-                btn.textContent = "Remover da cadeia";
+                btn.className = "btn btn-remove";
+                btn.textContent = "Remove";
+                btn.dataset.tip = "Take this block out of the chain";
                 btn.onclick = aoRemover;
                 cabeca.appendChild(btn);
             }
@@ -729,18 +776,17 @@
                 controles.clear();
                 const painel = document.createElement("div");
                 painel.className = "painel";
-                painel.appendChild(cabecaDoPainel(MASTER.name,
-                    "bloco fixo · vale para a memória inteira · " + PARAMS_MASTER.length + " parâmetros", null));
+                painel.appendChild(cabecaDoPainel(MASTER.name, null));
 
                 PARAMS_MASTER.forEach(([chave, p]) => {
                     painel.appendChild(criaControle({
-                        nome: p.name, endereco: p.address, p, valor: leValorMaster(p, efct, comum),
+                        endereco: p.address, p, valor: leValorMaster(p, efct, comum),
                         umByte: !!p.bytes, semDeslocamento: !p.bytes, nibbles: p.nibbles, chave: "m:" + chave
                     }));
                 });
 
                 painelEl.appendChild(painel);
-                addLog("Parâmetros do Master carregados.", "success");
+                addLog("Master parameters loaded.", "success");
             } catch (erro) {
                 addLog(erro.message, "error");
             } finally {
@@ -748,21 +794,18 @@
             }
         }
 
-        function criaControle({ nome, endereco, p, valor, umByte, semDeslocamento, nibbles, chave }) {
+        function criaControle({ endereco, p, valor, umByte, semDeslocamento, nibbles, chave }) {
             const linha = document.createElement("div");
             const semFaixa = p.min === null || p.min === undefined || p.max === null || p.max === undefined;
-            linha.className = "param" + (p.unverified ? " alerta" : "") + (semFaixa ? " travado" : "");
+            linha.className = "param" + (semFaixa ? " travado" : "");
 
             const ehLista = !!p.options;
             const posicaoDe = v => { const i = p.options.findIndex(o => o.value === v); return i === -1 ? 0 : i; };
 
             const rotulo = document.createElement("div");
             rotulo.className = "rotulo";
-            rotulo.textContent = p.label || nome;
-            const detalhe = document.createElement("small");
-            detalhe.textContent = nome + " · " + hex(endereco) +
-                (semFaixa ? " · sem faixa documentada" : ehLista ? " · " + p.options.length + " opções" : " · " + p.min + " a " + p.max);
-            rotulo.appendChild(detalhe);
+            rotulo.textContent = p.name;
+            rotulo.dataset.tip = p.description || p.name;
 
             const faixa = document.createElement("input");
             faixa.type = "range";
@@ -774,7 +817,7 @@
 
             const mostrador = document.createElement("div");
             mostrador.className = "valor";
-            mostrador.textContent = semFaixa ? "cru: " + valor : textoDoValor(p, valor);
+            mostrador.textContent = semFaixa ? "raw: " + valor : textoDoValor(p, valor);
 
             const valorDe = pos => ehLista ? p.options[pos].value : pos;
             let ultimoEnviado = valor;
@@ -783,15 +826,15 @@
                 if (v === ultimoEnviado) return;
                 ultimoEnviado = v;
                 const bytes = umByte ? [v] : (semDeslocamento ? valorParaNibblesSemDeslocamento(v, nibbles || 4) : valorParaNibbles(v));
-                if (!pedal.sendData(endereco, bytes)) { addLog("Falha ao enviar " + nome + ".", "error"); return; }
-                addLog(nome + " = " + textoDoValor(p, v) + "  (DT1 " + hex(endereco) + ": " + hex(bytes) + ")", "raw");
-                if (umByte && nome === "ON/OFF" && typeof selecionado === "number") {
+                if (!pedal.sendData(endereco, bytes)) { addLog("Could not send " + p.name + ".", "error"); return; }
+                addLog(p.name + " = " + textoDoValor(p, v) + "  (DT1 " + hex(endereco) + ": " + hex(bytes) + ")", "raw");
+                if (chave === "onoff" && typeof selecionado === "number") {
                     itens[selecionado].ligado = v === 1;
                     desenhaCadeia();
                 }
             };
 
-            // Arrastar só muda o número na tela; uma única mensagem sai ao soltar.
+            // While dragging only the number on screen changes; one single message goes out on release.
             faixa.addEventListener("input", () => { mostrador.textContent = textoDoValor(p, valorDe(Number(faixa.value))); });
             faixa.addEventListener("change", () => enviar(valorDe(Number(faixa.value))));
 
@@ -800,7 +843,7 @@
                     aplicar: v => {
                         ultimoEnviado = v;
                         faixa.value = ehLista ? posicaoDe(v) : v;
-                        mostrador.textContent = semFaixa ? "cru: " + v : textoDoValor(p, v);
+                        mostrador.textContent = semFaixa ? "raw: " + v : textoDoValor(p, v);
                         linha.classList.add("piscou");
                         setTimeout(() => linha.classList.remove("piscou"), 700);
                     }
@@ -811,24 +854,25 @@
             return linha;
         }
 
-        // ---------- BPM da memória (compartilhado por vários efeitos) ----------
+        // ---------- Memory BPM (shared by several effects) ----------
         const END_BPM = MASTER.parameters.bpm.address;
-        const P_BPM = Object.assign({}, MASTER.parameters.bpm, { label: "BPM da memória (compartilhado)" });
+        const P_BPM = Object.assign({}, MASTER.parameters.bpm,
+            { description: MASTER.parameters.bpm.description + " It is shared by every effect in the memory." });
 
         async function criaControleBpm() {
             const dados = await pedal.requestData(END_BPM, 4);
             const v = nibblesParaValorSemDeslocamento(dados);
-            return criaControle({ nome: "BPM", endereco: END_BPM, p: P_BPM, valor: v, semDeslocamento: true, nibbles: 4, chave: "bpm" });
+            return criaControle({ endereco: END_BPM, p: P_BPM, valor: v, semDeslocamento: true, nibbles: 4, chave: "bpm" });
         }
 
-        // ================== Espelhar o que muda NA PEDALEIRA ==================
+        // ================== Mirror what changes ON THE PEDAL ==================
         const linear = a => (a[0] << 21) | (a[1] << 14) | (a[2] << 7) | a[3];
         const BASE_EFCT = linear(END_EFCT);
         const BASE_CADEIA = linear(END_CADEIA);
-        // "Total Size 00 00 01 33" está em bytes de 7 bits: 1x128 + 51 = 179.
+        // "Total Size 00 00 01 33" is in 7-bit bytes: 1x128 + 51 = 179.
         const TAM_FX_ITEM = 179;
 
-        // Enquanto uma leitura minha está em andamento, nada é espelhado.
+        // While a read of mine is running nothing is mirrored.
         let lendo = 0;
         let recargaPendente = null;
 
@@ -836,7 +880,7 @@
             clearTimeout(recargaPendente);
             recargaPendente = setTimeout(() => {
                 if (!pedal.isConnected()) return;
-                addLog("Mudança grande na pedaleira (" + motivo + "): relendo.", "warn");
+                addLog("Big change on the pedal (" + motivo + "): reloading.", "warn");
                 lerCadeia();
             }, 400);
         }
@@ -859,8 +903,8 @@
 
             const doMaster = espelhaMaster(addr, dados);
             if (addr < BASE_CADEIA + TAM_CADEIA && addr + dados.length > BASE_CADEIA) {
-                recarregarEmBreve("cadeia");
-                return doMaster ? doMaster + " + cadeia" : "cadeia";
+                recarregarEmBreve("chain");
+                return doMaster ? doMaster + " + chain" : "chain";
             }
             if (doMaster) return doMaster;
             if (addr >= BASE_EFCT && addr < BASE_EFCT + 0x3E) return null;
@@ -875,64 +919,113 @@
                         itens[slot].typeId = dados[0];
                         if (dados.length > 1) itens[slot].ligado = dados[1] === 1;
                     }
-                    recarregarEmBreve("bloco " + (slot + 1) + " trocou de efeito");
-                    return "tipo do bloco " + (slot + 1);
+                    recarregarEmBreve("block " + (slot + 1) + " changed effect");
+                    return "type of block " + (slot + 1);
                 }
                 if (desloc === 1) {
                     if (itens[slot]) itens[slot].ligado = dados[0] === 1;
                     desenhaCadeia();
                     if (slot === selecionado && controles.has("onoff")) controles.get("onoff").aplicar(dados[0]);
-                    return "ON/OFF do bloco " + (slot + 1);
+                    return "on/off of block " + (slot + 1);
                 }
                 if (desloc >= 3 && (desloc - 3) % 4 === 0) {
-                    if (slot !== selecionado) return "parâmetro do bloco " + (slot + 1) + " (não está aberto)";
+                    if (slot !== selecionado) return "parameter of block " + (slot + 1) + " (not open)";
                     const primeiro = (desloc - 3) / 4 + 1;
                     let aplicados = 0;
                     for (let i = 0; i + 3 < dados.length; i += 4) {
                         const alvo = controles.get("p:" + (primeiro + i / 4));
                         if (alvo) { alvo.aplicar(nibblesParaValor(dados.slice(i, i + 4))); aplicados++; }
                     }
-                    return aplicados ? aplicados + " parâmetro(s) atualizado(s)" : null;
+                    return aplicados ? aplicados + " parameter(s) updated" : null;
                 }
                 return null;
             }
             return null;
         }
 
-        // ================== Eventos ==================
-        function atualizaBotoes() { $("btn-read").disabled = !pedal.isConnected(); }
+        // ================== Tooltip of our own ==================
+        // Replaces the browser's native tooltip: same texts (data-tip), nicer look,
+        // and it works on elements that are drawn and redrawn all the time.
+        const dicaEl = document.createElement("div");
+        dicaEl.className = "dica-flutuante";
+        document.body.appendChild(dicaEl);
+        let dicaAlvo = null, dicaTempo = null;
+
+        function posicionaDica() {
+            if (!dicaAlvo) return;
+            const r = dicaAlvo.getBoundingClientRect(), d = dicaEl.getBoundingClientRect(), m = 8;
+            let esq = r.left + r.width / 2 - d.width / 2;
+            esq = Math.max(m, Math.min(esq, window.innerWidth - d.width - m));
+            let topo = r.top - d.height - m;
+            if (topo < m) topo = r.bottom + m;          // não cabe em cima: desce para baixo
+            dicaEl.style.left = Math.round(esq) + "px";
+            dicaEl.style.top = Math.round(topo) + "px";
+        }
+        function mostraDica(alvo) {
+            if (!alvo.isConnected || !alvo.dataset.tip) return;
+            dicaAlvo = alvo;
+            dicaEl.textContent = alvo.dataset.tip;
+            dicaEl.style.left = "-9999px";
+            dicaEl.style.top = "0px";
+            dicaEl.classList.add("aberta");
+            posicionaDica();
+        }
+        function escondeDica() {
+            clearTimeout(dicaTempo);
+            dicaAlvo = null;
+            dicaEl.classList.remove("aberta");
+        }
+
+        document.addEventListener("mouseover", e => {
+            const alvo = e.target.closest("[data-tip]");
+            if (!alvo) { if (dicaAlvo) escondeDica(); return; }
+            if (alvo === dicaAlvo) return;
+            clearTimeout(dicaTempo);
+            dicaTempo = setTimeout(() => mostraDica(alvo), 260);   // pequena espera, como a do navegador
+        });
+        document.addEventListener("mouseleave", e => {
+            if (e.target.closest && e.target.closest("[data-tip]")) escondeDica();
+        }, true);
+        ["mousedown", "dragstart", "wheel", "scroll"].forEach(ev =>
+            document.addEventListener(ev, escondeDica, true));
+        document.addEventListener("focusin", e => {
+            const alvo = e.target.closest("[data-tip]");
+            if (alvo) mostraDica(alvo);
+        });
+        document.addEventListener("focusout", escondeDica);
+        window.addEventListener("resize", escondeDica);
+
+        // ================== Status, menu and events ==================
+        function atualizaBotoes() {
+            const ligado = pedal.isConnected();
+            $("btn-connect").disabled = ligado;
+            $("btn-disconnect").disabled = !ligado;
+            $("btn-read").disabled = !ligado;
+        }
         function atualizaStatus() {
             const ligado = pedal.isConnected();
-            $("status-indicator").classList.toggle("connected", ligado);
-            $("status-device").textContent = ligado ? "Conectado a: " + pedal.getDeviceName() : "Dispositivo Desconectado";
+            const bolinha = $("status-indicator");
+            bolinha.classList.toggle("connected", ligado);
+            bolinha.dataset.tip = ligado ? "Connected to: " + pedal.getDeviceName() : "Device disconnected";
             atualizaBotoes();
         }
 
-        pedal.onStateChange(({ reason }) => { addLog("Mudança física: " + reason, "warn"); atualizaStatus(); });
+        function fechaMenu() { $("menu").classList.remove("aberto"); }
+        $("btn-menu").onclick = e => { e.stopPropagation(); $("menu").classList.toggle("aberto"); };
+        document.addEventListener("click", e => { if (!$("menu").contains(e.target)) fechaMenu(); });
 
-        pedal.onSysEx(({ comando, endereco, dados, resposta }) => {
-            if ($("chk-espiao").checked) {
-                addLog("← comando " + comando.toString(16).toUpperCase() + "H, endereço " + hex(endereco) +
-                       ", " + dados.length + " byte(s): " + hex(dados.slice(0, 12)) + (dados.length > 12 ? " ..." : "") +
-                       (resposta ? "   (resposta ao meu pedido)" : ""), "raw");
-            }
-            // Resposta a uma leitura minha NÃO é mudança feita na pedaleira.
-            if (comando !== 0x12 || resposta || lendo > 0 || !$("chk-espelho").checked) return;
-            try {
-                const o = espelhaMudanca(endereco, dados);
-                if (o) addLog("Veio da pedaleira: " + o, "success");
-            } catch (e) {
-                addLog("Não consegui espelhar a mudança: " + e.message, "warn");
-            }
-        });
-
-        $("btn-connect").onclick = async () => {
+        async function conectar(automatico) {
             const r = await pedal.connect();
-            addLog(r.success ? r.message : r.error, r.success ? "success" : "error");
+            if (r.success) addLog(r.message, "success");
+            else addLog((automatico ? "Could not connect on its own: " : "") + r.error, automatico ? "warn" : "error");
             atualizaStatus();
             if (r.success) await lerCadeia();
-        };
+            else desenhaCadeia();
+        }
+
+        $("btn-connect").onclick = () => { fechaMenu(); conectar(false); };
         $("btn-disconnect").onclick = () => {
+            fechaMenu();
             const r = pedal.disconnect();
             addLog(r.success ? r.message : r.error, r.success ? "success" : "warn");
             clearTimeout(recargaPendente);
@@ -941,17 +1034,80 @@
             painelEl.innerHTML = "";
             atualizaStatus();
         };
-        $("btn-read").onclick = lerCadeia;
+        $("btn-read").onclick = () => { fechaMenu(); lerCadeia(); };
+
+        // Debug mode: adds or drops ?debug=true and reloads the page
+        $("marca-debug").textContent = DEBUG ? "on" : "";
+        $("btn-debug").onclick = () => {
+            const url = new URL(location.href);
+            if (DEBUG) url.searchParams.delete("debug");
+            else url.searchParams.set("debug", "true");
+            location.href = url.toString();
+        };
+
+        $("sobre-versao").textContent = APP_VERSAO + " — " + APP_DATA;
+        $("sobre-tabelas").textContent = window.GX10_MODULES_VERSAO || "unknown";
+        $("btn-sobre").onclick = () => { fechaMenu(); escondeDica(); $("cortina-sobre").classList.add("aberta"); };
+        $("cortina-sobre").onclick = e => { if (e.target === $("cortina-sobre")) $("cortina-sobre").classList.remove("aberta"); };
+
         $("btn-clear-log").onclick = () => { consoleLog.innerHTML = ""; };
         $("busca").oninput = () => montaGrade($("busca").value);
+        $("btn-legenda").onclick = () => $("cortina-legenda").classList.add("aberta");
         $("cortina").onclick = e => { if (e.target === $("cortina")) fechaEscolha(); };
-        document.addEventListener("keydown", e => { if (e.key === "Escape") fechaEscolha(); });
+        $("cortina-legenda").onclick = e => { if (e.target === $("cortina-legenda")) $("cortina-legenda").classList.remove("aberta"); };
+        document.addEventListener("keydown", e => {
+            if (e.key !== "Escape") return;
+            fechaEscolha();
+            fechaMenu();
+            escondeDica();
+            $("cortina-legenda").classList.remove("aberta");
+            $("cortina-sobre").classList.remove("aberta");
+        });
 
-        window.addEventListener("beforeunload", () => { if (pedal.isConnected()) pedal.setEditorMode(false); });
+        pedal.onStateChange(({ isConnected, reason }) => {
+            addLog("Device change: " + reason, "warn");
+            if (!isConnected) {
+                clearTimeout(recargaPendente);
+                cadeia = null; itens = []; ordem = []; selecionado = null;
+                painelEl.innerHTML = "";
+                desenhaCadeia();
+            }
+            atualizaStatus();
+        });
 
-        addLog("Tabelas de parâmetros: versão " + (window.GX10_MODULES_VERSAO || "desconhecida") + ".", "warn");
-        addLog("Página pronta. Conecte a pedaleira para começar.", "info");
+        pedal.onSysEx(({ comando, endereco, dados, resposta }) => {
+            if ($("chk-espiao").checked) {
+                addLog("← command " + comando.toString(16).toUpperCase() + "H, address " + hex(endereco) +
+                       ", " + dados.length + " byte(s): " + hex(dados.slice(0, 12)) + (dados.length > 12 ? " ..." : "") +
+                       (resposta ? "   (answer to my own request)" : ""), "raw");
+            }
+            // An answer to a read of mine is NOT a change made on the pedal.
+            if (comando !== 0x12 || resposta || lendo > 0 || !$("chk-espelho").checked) return;
+            try {
+                const o = espelhaMudanca(endereco, dados);
+                if (o) addLog("From the pedal: " + o, "success");
+            } catch (e) {
+                addLog("Could not mirror the change: " + e.message, "warn");
+            }
+        });
+
+        // Ao fechar a aba: devolve a pedaleira ao normal e SOLTA as portas MIDI.
+        // Deixar a porta aberta com o aparelho desligado trava o navegador na hora de fechar.
+        let encerrado = false;
+        function encerra() {
+            if (encerrado) return;
+            encerrado = true;
+            clearTimeout(recargaPendente);
+            try { pedal.disconnect(); } catch (e) { /* já tinha ido embora */ }
+        }
+        window.addEventListener("pagehide", encerra);
+        window.addEventListener("beforeunload", encerra);
+
+        // ================== Start ==================
+        if (DEBUG) $("secao-log").hidden = false;
+        addLog("Parameter tables: version " + (window.GX10_MODULES_VERSAO || "unknown") + ".", "warn");
         atualizaStatus();
+        conectar(true);
     </script>
 </body>
 </html>

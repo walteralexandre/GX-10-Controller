@@ -215,9 +215,6 @@
                on the pedal shows up here on its own.</p>
             <dl>
                 <dt>Pedal</dt><dd>BOSS GX-10 · firmware 1.06.0068</dd>
-                <dt>Heads-up</dt><dd>Chrome on Windows freezes if the pedal is unplugged while a page
-                    still holds the MIDI session. Use <em>Disconnect</em> in the menu before pulling the cable:
-                    closing the ports is not enough, the page has to let the session go.</dd>
                 <dt>Author</dt><dd>Walter Alexandre</dd>
                 <dt>Version</dt><dd id="sobre-versao"></dd>
                 <dt>Tables</dt><dd id="sobre-tabelas"></dd>
@@ -259,10 +256,6 @@
         const TIPOS_DO_GRUPO = [TIPO_DIVIDER, TIPO_SPLITTER, TIPO_MIXER];
 
         const DEBUG = /[?&]debug=(true|1)(&|$)/i.test(location.search);
-        // Com ?midi=off a página NÃO pede acesso MIDI. Serve para largar o aparelho
-        // antes de tirar o cabo: o Chrome no Windows congela se o dispositivo some
-        // enquanto alguma página ainda tem a sessão MIDI aberta.
-        const MIDI_OFF = /[?&]midi=off(&|$)/i.test(location.search);
         const APP_VERSAO = "0.9.0";
         const APP_DATA = "October 2, 2026";
 
@@ -1006,7 +999,7 @@
         function atualizaBotoes() {
             const ligado = pedal.isConnected();
             $("btn-connect").disabled = ligado;
-            $("btn-disconnect").disabled = MIDI_OFF;
+            $("btn-disconnect").disabled = !ligado;
             $("btn-read").disabled = !ligado;
         }
         function atualizaStatus() {
@@ -1030,25 +1023,16 @@
             else desenhaCadeia();
         }
 
-        $("btn-connect").onclick = () => {
-            fechaMenu();
-            if (MIDI_OFF) {                      // volta ao modo normal, com sessão MIDI
-                const url = new URL(location.href);
-                url.searchParams.delete("midi");
-                location.href = url.toString();
-                return;
-            }
-            conectar(false);
-        };
-        // Desconectar fecha as portas E larga a sessão MIDI, recarregando a página.
-        // Só fechar as portas não basta: o Chrome no Windows congela se o aparelho
-        // some enquanto a página ainda tem a sessão aberta, mesmo com tudo fechado.
+        $("btn-connect").onclick = () => { fechaMenu(); conectar(false); };
         $("btn-disconnect").onclick = () => {
             fechaMenu();
-            encerra();
-            const url = new URL(location.href);
-            url.searchParams.set("midi", "off");
-            location.href = url.toString();
+            const r = pedal.disconnect();
+            addLog(r.success ? r.message : r.error, r.success ? "success" : "warn");
+            clearTimeout(recargaPendente);
+            cadeia = null; itens = []; ordem = []; selecionado = null;
+            desenhaCadeia();
+            painelEl.innerHTML = "";
+            atualizaStatus();
         };
         $("btn-read").onclick = () => { fechaMenu(); lerCadeia(); };
 
@@ -1123,13 +1107,7 @@
         if (DEBUG) $("secao-log").hidden = false;
         addLog("Parameter tables: version " + (window.GX10_MODULES_VERSAO || "unknown") + ".", "warn");
         atualizaStatus();
-        if (MIDI_OFF) {
-            cadeiaEl.innerHTML = '<div class="vazio">MIDI released — it is safe to unplug the pedal now. ' +
-                                 'Use the menu to connect again.</div>';
-            addLog("MIDI released: this page is not holding the pedal. Safe to unplug.", "warn");
-        } else {
-            conectar(true);
-        }
+        conectar(true);
     </script>
 </body>
 </html>
