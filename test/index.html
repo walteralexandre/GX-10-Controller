@@ -292,17 +292,13 @@
         <div class="escolha sobre" style="max-width:460px;">
             <h3>BOSS GX-10 Controller</h3>
             <div class="dica">Editor for the BOSS GX-10 guitar processor.</div>
-            <p>Edits the memory you have open on the pedal, straight from the browser over USB MIDI:
+            <p>Edits your presets straight from the browser over a USB connection:
                build the effect chain, drag the blocks around and adjust every parameter. What you change
                on the pedal shows up here on its own.</p>
             <dl>
-                <dt>Pedal</dt><dd>BOSS GX-10 · firmware 1.06.0068</dd>
-                <dt>Heads-up</dt><dd>Chrome on Windows freezes if the pedal is unplugged while a page
-                    still holds the MIDI session. Use <em>Disconnect</em> in the menu before pulling the cable:
-                    closing the ports is not enough, the page has to let the session go.</dd>
                 <dt>Author</dt><dd>Walter Alexandre</dd>
                 <dt>Version</dt><dd id="sobre-versao"></dd>
-                <dt>Tables</dt><dd id="sobre-tabelas"></dd>
+                <dt>Pedal</dt><dd>BOSS GX-10 · firmware 1.06.0068</dd>
             </dl>
         </div>
     </div>
@@ -345,8 +341,8 @@
         // antes de tirar o cabo: o Chrome no Windows congela se o dispositivo some
         // enquanto alguma página ainda tem a sessão MIDI aberta.
         const MIDI_OFF = /[?&]midi=off(&|$)/i.test(location.search);
-        const APP_VERSAO = "0.9.0";
-        const APP_DATA = "October 2, 2026";
+        const APP_VERSAO = "0.10.0";
+        const APP_DATA = "October 5, 2026";
 
         const pedal = new GX10();
         let cadeia = null, itens = [], ordem = [], selecionado = null;
@@ -1582,7 +1578,7 @@
         };
 
         $("sobre-versao").textContent = APP_VERSAO + " — " + APP_DATA;
-        $("sobre-tabelas").textContent = window.GX10_MODULES_VERSAO || "unknown";
+        // $("sobre-tabelas").textContent = window.GX10_MODULES_VERSAO || "unknown";
         $("btn-sobre").onclick = () => { fechaMenu(); escondeDica(); $("cortina-sobre").classList.add("aberta"); };
         $("cortina-sobre").onclick = e => { if (e.target === $("cortina-sobre")) $("cortina-sobre").classList.remove("aberta"); };
         $("cortina-salvar").onclick = e => { if (e.target === $("cortina-salvar")) $("cortina-salvar").classList.remove("aberta"); };
