@@ -143,6 +143,20 @@
         .log-barra { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
                      gap: 12px; margin-bottom: 8px; font-size: .78rem; color: var(--text-muted); }
         .log-barra label { display: flex; align-items: center; gap: 6px; }
+        .escolha label.linha { display:flex; align-items:flex-start; gap:9px; font-size:.82rem; line-height:1.5;
+                               padding:9px 10px; border:1px solid var(--border-color); border-radius:9px; cursor:pointer; }
+        .escolha label.linha:hover { background: rgba(255,255,255,.04); }
+        .escolha label.linha input { margin-top:3px; }
+        .escolha label.linha small { display:block; color:var(--text-muted); font-size:.75rem; margin-top:2px; }
+        .escolha select { width:100%; background:#0f1219; color:var(--text-main); border:1px solid var(--border-color);
+                          border-radius:8px; padding:8px; font-size:.82rem; font-family:"Courier New", monospace; }
+        .escolha .rodape { display:flex; justify-content:flex-end; gap:10px; margin-top:16px; }
+        .escolha .perigo { background: rgba(239,68,68,.1); border:1px solid var(--accent-red); border-radius:8px;
+                           padding:10px 12px; font-size:.8rem; color:#fecaca; line-height:1.5; }
+        .barra-progresso { height:8px; background:#0f1219; border:1px solid var(--border-color); border-radius:99px;
+                           overflow:hidden; margin-top:12px; }
+        .barra-progresso i { display:block; height:100%; width:0; background:var(--accent-blue); transition:width .15s linear; }
+
         /* ============ Tooltip ============ */
         .dica-flutuante { position: fixed; z-index: 90; max-width: 320px; pointer-events: none;
                           background: #0b0d14; color: var(--text-main); border: 1px solid var(--border-color);
@@ -174,6 +188,10 @@
                     <button id="btn-disconnect">Disconnect</button>
                     <button id="btn-read">Reload chain</button>
                     <div class="risca"></div>
+                    <button id="btn-save">Save</button>
+                    <button id="btn-save-as">Save as…</button>
+                    <button id="btn-export">Export…</button>
+                    <div class="risca"></div>
                     <button id="btn-debug">Debug mode <span id="marca-debug" class="marca"></span></button>
                     <button id="btn-sobre">About</button>
                 </div>
@@ -203,6 +221,70 @@
             <div id="escolha-onde" class="dica"></div>
             <input type="search" id="busca" placeholder="filter by name…" autocomplete="off">
             <div id="grade" class="grade"></div>
+        </div>
+    </div>
+
+    <div id="cortina-salvar" class="cortina">
+        <div class="escolha" style="max-width:560px;">
+            <h3>Save as…</h3>
+            <div class="dica" id="salvar-origem"></div>
+            <div style="display:grid;gap:12px;">
+                <div>
+                    <div class="dica" style="margin-bottom:6px;">Destination memory</div>
+                    <select id="sel-memoria" size="9"></select>
+                </div>
+                <label class="linha">
+                    <input type="radio" name="modo-salvar" value="overwrite" checked>
+                    <span><b>Overwrite</b><small>The destination memory is replaced by what you have now. Cannot be undone.</small></span>
+                </label>
+                <label class="linha">
+                    <input type="radio" name="modo-salvar" value="exchange">
+                    <span><b>Exchange</b><small>What you have now goes to the destination, and what was there comes back to the memory you are editing.</small></span>
+                </label>
+            </div>
+            <div class="rodape">
+                <button class="btn" id="salvar-cancela">Cancel</button>
+                <button class="btn btn-remove" id="salvar-ok">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="cortina-export" class="cortina">
+        <div class="escolha" style="max-width:520px;">
+            <h3>Export</h3>
+            <div class="dica" id="export-origem"></div>
+            <div style="display:grid;gap:10px;">
+                <label class="linha" id="export-texto">
+                    <span><b>Plain text (.txt)</b><small>Everything the app knows about this memory, written out to read:
+                        master settings, the chain in order and every parameter of every block.</small></span>
+                </label>
+                <label class="linha" id="export-binario">
+                    <span><b>Raw dump (.gx10)</b><small>The 7219 bytes of the temporary memory exactly as the pedal holds them.
+                        Nothing is interpreted.</small></span>
+                </label>
+            </div>
+            <div class="rodape">
+                <button class="btn" id="export-cancela">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="cortina-confirma" class="cortina">
+        <div class="escolha" style="max-width:470px;">
+            <h3 id="confirma-titulo">Are you sure?</h3>
+            <div class="perigo" id="confirma-texto" style="margin-top:8px;"></div>
+            <div class="rodape">
+                <button class="btn" id="confirma-nao">Cancel</button>
+                <button class="btn btn-remove" id="confirma-sim">Overwrite</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="cortina-progresso" class="cortina">
+        <div class="escolha" style="max-width:420px;">
+            <h3 id="progresso-titulo">Working…</h3>
+            <div class="dica" id="progresso-texto">Please keep the pedal connected.</div>
+            <div class="barra-progresso"><i id="progresso-barra"></i></div>
         </div>
     </div>
 
@@ -950,6 +1032,441 @@
             return null;
         }
 
+
+        // ================== Saving to a memory ==================
+        // The MIDI spec has no "write" or "exchange" command: saving means copying the
+        // 7219 bytes of the temporary memory into the user memory address space, in
+        // chunks, and reading them back to be sure the pedal took them.
+        const END_MEMORY_NUMBER = [0x00, 0x00, 0x00, 0x00];   // [SystemCommon] 0x00-0x03, 0..299
+        const END_MEM_TEMP = [0x10, 0x00, 0x00, 0x00];        // temporary memory
+        const END_MEM_USER_1 = [0x20, 0x00, 0x00, 0x00];      // user memory 1
+        const PASSO_MEMORIA = 0x06 << 14;                     // next memory, in linear address units
+        const TOTAL_MEM_USER = 198;                           // U01-1 … U66-3
+        const TAM_MEMORIA = 7219;                             // Fx Item 20 (0x3700 = 7040) + 179
+        const TAM_NOME = 16;                                  // [MemoryCommon] 0x00-0x0F
+        const PEDACO = 128;                                   // bytes per message
+        const CHAVE_BACKUP = "gx10-exchange-backup";
+
+        const enderecoDaMemoria = n => GX10.addrAdd(END_MEM_USER_1, (n - 1) * PASSO_MEMORIA);
+        const rotuloDaMemoria = n => "U" + String(Math.floor((n - 1) / 3) + 1).padStart(2, "0") + "-" + ((n - 1) % 3 + 1);
+        const textoAscii = bytes => Array.from(bytes).map(b => (b >= 32 && b <= 126) ? String.fromCharCode(b) : " ").join("").trim();
+
+        let memoriaAtual = null;        // 1..198, or null when the pedal is on a factory preset
+        let nomesDasMemorias = null;    // cache, filled the first time "Save as…" opens
+
+        /** Which memory the pedal has loaded. 0..197 = user, 200..298 = factory preset. */
+        async function leMemoriaAtual() {
+            const d = await pedal.requestData(END_MEMORY_NUMBER, 4);
+            const n = nibblesParaValorSemDeslocamento(d);
+            memoriaAtual = n <= TOTAL_MEM_USER - 1 ? n + 1 : null;
+            return { numero: n, user: memoriaAtual };
+        }
+
+        /** Reads a long stretch in chunks the pedal is comfortable with. */
+        async function lerPedacos(endereco, total, aoAndar) {
+            const saida = [];
+            for (let i = 0; i < total; i += PEDACO) {
+                const quanto = Math.min(PEDACO, total - i);
+                const d = await pedal.requestData(GX10.addrAdd(endereco, i), quanto, 3000);
+                if (d.length !== quanto) throw new Error("The pedal answered with " + d.length + " bytes instead of " + quanto + ".");
+                saida.push(...d);
+                if (aoAndar) aoAndar(saida.length / total);
+            }
+            return saida;
+        }
+
+        async function gravarPedacos(endereco, bytes, aoAndar) {
+            for (let i = 0; i < bytes.length; i += PEDACO) {
+                const trecho = bytes.slice(i, i + PEDACO);
+                if (!pedal.sendData(GX10.addrAdd(endereco, i), trecho)) throw new Error("Could not send the data.");
+                await new Promise(r => setTimeout(r, 25));
+                if (aoAndar) aoAndar(Math.min(1, (i + trecho.length) / bytes.length));
+            }
+        }
+
+        /** Writes and reads back: a save that was not accepted must not pass as done. */
+        async function gravarEConferir(endereco, bytes, rotulo, fatia) {
+            await gravarPedacos(endereco, bytes, f => progresso(fatia[0] + f * (fatia[1] - fatia[0]) / 2, "Writing " + rotulo + "…"));
+            const lidos = await lerPedacos(endereco, bytes.length, f => progresso(fatia[0] + (fatia[1] - fatia[0]) / 2 + f * (fatia[1] - fatia[0]) / 2, "Checking " + rotulo + "…"));
+            const erro = bytes.findIndex((b, i) => b !== lidos[i]);
+            if (erro !== -1) {
+                throw new Error("The pedal did not store " + rotulo + ": byte " + erro + " was sent as " +
+                                bytes[erro] + " and came back as " + lidos[erro] + ".");
+            }
+            addLog(rotulo + ": " + bytes.length + " bytes written and checked.", "success");
+        }
+
+        // ---------- progress overlay ----------
+        function progresso(fracao, texto) {
+            $("progresso-barra").style.width = Math.round(Math.max(0, Math.min(1, fracao)) * 100) + "%";
+            if (texto) $("progresso-texto").textContent = texto;
+        }
+        function abreProgresso(titulo) {
+            $("progresso-titulo").textContent = titulo;
+            progresso(0, "Please keep the pedal connected.");
+            $("cortina-progresso").classList.add("aberta");
+        }
+        const fechaProgresso = () => $("cortina-progresso").classList.remove("aberta");
+
+        // ---------- custom confirm ----------
+        function confirma(titulo, texto, rotuloOk) {
+            return new Promise(resolve => {
+                $("confirma-titulo").textContent = titulo;
+                $("confirma-texto").textContent = texto;
+                $("confirma-sim").textContent = rotuloOk || "Confirm";
+                const fim = valor => {
+                    $("cortina-confirma").classList.remove("aberta");
+                    $("confirma-sim").onclick = $("confirma-nao").onclick = null;
+                    resolve(valor);
+                };
+                $("confirma-sim").onclick = () => fim(true);
+                $("confirma-nao").onclick = () => fim(false);
+                $("cortina-confirma").classList.add("aberta");
+            });
+        }
+
+        /** The 16-character name stored at the start of each memory. */
+        async function lerNomeDaMemoria(n) {
+            const d = await pedal.requestData(GX10.addrAdd(enderecoDaMemoria(n), 0), TAM_NOME, 2500);
+            return textoAscii(d);
+        }
+
+        async function carregaNomes() {
+            if (nomesDasMemorias) return nomesDasMemorias;
+            abreProgresso("Reading memory names");
+            lendo++;
+            try {
+                const nomes = [];
+                for (let n = 1; n <= TOTAL_MEM_USER; n++) {
+                    nomes.push(await lerNomeDaMemoria(n));
+                    progresso(n / TOTAL_MEM_USER, "Memory " + rotuloDaMemoria(n) + "…");
+                }
+                nomesDasMemorias = nomes;
+            } finally {
+                lendo--;
+                fechaProgresso();
+            }
+            return nomesDasMemorias;
+        }
+
+        /**
+         * Copies the temporary memory into a user memory.
+         * exchange: what was in the destination comes back to the memory being edited.
+         */
+        async function salvarEm(destino, modo) {
+            const origem = memoriaAtual;
+            if (modo === "exchange" && !origem) throw new Error("Exchange needs a user memory loaded on the pedal.");
+            if (modo === "exchange" && origem === destino) modo = "overwrite";
+
+            lendo++;
+            abreProgresso(modo === "exchange" ? "Exchanging memories" : "Saving");
+            try {
+                progresso(0, "Reading what you have now…");
+                const agora = await lerPedacos(END_MEM_TEMP, TAM_MEMORIA, f => progresso(f * 0.2, "Reading what you have now…"));
+
+                if (modo !== "exchange") {
+                    await gravarEConferir(enderecoDaMemoria(destino), agora, rotuloDaMemoria(destino), [0.2, 1]);
+                    addLog("Saved to " + rotuloDaMemoria(destino) + ".", "success");
+                    return;
+                }
+
+                // Exchange: the destination is read first and kept outside the pedal, so a
+                // failure in the middle never leaves both memories holding the same sound.
+                const antigo = await lerPedacos(enderecoDaMemoria(destino), TAM_MEMORIA,
+                                                f => progresso(0.2 + f * 0.2, "Reading " + rotuloDaMemoria(destino) + "…"));
+                guardaBackup({ destino, origem, bytes: antigo, quando: new Date().toISOString() });
+
+                await gravarEConferir(enderecoDaMemoria(destino), agora, rotuloDaMemoria(destino), [0.4, 0.7]);
+                await gravarEConferir(enderecoDaMemoria(origem), antigo, rotuloDaMemoria(origem), [0.7, 1]);
+                limpaBackup();
+                addLog("Exchanged: " + rotuloDaMemoria(origem) + " ⇄ " + rotuloDaMemoria(destino) + ".", "success");
+            } finally {
+                lendo--;
+                fechaProgresso();
+                nomesDasMemorias = null;      // names changed, read them again next time
+            }
+        }
+
+        // ---------- safety net for the exchange ----------
+        function guardaBackup(dados) {
+            try { localStorage.setItem(CHAVE_BACKUP, JSON.stringify(dados)); }
+            catch (e) { addLog("Could not keep a backup copy in the browser: " + e.message, "warn"); }
+        }
+        function limpaBackup() {
+            try { localStorage.removeItem(CHAVE_BACKUP); } catch (e) { /* nothing to do */ }
+        }
+        function backupGuardado() {
+            try { return JSON.parse(localStorage.getItem(CHAVE_BACKUP) || "null"); } catch (e) { return null; }
+        }
+
+        /** An exchange that stopped halfway leaves the old content here; offer it back. */
+        async function ofereceBackup() {
+            const b = backupGuardado();
+            if (!b || !Array.isArray(b.bytes) || b.bytes.length !== TAM_MEMORIA) return;
+            const quer = await confirma("Unfinished exchange",
+                "An exchange started on " + new Date(b.quando).toLocaleString() + " did not finish. The old content of " +
+                rotuloDaMemoria(b.destino) + " is still saved in this browser. Write it to " + rotuloDaMemoria(b.origem) + " now?",
+                "Restore");
+            if (!quer) { limpaBackup(); return; }
+            lendo++;
+            abreProgresso("Restoring");
+            try {
+                await gravarEConferir(enderecoDaMemoria(b.origem), b.bytes, rotuloDaMemoria(b.origem), [0, 1]);
+                limpaBackup();
+                addLog("Restored to " + rotuloDaMemoria(b.origem) + ".", "success");
+            } catch (e) {
+                addLog(e.message, "error");
+            } finally {
+                lendo--;
+                fechaProgresso();
+            }
+        }
+
+        // ---------- menu: Save ----------
+        $("btn-save").onclick = async () => {
+            fechaMenu();
+            try {
+                lendo++;
+                let atual;
+                try { atual = await leMemoriaAtual(); } finally { lendo--; }
+                if (!atual.user) {
+                    addLog("The pedal is on a factory preset (it cannot be overwritten). Use “Save as…”.", "warn");
+                    await confirma("Factory preset", "The pedal is playing a factory preset, which cannot be overwritten. " +
+                                   "Use “Save as…” to store what you have in one of your own memories.", "Got it");
+                    return;
+                }
+                const nome = await (async () => { lendo++; try { return await lerNomeDaMemoria(atual.user); } finally { lendo--; } })();
+                const quer = await confirma("Overwrite " + rotuloDaMemoria(atual.user) + "?",
+                    "What you have now replaces " + rotuloDaMemoria(atual.user) + (nome ? " “" + nome + "”" : "") +
+                    ". This cannot be undone.", "Overwrite");
+                if (!quer) return;
+                await salvarEm(atual.user, "overwrite");
+            } catch (e) {
+                addLog(e.message, "error");
+            }
+        };
+
+        // ---------- menu: Save as… ----------
+        $("btn-save-as").onclick = async () => {
+            fechaMenu();
+            try {
+                lendo++;
+                let atual;
+                try { atual = await leMemoriaAtual(); } finally { lendo--; }
+                const nomes = await carregaNomes();
+
+                $("salvar-origem").textContent = atual.user
+                    ? "Now editing " + rotuloDaMemoria(atual.user) + (nomes[atual.user - 1] ? " “" + nomes[atual.user - 1] + "”" : "") + "."
+                    : "The pedal is on a factory preset, so Exchange is not available.";
+                document.querySelector('input[name="modo-salvar"][value="overwrite"]').checked = true;
+                document.querySelector('input[name="modo-salvar"][value="exchange"]').disabled = !atual.user;
+
+                const lista = $("sel-memoria");
+                lista.innerHTML = "";
+                nomes.forEach((nome, i) => {
+                    const op = document.createElement("option");
+                    op.value = String(i + 1);
+                    op.textContent = rotuloDaMemoria(i + 1) + "   " + (nome || "—");
+                    lista.appendChild(op);
+                });
+                lista.value = String(atual.user || 1);
+                $("cortina-salvar").classList.add("aberta");
+            } catch (e) {
+                addLog(e.message, "error");
+            }
+        };
+
+        $("salvar-cancela").onclick = () => $("cortina-salvar").classList.remove("aberta");
+        $("salvar-ok").onclick = async () => {
+            const destino = Number($("sel-memoria").value);
+            const modo = document.querySelector('input[name="modo-salvar"]:checked').value;
+            if (!destino) return;
+            $("cortina-salvar").classList.remove("aberta");
+
+            const nome = nomesDasMemorias ? nomesDasMemorias[destino - 1] : "";
+            const texto = modo === "exchange"
+                ? "What you have now goes to " + rotuloDaMemoria(destino) + (nome ? " “" + nome + "”" : "") +
+                  ", and what was there goes to " + rotuloDaMemoria(memoriaAtual) + ". Both memories change, and this cannot be undone."
+                : "What you have now replaces " + rotuloDaMemoria(destino) + (nome ? " “" + nome + "”" : "") +
+                  ". This cannot be undone.";
+            if (!await confirma(modo === "exchange" ? "Exchange with " + rotuloDaMemoria(destino) + "?"
+                                                    : "Overwrite " + rotuloDaMemoria(destino) + "?",
+                                texto, modo === "exchange" ? "Exchange" : "Overwrite")) return;
+            try { await salvarEm(destino, modo); }
+            catch (e) { addLog(e.message, "error"); }
+        };
+
+
+        // ================== Export ==================
+        // Everything comes from ONE read of the temporary memory: the raw dump is those
+        // bytes untouched, and the text file is the same bytes decoded with the parameter
+        // tables. Offsets below are inside [Memory], the same layout the pedal uses.
+        const OFS_NOME = 0x00;                 // [MemoryCommon] 0x00-0x0F
+        const OFS_INPUT_SETTING = 0x32;        // [MemoryCommon] 0x32
+        const OFS_EFCT = 0x0F << 7;            // [MemoryEfct] = 1920
+        const OFS_FX_1 = 0x11 << 7;            // Fx Item 1 = 2176
+        const PASSO_FX_DUMP = 0x02 << 7;       // next Fx Item = 256
+
+        /** U01-1…U66-3 for user memories, P01-1…P33-3 for the factory ones. */
+        function rotuloDoNumero(v) {
+            if (v >= 0 && v <= 197) return "U" + String(Math.floor(v / 3) + 1).padStart(2, "0") + "-" + (v % 3 + 1);
+            if (v >= 200 && v <= 298) { const k = v - 200; return "P" + String(Math.floor(k / 3) + 1).padStart(2, "0") + "-" + (k % 3 + 1); }
+            return "—";
+        }
+
+        const nibblesEm = (bytes, i) => ((bytes[i] << 12) | (bytes[i + 1] << 8) | (bytes[i + 2] << 4) | bytes[i + 3]);
+
+        /** Reads the chain out of the dump: the same linked list the pedal keeps. */
+        function cadeiaDoDump(bytes) {
+            const topo = bytes[OFS_EFCT + 0x0C] - 1;
+            const proximos = [];
+            for (let i = 0; i < 49; i++) proximos.push(bytes[OFS_EFCT + 0x0D + i] - 1);
+            const ordem = [];
+            let atual = topo, guarda = 0;
+            while (atual !== -1 && guarda++ < 60) {
+                if (ordem.includes(atual)) break;
+                ordem.push(atual);
+                atual = proximos[atual] ?? -1;
+            }
+            return ordem;
+        }
+
+        const blocoDoDump = (bytes, slot) => {
+            const base = OFS_FX_1 + slot * PASSO_FX_DUMP;
+            return { typeId: bytes[base], ligado: bytes[base + 1] === 1, base };
+        };
+
+        /** Text report. Written to be read by a person, not parsed by a machine. */
+        function textoDoPreset(bytes, numero) {
+            const L = [];
+            const alinha = (rotulo, valor, larg = 26) => "  " + String(rotulo).padEnd(larg) + valor;
+            const titulo = (t, traco = "=") => { L.push("", t, traco.repeat(t.length)); };
+
+            const nome = textoAscii(bytes.slice(OFS_NOME, OFS_NOME + TAM_NOME));
+            L.push("BOSS GX-10 — preset export");
+            L.push("==========================");
+            L.push(alinha("Exported", new Date().toLocaleString(), 16));
+            L.push(alinha("Memory", rotuloDoNumero(numero) + (nome ? "  “" + nome + "”" : "") + "   (as it is in the temporary memory)", 16));
+            L.push(alinha("Pedal", "BOSS GX-10 · firmware 1.06.0068", 16));
+            L.push(alinha("App", "BOSS GX-10 Controller " + APP_VERSAO + " · parameter tables " + (window.GX10_MODULES_VERSAO || "?"), 16));
+
+            // ---- Master ----
+            titulo("MASTER", "-");
+            PARAMS_MASTER.forEach(([, p]) => {
+                const desloc = linear(p.address) - linear(END_EFCT);
+                const tam = p.bytes || p.nibbles;
+                const trecho = desloc >= 0 ? bytes.slice(OFS_EFCT + desloc, OFS_EFCT + desloc + tam)
+                                           : bytes.slice(OFS_INPUT_SETTING, OFS_INPUT_SETTING + tam);
+                const v = p.bytes ? trecho[0] : Array.from(trecho).reduce((a, x) => (a << 4) | x, 0);
+                L.push(alinha(p.name, textoDoValor(p, v)));
+            });
+
+            // ---- Chain ----
+            const ordem = cadeiaDoDump(bytes);
+            const tipos = ordem.map(id => blocoDoDump(bytes, id).typeId);
+            const iDiv = tipos.indexOf(TIPO_DIVIDER), iSpl = tipos.indexOf(TIPO_SPLITTER), iMix = tipos.indexOf(TIPO_MIXER);
+            const temRamo = iDiv !== -1 && iSpl !== -1 && iMix !== -1;
+            const canalDe = pos => !temRamo ? "  " : (pos > iDiv && pos < iSpl ? "A " : (pos > iSpl && pos < iMix ? "B " : "  "));
+
+            titulo("CHAIN", "-");
+            L.push("  The pedal plays the blocks in this order. A and B are the two sides of the Divider/Mixer.");
+            L.push("");
+            ordem.forEach((id, pos) => {
+                const b = blocoDoDump(bytes, id);
+                const mod = moduloPorTipo.get(b.typeId);
+                L.push("  " + canalDe(pos) + String(pos + 1).padStart(2) + ". " +
+                       (mod ? mod.name : "type " + b.typeId).padEnd(28) + (b.ligado ? "ON" : "OFF") +
+                       "   (Fx Item " + (id + 1) + ")");
+            });
+            L.push("     " + "--. " + "Master".padEnd(28) + "     (always last, never leaves the chain)");
+
+            // ---- Every block in detail ----
+            ordem.forEach((id, pos) => {
+                const b = blocoDoDump(bytes, id);
+                const mod = moduloPorTipo.get(b.typeId);
+                if (!mod) { titulo((pos + 1) + ". UNKNOWN TYPE " + b.typeId, "-"); return; }
+                titulo((pos + 1) + ". " + mod.name.toUpperCase() + (canalDe(pos).trim() ? "   [channel " + canalDe(pos).trim() + "]" : ""), "-");
+                L.push(alinha("On/Off", b.ligado ? "ON" : "OFF"));
+                Object.values(mod.parameters)
+                      .filter(p => p.paramIndex)
+                      .sort((x, y) => x.paramIndex - y.paramIndex)
+                      .forEach(p => {
+                          const v = nibblesEm(bytes, b.base + p.offset) - DESLOC_NIBBLE;
+                          L.push(alinha(p.name, textoDoValor(p, v)));
+                      });
+            });
+
+            const livres = 20 - ordem.filter(id => id < TOTAL_FX_ITENS).length;
+            titulo("NOT IN THIS FILE YET", "-");
+            L.push("  The app does not read these yet, so they are missing here. They will show up as the app learns them:");
+            L.push("    · footswitch and NUM assignments");
+            L.push("    · CTL/EXP assigns (Assign 1-20)");
+            L.push("    · LED colours");
+            L.push("    · the memory's own MIDI settings");
+            L.push("");
+            L.push("  " + livres + " of the 20 effect slots are free in this memory.");
+            L.push("");
+            return L.join("\n");
+        }
+
+        /** Hands the file to the browser. */
+        function baixa(nomeArquivo, conteudo, tipo) {
+            const blob = new Blob([conteudo], { type: tipo });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = nomeArquivo;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 2000);
+        }
+
+        const nomeDeArquivo = t => t.replace(/[\\/:*?"<>|]/g, "-").replace(/\s+/g, " ").trim();
+
+        async function exportar(formato) {
+            $("cortina-export").classList.remove("aberta");
+            lendo++;
+            abreProgresso("Reading the memory");
+            try {
+                const bytes = await lerPedacos(END_MEM_TEMP, TAM_MEMORIA, f => progresso(f, "Reading the memory…"));
+                const d = await pedal.requestData(END_MEMORY_NUMBER, 4);
+                const numero = nibblesParaValorSemDeslocamento(d);
+                const nome = textoAscii(bytes.slice(OFS_NOME, OFS_NOME + TAM_NOME));
+                const base = nomeDeArquivo("GX10 " + rotuloDoNumero(numero) + (nome ? " " + nome : ""));
+
+                if (formato === "binario") {
+                    baixa(base + ".gx10", new Uint8Array(bytes), "application/octet-stream");
+                    addLog("Exported " + bytes.length + " raw bytes to " + base + ".gx10.", "success");
+                } else {
+                    baixa(base + ".txt", textoDoPreset(bytes, numero), "text/plain;charset=utf-8");
+                    addLog("Exported " + base + ".txt.", "success");
+                }
+            } catch (e) {
+                addLog(e.message, "error");
+            } finally {
+                lendo--;
+                fechaProgresso();
+            }
+        }
+
+        $("btn-export").onclick = async () => {
+            fechaMenu();
+            try {
+                lendo++;
+                let atual;
+                try { atual = await leMemoriaAtual(); } finally { lendo--; }
+                $("export-origem").textContent = "Exports what you have now — " + rotuloDoNumero(atual.numero) +
+                    " with any edits you have made, exactly as the pedal is playing it.";
+                $("cortina-export").classList.add("aberta");
+            } catch (e) {
+                addLog(e.message, "error");
+            }
+        };
+        $("export-texto").onclick = () => exportar("texto");
+        $("export-binario").onclick = () => exportar("binario");
+        $("export-cancela").onclick = () => $("cortina-export").classList.remove("aberta");
+
         // ================== Tooltip of our own ==================
         // Replaces the browser's native tooltip: same texts (data-tip), nicer look,
         // and it works on elements that are drawn and redrawn all the time.
@@ -1008,6 +1525,9 @@
             $("btn-connect").disabled = ligado;
             $("btn-disconnect").disabled = MIDI_OFF;
             $("btn-read").disabled = !ligado;
+            $("btn-save").disabled = !ligado;
+            $("btn-save-as").disabled = !ligado;
+            $("btn-export").disabled = !ligado;
         }
         function atualizaStatus() {
             const ligado = pedal.isConnected();
@@ -1026,7 +1546,7 @@
             if (r.success) addLog(r.message, "success");
             else addLog((automatico ? "Could not connect on its own: " : "") + r.error, automatico ? "warn" : "error");
             atualizaStatus();
-            if (r.success) await lerCadeia();
+            if (r.success) { await lerCadeia(); await ofereceBackup(); }
             else desenhaCadeia();
         }
 
@@ -1065,6 +1585,8 @@
         $("sobre-tabelas").textContent = window.GX10_MODULES_VERSAO || "unknown";
         $("btn-sobre").onclick = () => { fechaMenu(); escondeDica(); $("cortina-sobre").classList.add("aberta"); };
         $("cortina-sobre").onclick = e => { if (e.target === $("cortina-sobre")) $("cortina-sobre").classList.remove("aberta"); };
+        $("cortina-salvar").onclick = e => { if (e.target === $("cortina-salvar")) $("cortina-salvar").classList.remove("aberta"); };
+        $("cortina-export").onclick = e => { if (e.target === $("cortina-export")) $("cortina-export").classList.remove("aberta"); };
 
         $("btn-clear-log").onclick = () => { consoleLog.innerHTML = ""; };
         $("busca").oninput = () => montaGrade($("busca").value);
@@ -1078,6 +1600,8 @@
             escondeDica();
             $("cortina-legenda").classList.remove("aberta");
             $("cortina-sobre").classList.remove("aberta");
+            $("cortina-salvar").classList.remove("aberta");
+            $("cortina-export").classList.remove("aberta");
         });
 
         pedal.onStateChange(({ isConnected, reason }) => {
