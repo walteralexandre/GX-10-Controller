@@ -354,8 +354,8 @@
         // antes de tirar o cabo: o Chrome no Windows congela se o dispositivo some
         // enquanto alguma página ainda tem a sessão MIDI aberta.
         const MIDI_OFF = /[?&]midi=off(&|$)/i.test(location.search);
-        const APP_VERSAO = "0.10.1";
-        const APP_DATA = "October 5, 2026";
+        const APP_VERSAO = "0.10.2";
+        const APP_DATA = "October 6, 2026";
 
         const pedal = new GX10();
         let cadeia = null, itens = [], ordem = [], selecionado = null;
@@ -1084,9 +1084,19 @@
                        { desloc: 0x00C0, tamanho: 28,  nome: "led" }];        // [MemoryLed]    00 01 40
             for (let i = 0; i < 20; i++) s.push({ desloc: 0x0100 + i * 0x40, tamanho: 45, nome: "assign " + (i + 1) });
             s.push({ desloc: 0x0780, tamanho: 62, nome: "efct" });            // [MemoryEfct]   00 0F 00
-            for (let i = 0; i < 20; i++) s.push({ desloc: 0x0880 + i * 0x100, tamanho: 179, nome: "fx item " + (i + 1) });
+            // Um bloco de efeito é 3 bytes de cabeçalho (tipo, on/off, duplicação) seguidos de
+            // parâmetros de 4 bytes. A pedaleira corta as respostas no fim de um parâmetro —
+            // pedir 128 bytes aqui devolve 127 (3 + 31x4) — então os pedaços seguem essa divisão.
+            for (let i = 0; i < 20; i++) s.push({ desloc: 0x0880 + i * 0x100, tamanho: 179,
+                                                  nome: "fx item " + (i + 1), cabecalho: 3, passo: 124 });
             return s;
         })();
+
+        /** Quanto pedir a partir deste ponto do segmento, respeitando o cabeçalho e os parâmetros. */
+        function proximoPedido(seg, i) {
+            if (seg.cabecalho && i < seg.cabecalho) return seg.cabecalho - i;
+            return Math.min(seg.passo || PEDACO, seg.tamanho - i);
+        }
         const BYTES_UTEIS = SEGMENTOS.reduce((t, s) => t + s.tamanho, 0);     // 4699
 
         /**
@@ -1097,15 +1107,17 @@
             const buf = new Array(TAM_MEMORIA).fill(0);
             let feito = 0;
             for (const seg of SEGMENTOS) {
-                for (let i = 0; i < seg.tamanho; i += PEDACO) {
-                    const quanto = Math.min(PEDACO, seg.tamanho - i);
+                let i = 0, teimosia = 0;
+                while (i < seg.tamanho) {
+                    const quanto = proximoPedido(seg, i);
                     const d = await pedal.requestData(GX10.addrAdd(base, seg.desloc + i), quanto, 3000);
-                    if (d.length !== quanto) {
-                        throw new Error("Reading " + seg.nome + ": asked for " + quanto + " bytes and got " + d.length + ".");
-                    }
+                    if (!d.length) throw new Error("Reading " + seg.nome + ": the pedal sent nothing at byte " + i + ".");
+                    // Pode vir menos do que foi pedido: continua de onde parou.
                     d.forEach((b, k) => { buf[seg.desloc + i + k] = b; });
-                    feito += quanto;
-                    if (aoAndar) aoAndar(feito / BYTES_UTEIS);
+                    i += d.length;
+                    feito += d.length;
+                    if (aoAndar) aoAndar(Math.min(1, feito / BYTES_UTEIS));
+                    if (++teimosia > 40) throw new Error("Reading " + seg.nome + ": too many partial answers.");
                 }
             }
             return buf;
@@ -1114,13 +1126,15 @@
         async function gravarMemoriaCompleta(base, buf, aoAndar) {
             let feito = 0;
             for (const seg of SEGMENTOS) {
-                for (let i = 0; i < seg.tamanho; i += PEDACO) {
-                    const quanto = Math.min(PEDACO, seg.tamanho - i);
+                let i = 0;
+                while (i < seg.tamanho) {
+                    const quanto = proximoPedido(seg, i);
                     const trecho = buf.slice(seg.desloc + i, seg.desloc + i + quanto);
                     if (!pedal.sendData(GX10.addrAdd(base, seg.desloc + i), trecho)) throw new Error("Could not send the data.");
                     await new Promise(r => setTimeout(r, 25));
+                    i += quanto;
                     feito += quanto;
-                    if (aoAndar) aoAndar(feito / BYTES_UTEIS);
+                    if (aoAndar) aoAndar(Math.min(1, feito / BYTES_UTEIS));
                 }
             }
         }
@@ -1212,6 +1226,18 @@
             return nomesDasMemorias;
         }
 
+        /** Tells the pedal to load a memory, so the display and the sound follow the save. */
+        async function selecionaMemoria(n) {
+            const v = n - 1;                       // Memory Number: 0..197 = U01-1…U66-3
+            if (!pedal.sendData(END_MEMORY_NUMBER, [(v >> 12) & 0x0F, (v >> 8) & 0x0F, (v >> 4) & 0x0F, v & 0x0F])) {
+                addLog("Could not switch the pedal to " + rotuloDaMemoria(n) + ".", "warn");
+                return;
+            }
+            memoriaAtual = n;
+            await new Promise(r => setTimeout(r, 350));    // a pedaleira carrega o preset
+            addLog("Pedal switched to " + rotuloDaMemoria(n) + ".", "info");
+        }
+
         /**
          * Copies the temporary memory into a user memory.
          * exchange: what was in the destination comes back to the memory being edited.
@@ -1239,23 +1265,33 @@
                 if (modo !== "exchange") {
                     await gravarEConferir(enderecoDaMemoria(destino), agora, rotuloDaMemoria(destino), [0.2, 1]);
                     addLog("Saved to " + rotuloDaMemoria(destino) + ".", "success");
-                    return;
+                } else {
+                    // Exchange: the destination is read first and kept outside the pedal, so a
+                    // failure in the middle never leaves both memories holding the same sound.
+                    const antigo = await lerMemoriaCompleta(enderecoDaMemoria(destino),
+                                                            f => progresso(0.2 + f * 0.2, "Reading " + rotuloDaMemoria(destino) + "…"));
+                    guardaBackup({ destino, origem, bytes: antigo, quando: new Date().toISOString() });
+
+                    await gravarEConferir(enderecoDaMemoria(destino), agora, rotuloDaMemoria(destino), [0.4, 0.7]);
+                    await gravarEConferir(enderecoDaMemoria(origem), antigo, rotuloDaMemoria(origem), [0.7, 1]);
+                    limpaBackup();
+                    addLog("Exchanged: " + rotuloDaMemoria(origem) + " ⇄ " + rotuloDaMemoria(destino) + ".", "success");
                 }
 
-                // Exchange: the destination is read first and kept outside the pedal, so a
-                // failure in the middle never leaves both memories holding the same sound.
-                const antigo = await lerMemoriaCompleta(enderecoDaMemoria(destino),
-                                                        f => progresso(0.2 + f * 0.2, "Reading " + rotuloDaMemoria(destino) + "…"));
-                guardaBackup({ destino, origem, bytes: antigo, quando: new Date().toISOString() });
-
-                await gravarEConferir(enderecoDaMemoria(destino), agora, rotuloDaMemoria(destino), [0.4, 0.7]);
-                await gravarEConferir(enderecoDaMemoria(origem), antigo, rotuloDaMemoria(origem), [0.7, 1]);
-                limpaBackup();
-                addLog("Exchanged: " + rotuloDaMemoria(origem) + " ⇄ " + rotuloDaMemoria(destino) + ".", "success");
+                // Saving somewhere else means moving there: otherwise the pedal keeps showing
+                // the memory you came from while playing what you have just stored elsewhere.
+                if (destino !== origem) {
+                    progresso(1, "Switching the pedal to " + rotuloDaMemoria(destino) + "…");
+                    await selecionaMemoria(destino);
+                }
             } finally {
                 lendo--;
                 fechaProgresso();
                 nomesDasMemorias = null;      // names changed, read them again next time
+            }
+            if (memoriaAtual === destino && destino !== origem) {
+                clearTimeout(recargaPendente);
+                await lerCadeia();
             }
         }
 

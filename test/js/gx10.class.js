@@ -376,16 +376,31 @@ class GX10 {
                 return;
             }
 
+            // A pedaleira responde do jeito dela: às vezes manda tudo de uma vez, às vezes
+            // parte a resposta em pedaços (ela corta no fim de um parâmetro). Então o pedido
+            // vai juntando o que chega, do endereço pedido em diante, até completar o que
+            // foi pedido ou o silêncio durar demais — e devolve o que conseguiu.
             const pedido = {
                 endereco,
                 tamanho,
+                proximo: endereco.slice(),      // endereço do próximo pedaço esperado
+                recebidos: [],
                 resolve,
                 reject,
-                temporizador: setTimeout(() => {
-                    this.#pendentes = this.#pendentes.filter(p => p !== pedido);
-                    reject(new Error(`The pedal did not answer within ${tempoLimite} ms (address ${endereco.map(b => b.toString(16).padStart(2, "0")).join(" ")}).`));
-                }, tempoLimite)
+                temporizador: null
             };
+
+            const desistir = () => {
+                this.#pendentes = this.#pendentes.filter(p => p !== pedido);
+                if (pedido.recebidos.length > 0) { resolve(pedido.recebidos); return; }
+                reject(new Error(`The pedal did not answer within ${tempoLimite} ms (address ${endereco.map(b => b.toString(16).padStart(2, "0")).join(" ")}).`));
+            };
+            pedido.espera = () => {
+                clearTimeout(pedido.temporizador);
+                // depois do primeiro pedaço, a espera pelo resto é curta
+                pedido.temporizador = setTimeout(desistir, pedido.recebidos.length ? 300 : tempoLimite);
+            };
+            pedido.espera();
 
             this.#pendentes.push(pedido);
 
@@ -493,7 +508,7 @@ class GX10 {
         // quando ALGUÉM MEXE NELA. A única diferença é haver um pedido meu esperando
         // por aquele endereço, então isso é decidido ANTES de avisar quem escuta.
         const pedido = comando === 0x12
-            ? this.#pendentes.find(p => p.endereco.join() === endereco.join())
+            ? this.#pendentes.find(p => p.proximo.join() === endereco.join())
             : null;
 
         if (this.#onSysExCallback) {
@@ -502,9 +517,16 @@ class GX10 {
 
         if (!pedido) return;
 
-        clearTimeout(pedido.temporizador);
-        this.#pendentes = this.#pendentes.filter(p => p !== pedido);
-        pedido.resolve(dados);
+        pedido.recebidos.push(...dados);
+        pedido.proximo = GX10.addrAdd(pedido.proximo, dados.length);
+
+        if (pedido.recebidos.length >= pedido.tamanho) {
+            clearTimeout(pedido.temporizador);
+            this.#pendentes = this.#pendentes.filter(p => p !== pedido);
+            pedido.resolve(pedido.recebidos.slice(0, pedido.tamanho));
+            return;
+        }
+        pedido.espera();      // veio só um pedaço: espera o resto por um instante
     }
 }
 

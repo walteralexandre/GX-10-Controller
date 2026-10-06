@@ -12,3 +12,16 @@ This project is a work in progress. **Use it at your own risk.**
 ## Notes
 
 - Click **Disconnect** before turning off your pedalboard or unplugging the USB cable. This helps prevent your browser from freezing.
+
+
+## Log
+
+v0.10.2 (2026-10-06)
+- save and export functions fixed
+
+v0.10.1 (2026-10-05)
+- save and export functions added
+
+older
+- edit the chain fx
+
