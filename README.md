@@ -16,11 +16,15 @@ This project is a work in progress. **Use it at your own risk.**
 
 ## Log
 
+v0.11.0 (2026-10-06)
+- randomize function created
+- import funcion created
+
 v0.10.2 (2026-10-06)
 - save and export functions fixed
 
 v0.10.1 (2026-10-05)
-- save and export functions added
+- save and export functions created
 
 older
 - edit the chain fx

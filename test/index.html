@@ -126,6 +126,13 @@
         input[type=range] { width: 100%; accent-color: var(--accent-blue); cursor: pointer; }
         input[type=range]:disabled { cursor: not-allowed; }
         .vazio { color: var(--text-muted); font-size: .85rem; padding: 8px 0; }
+        .sortear { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-color); }
+        .sortear .titulo { font-size: .78rem; color: var(--text-muted); margin-bottom: 9px;
+                           text-transform: uppercase; letter-spacing: .08em; }
+        .sortear .botoes { display: flex; flex-wrap: wrap; gap: 8px; }
+        .sortear button { padding: 7px 13px; font-size: .8rem; font-weight: 600; border-radius: 8px; cursor: pointer;
+                          border: 1px solid var(--border-color); background: rgba(255,255,255,.05); color: var(--text-main); }
+        .sortear button:hover:not(:disabled) { background: var(--btn-hover); border-color: var(--accent-blue); }
 
         /* ============ Log ============ */
         #secao-log[hidden] { display: none; }
@@ -195,6 +202,7 @@
                     <button id="btn-save">Save</button>
                     <button id="btn-save-as">Save as…</button>
                     <button id="btn-export">Export…</button>
+                    <button id="btn-import">Import…</button>
                     <div class="risca"></div>
                     <button id="btn-debug">Debug mode <span id="marca-debug" class="marca"></span></button>
                     <button id="btn-sobre">About</button>
@@ -252,6 +260,8 @@
             </div>
         </div>
     </div>
+
+    <input type="file" id="arquivo-import" accept=".gx10" style="display:none;">
 
     <div id="cortina-export" class="cortina">
         <div class="escolha" style="max-width:520px;">
@@ -828,6 +838,7 @@
                                                       valor: nibblesParaValor(n), chave: "p:" + p.paramIndex }));
                 });
 
+                painel.appendChild(secaoSorteio(mod));
                 painelEl.appendChild(painel);
                 addLog(mod.name + " parameters loaded.", "success");
             } catch (erro) {
@@ -852,6 +863,77 @@
                 cabeca.appendChild(btn);
             }
             return cabeca;
+        }
+
+        // ================== Randomize ==================
+        // Grupos extras: aparecem só nos módulos que tiverem todos esses parâmetros
+        // (hoje, os dois AIRD Preamp — o de guitarra e o de baixo).
+        const GRUPOS_SORTEIO = [
+            { rotulo: "EQ", chaves: ["bass", "middle", "treble", "presence", "brightSw"] },
+            { rotulo: "EQ + Gain", chaves: ["bass", "middle", "treble", "presence", "brightSw", "gain", "gainSw", "level"] },
+            { rotulo: "Cab", chaves: ["spType"] },
+            { rotulo: "Cab + Mic", chaves: ["spType", "micType", "micDistance", "micPosition", "micLevel"] }
+        ];
+
+        const semFaixaUtil = p => p.min === null || p.min === undefined || p.max === null || p.max === undefined;
+
+        /** Em lista, sorteia uma das opções; no resto, um número qualquer da faixa. */
+        function valorAleatorio(p) {
+            if (p.options) return p.options[Math.floor(Math.random() * p.options.length)].value;
+            return p.min + Math.floor(Math.random() * (p.max - p.min + 1));
+        }
+
+        let sorteando = false;
+
+        async function sorteia(mod, chaves, rotulo) {
+            if (sorteando) return;
+            const indices = chaves ? chaves.map(k => mod.parameters[k].paramIndex) : null;
+            const alvos = [...controles.entries()].filter(([k, c]) => {
+                if (!k.startsWith("p:") || !c.p || semFaixaUtil(c.p)) return false;   // on/off e BPM ficam de fora
+                return !indices || indices.includes(Number(k.slice(2)));
+            });
+            if (!alvos.length) return;
+
+            sorteando = true;
+            document.querySelectorAll(".sortear button").forEach(b => { b.disabled = true; });
+            try {
+                for (const [, c] of alvos) {
+                    c.definir(valorAleatorio(c.p));
+                    await new Promise(r => setTimeout(r, 20));   // uma mensagem de cada vez
+                }
+                addLog("Randomized " + alvos.length + " parameter(s) of " + mod.name +
+                       (chaves ? " (" + rotulo + ")" : "") + ".", "success");
+            } finally {
+                sorteando = false;
+                document.querySelectorAll(".sortear button").forEach(b => { b.disabled = false; });
+            }
+        }
+
+        function secaoSorteio(mod) {
+            const caixa = document.createElement("div");
+            caixa.className = "sortear";
+            const titulo = document.createElement("div");
+            titulo.className = "titulo";
+            titulo.textContent = "Randomize";
+            const botoes = document.createElement("div");
+            botoes.className = "botoes";
+
+            const cria = (rotulo, chaves, dica) => {
+                const b = document.createElement("button");
+                b.textContent = rotulo;
+                b.dataset.tip = dica;
+                b.onclick = () => sorteia(mod, chaves, rotulo);
+                botoes.appendChild(b);
+            };
+
+            cria("All", null, "Gives every knob and switch of this effect a new value at random. The on/off switch is left alone.");
+            GRUPOS_SORTEIO
+                .filter(g => g.chaves.every(k => mod.parameters[k] && mod.parameters[k].paramIndex))
+                .forEach(g => cria(g.rotulo, g.chaves,
+                    "New values at random for: " + g.chaves.map(k => mod.parameters[k].name).join(", ") + "."));
+
+            caixa.append(titulo, botoes);
+            return caixa;
         }
 
         function leValorMaster(p, efct, comum) {
@@ -920,8 +1002,7 @@
             const valorDe = pos => ehLista ? p.options[pos].value : pos;
             let ultimoEnviado = valor;
 
-            const enviar = v => {
-                if (v === ultimoEnviado) return;
+            const manda = v => {
                 ultimoEnviado = v;
                 const bytes = umByte ? [v] : (semDeslocamento ? valorParaNibblesSemDeslocamento(v, nibbles || 4) : valorParaNibbles(v));
                 if (!pedal.sendData(endereco, bytes)) { addLog("Could not send " + p.name + ".", "error"); return; }
@@ -931,20 +1012,26 @@
                     desenhaCadeia();
                 }
             };
+            const enviar = v => { if (v !== ultimoEnviado) manda(v); };
 
             // While dragging only the number on screen changes; one single message goes out on release.
             faixa.addEventListener("input", () => { mostrador.textContent = textoDoValor(p, valorDe(Number(faixa.value))); });
             faixa.addEventListener("change", () => enviar(valorDe(Number(faixa.value))));
 
+            const mostra = v => {
+                faixa.value = ehLista ? posicaoDe(v) : v;
+                mostrador.textContent = semFaixa ? "raw: " + v : textoDoValor(p, v);
+                linha.classList.add("piscou");
+                setTimeout(() => linha.classList.remove("piscou"), 700);
+            };
+
             if (chave) {
                 controles.set(chave, {
-                    aplicar: v => {
-                        ultimoEnviado = v;
-                        faixa.value = ehLista ? posicaoDe(v) : v;
-                        mostrador.textContent = semFaixa ? "raw: " + v : textoDoValor(p, v);
-                        linha.classList.add("piscou");
-                        setTimeout(() => linha.classList.remove("piscou"), 700);
-                    }
+                    p,
+                    // veio da pedaleira: só mostra na tela, não devolve nada
+                    aplicar: v => { ultimoEnviado = v; mostra(v); },
+                    // veio da página (sorteio): mostra e manda para a pedaleira
+                    definir: v => { mostra(v); manda(v); }
                 });
             }
 
@@ -1565,6 +1652,60 @@
             }
         }
 
+        // ================== Import ==================
+        // Loads a .gx10 file into the temporary memory — what the pedal is playing.
+        // Nothing is stored in a memory until the player uses Save.
+        $("btn-import").onclick = () => {
+            fechaMenu();
+            $("arquivo-import").value = "";
+            $("arquivo-import").click();
+        };
+
+        $("arquivo-import").onchange = async e => {
+            const arquivo = e.target.files && e.target.files[0];
+            if (!arquivo) return;
+            try {
+                const bytes = Array.from(new Uint8Array(await arquivo.arrayBuffer()));
+                if (bytes.length !== TAM_MEMORIA) {
+                    throw new Error("“" + arquivo.name + "” has " + bytes.length + " bytes; a GX-10 preset file has " + TAM_MEMORIA + ".");
+                }
+                if (bytes.some(b => b > 127)) throw new Error("“" + arquivo.name + "” does not look like a GX-10 preset file.");
+
+                const nome = textoAscii(bytes.slice(OFS_NOME, OFS_NOME + TAM_NOME));
+                const r = await confirma("Load " + (nome ? "“" + nome + "”" : "this preset") + "?",
+                    "It replaces what you are playing right now, and whatever you have not saved is lost. " +
+                    "Nothing goes into a memory until you use Save.", "Load");
+                if (!r.ok) return;
+
+                lendo++;
+                abreProgresso("Loading the preset");
+                let diferentes = 0;
+                try {
+                    await gravarMemoriaCompleta(END_MEM_TEMP, bytes, f => progresso(f * 0.6, "Sending to the pedal…"));
+                    const lidos = await lerMemoriaCompleta(END_MEM_TEMP, f => progresso(0.6 + f * 0.4, "Checking…"));
+                    SEGMENTOS.forEach(seg => {
+                        for (let i = 0; i < seg.tamanho; i++) {
+                            if (bytes[seg.desloc + i] !== lidos[seg.desloc + i]) diferentes++;
+                        }
+                    });
+                } finally {
+                    lendo--;
+                    fechaProgresso();
+                }
+
+                clearTimeout(recargaPendente);
+                await lerCadeia();
+                if (diferentes) {
+                    addLog("Loaded “" + arquivo.name + "”, but the pedal kept its own value on " + diferentes +
+                           " byte(s) — some settings may not have come across.", "warn");
+                } else {
+                    addLog("Loaded “" + arquivo.name + "”. Use Save to keep it in a memory.", "success");
+                }
+            } catch (err) {
+                addLog(err.message, "error");
+            }
+        };
+
         $("btn-export").onclick = async () => {
             fechaMenu();
             try {
@@ -1647,6 +1788,7 @@
             $("btn-save").disabled = !ligado;
             $("btn-save-as").disabled = !ligado;
             $("btn-export").disabled = !ligado;
+            $("btn-import").disabled = !ligado;
         }
         function atualizaStatus() {
             const ligado = pedal.isConnected();
