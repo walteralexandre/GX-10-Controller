@@ -112,6 +112,11 @@
         .btn-remove { border-color: var(--accent-red); color: var(--accent-red); }
         h2 { font-size: .95rem; margin: 16px 0 10px; }
 
+        .faixa-preset { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; padding: 0 4px; }
+        .faixa-preset #preset-numero { font-family: var(--fonte-mono); font-size: 1.05rem; font-weight: 700;
+                                       color: var(--accent-blue); }
+        .faixa-preset #preset-nome { font-size: .95rem; font-weight: 600; letter-spacing: .03em; }
+
         /* ============ Chain stage ============ */
         .palco { background: var(--palco); border: 1px solid var(--border-color); border-radius: 12px;
                  padding: 22px 18px; overflow-x: auto; }
@@ -264,13 +269,13 @@
                 <div id="menu" class="menu">
                     <button id="btn-connect">Connect</button>
                     <button id="btn-disconnect">Disconnect</button>
+                    <button id="btn-presets">Presets…</button>
                     <button id="btn-read">Reload chain</button>
                     <div class="risca"></div>
                     <button id="btn-save">Save</button>
                     <button id="btn-save-as">Save as…</button>
                     <button id="btn-export">Export…</button>
                     <button id="btn-import">Import…</button>
-                    <button id="btn-presets">Presets…</button>
                     <div class="risca"></div>
                     <div class="grupo">CTL/EXP</div>
                     <button id="btn-ctl-control" class="sub">Control</button>
@@ -284,6 +289,10 @@
             </div>
         </header>
 
+        <div class="faixa-preset">
+            <span id="preset-numero">—</span>
+            <span id="preset-nome"></span>
+        </div>
         <div class="palco"><div id="cadeia" class="cadeia"><div class="vazio">Connecting to the pedal…</div></div></div>
 
         <div id="painel"></div>
@@ -414,7 +423,10 @@
                 <button id="aba-fabrica">Factory</button>
             </div>
             <div class="rolagem"><table class="tabela-presets" id="tabela-presets"></table></div>
-            <div class="rodape"><button class="btn" id="presets-fecha">Close</button></div>
+            <div class="rodape">
+                <button class="btn" id="presets-reler">Read names again</button>
+                <button class="btn" id="presets-fecha">Close</button>
+            </div>
         </div>
     </div>
 
@@ -492,8 +504,8 @@
         // antes de tirar o cabo: o Chrome no Windows congela se o dispositivo some
         // enquanto alguma página ainda tem a sessão MIDI aberta.
         const MIDI_OFF = /[?&]midi=off(&|$)/i.test(location.search);
-        const APP_VERSAO = "0.11.1";
-        const APP_DATA = "October 8, 2026";
+        const APP_VERSAO = "0.11.2";
+        const APP_DATA = "October 9, 2026";
 
         const pedal = new GX10();
         let cadeia = null, itens = [], ordem = [], selecionado = null;
@@ -611,7 +623,30 @@
             if (selecionado === ID_MASTER) await abrirMaster();
             else if (selecionado !== null && ordem.includes(selecionado)) await abrirBloco(selecionado);
             else { painelEl.innerHTML = ""; selecionado = null; }
+            await atualizaFaixaPreset();
             atualizaBotoes();
+        }
+
+        /** Mostra, acima da cadeia, o número e o nome do preset que está tocando. */
+        async function atualizaFaixaPreset() {
+            if (!pedal.isConnected()) {
+                $("preset-numero").textContent = "—";
+                $("preset-nome").textContent = "";
+                return;
+            }
+            try {
+                lendo++;
+                let atual, nome;
+                try {
+                    atual = await leMemoriaAtual();
+                    nome = await lerNomeAtual();
+                } finally { lendo--; }
+                $("preset-numero").textContent = rotuloDoNumero(atual.numero);
+                $("preset-nome").textContent = nome || "(no name)";
+            } catch (e) {
+                $("preset-numero").textContent = "—";
+                $("preset-nome").textContent = "";
+            }
         }
 
         function nomeDoBloco(id) {
@@ -1280,6 +1315,21 @@
 
         let memoriaAtual = null;        // 1..198, or null when the pedal is on a factory preset
         let nomesDasMemorias = null;    // cache, filled the first time "Save as…" opens
+        const CHAVE_NOMES = "gx10-nomes-memorias";
+
+        function nomesDoCache() {
+            try {
+                const j = JSON.parse(localStorage.getItem(CHAVE_NOMES) || "null");
+                return Array.isArray(j) && j.length === TOTAL_MEM_USER ? j : null;
+            } catch (e) { return null; }
+        }
+        function guardaNomes(nomes) {
+            try { localStorage.setItem(CHAVE_NOMES, JSON.stringify(nomes)); } catch (e) { /* sem espaço */ }
+        }
+        function esqueceNomes() {
+            nomesDasMemorias = null;
+            try { localStorage.removeItem(CHAVE_NOMES); } catch (e) { /* nada a fazer */ }
+        }
 
         /** Which memory the pedal has loaded. 0..197 = user, 200..298 = factory preset. */
         async function leMemoriaAtual() {
@@ -1423,8 +1473,12 @@
             return textoAscii(d);
         }
 
-        async function carregaNomes() {
-            if (nomesDasMemorias) return nomesDasMemorias;
+        async function carregaNomes(forcar) {
+            if (!forcar && nomesDasMemorias) return nomesDasMemorias;
+            if (!forcar) {
+                const guardados = nomesDoCache();            // lidos de uma vez anterior
+                if (guardados) { nomesDasMemorias = guardados; return nomesDasMemorias; }
+            }
             abreProgresso("Reading memory names");
             lendo++;
             try {
@@ -1434,6 +1488,7 @@
                     progresso(n / TOTAL_MEM_USER, "Memory " + rotuloDaMemoria(n) + "…");
                 }
                 nomesDasMemorias = nomes;
+                guardaNomes(nomes);
             } finally {
                 lendo--;
                 fechaProgresso();
@@ -1505,7 +1560,7 @@
             } finally {
                 lendo--;
                 fechaProgresso();
-                nomesDasMemorias = null;      // names changed, read them again next time
+                esqueceNomes();               // names changed, read them again next time
             }
             if (memoriaAtual === destino && destino !== origem) {
                 clearTimeout(recargaPendente);
@@ -1860,7 +1915,17 @@
 
 
         // ================== CTL/EXP ==================
-        const CTLEXP = window.GX10_CTLEXP;
+        const CTLEXP = window.GX10_CTLEXP || {};
+        // O index.html e o js/gx10.ctlexp.js andam juntos. Se só um dos dois for copiado,
+        // os diálogos quebrariam no meio; aqui isso vira um aviso claro.
+        const CTLEXP_FALTA = ["listas", "controles", "assign", "knobs", "memoryMidi", "presetsFabrica"]
+            .filter(k => !CTLEXP[k]) .concat(CTLEXP.listas && !CTLEXP.listas.comModo ? ["listas.comModo"] : []);
+        function dadosCtlExpOk() {
+            if (!CTLEXP_FALTA.length) return true;
+            addLog("js/gx10.ctlexp.js is out of date (missing: " + CTLEXP_FALTA.join(", ") +
+                   "). Copy it from the same place as index.html.", "error");
+            return false;
+        }
         const END_SYSTEM_CONTROL = [0x00, 0x00, 0x10, 0x00];   // [SystemControl]
         const TAM_SYSTEM_CONTROL = 102;
         const OFS_CTL_MEM = 0x10;                              // controles dentro do [MemoryCommon]
@@ -1920,6 +1985,7 @@
         // ---------- Control ----------
         async function abreControl() {
             fechaMenu();
+            if (!dadosCtlExpOk()) return;
             let sis, mem;
             lendo++;
             abreProgresso("Reading the controls");
@@ -2042,16 +2108,20 @@
             if (campo.tipo === "nibbles2") return valorParaNibblesSemDeslocamento(valor, 2);
             return valorParaNibblesSemDeslocamento(valor, 4);
         }
-        function escreveCampo(i, campo, valor) {
-            const end = GX10.addrAdd(END_MEM_TEMP, baseDoAssign(i) + campo.desloc);
-            gravaEConfere(end, bytesDoCampo(campo, valor), "assign " + (i + 1) + " " + campo.rotulo);
+        /**
+         * A pedaleira recusa byte avulso dentro de um Assign (testado: manda 00, ela fica com 01).
+         * Então a mudança entra no bloco de 45 bytes e a estrutura inteira é reenviada.
+         */
+        function escreveCampo(i, dados, campo, valor) {
+            bytesDoCampo(campo, valor).forEach((b, k) => { dados[campo.desloc + k] = b; });
+            return gravaEConfere(GX10.addrAdd(END_MEM_TEMP, baseDoAssign(i)), dados.slice(0, 45),
+                                 "assign " + (i + 1) + " " + campo.rotulo);
         }
 
         /** Controle certo para o campo: lista, lista de alvos ou número. */
         function controleDoCampo(i, campo, dados, aoMudar) {
             const valor = leCampo(dados, campo);
-            const troca = v => { dados[campo.desloc] = campo.tipo === "byte" ? v : dados[campo.desloc];
-                                 escreveCampo(i, campo, v); if (aoMudar) aoMudar(v); };
+            const troca = v => { escreveCampo(i, dados, campo, v); if (aoMudar) aoMudar(v); };
             if (campo.alvos) return criaSelect(CTLEXP.assign.alvos, valor, troca);
             if (campo.chave === "fxItem") {
                 return criaSelect(Array.from({ length: 20 }, (_, k) => "Fx Item " + (k + 1)), valor, troca);
@@ -2062,6 +2132,7 @@
 
         async function abreAssign() {
             fechaMenu();
+            if (!dadosCtlExpOk()) return;
             const tudo = [];
             lendo++;
             abreProgresso("Reading the assigns");
@@ -2181,8 +2252,7 @@
                     const numero = numeroBase + indice;
                     const cel = document.createElement("td");
                     const b = document.createElement("button");
-                    b.innerHTML = '<span class="n">' + (n + 1) + "</span>";
-                    b.appendChild(document.createTextNode(nomes[indice] || "—"));
+                    b.textContent = nomes[indice] || "—";
                     if (memoriaAtual !== null && usuario && memoriaAtual - 1 === indice) b.classList.add("atual");
                     b.onclick = () => carregaPreset(numero);
                     cel.appendChild(b);
@@ -2208,6 +2278,7 @@
 
         $("btn-presets").onclick = async () => {
             fechaMenu();
+            if (!dadosCtlExpOk()) return;
             try {
                 lendo++;
                 try { await leMemoriaAtual(); } finally { lendo--; }
@@ -2231,6 +2302,10 @@
             $("aba-user").classList.remove("ativa");
             desenhaPresets();
         };
+        $("presets-reler").onclick = async () => {
+            await carregaNomes(true);          // ignora o que está guardado e lê da pedaleira
+            desenhaPresets();
+        };
         $("presets-fecha").onclick = () => $("cortina-presets").classList.remove("aberta");
         $("cortina-presets").onclick = e => { if (e.target === $("cortina-presets")) $("cortina-presets").classList.remove("aberta"); };
 
@@ -2239,6 +2314,7 @@
 
         async function abreKnob() {
             fechaMenu();
+            if (!dadosCtlExpOk()) return;
             let dados;
             lendo++;
             abreProgresso("Reading the knobs");
@@ -2287,6 +2363,7 @@
 
         async function abreMidi() {
             fechaMenu();
+            if (!dadosCtlExpOk()) return;
             let dados;
             lendo++;
             abreProgresso("Reading the MIDI settings");
@@ -2491,6 +2568,7 @@
                 cadeia = null; itens = []; ordem = []; selecionado = null;
                 painelEl.innerHTML = "";
                 desenhaCadeia();
+                atualizaFaixaPreset();
             }
             atualizaStatus();
         });

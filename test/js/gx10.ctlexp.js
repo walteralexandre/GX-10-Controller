@@ -7,6 +7,7 @@
  * Os nomes das linhas seguem o que aparece na tela da pedaleira (GX-10); o manual
  * chama de BankDown/BankUp, Manual Num1/2, CNum, Ctl1-3, Exp1Sw, Exp1 e Exp2.
  */
+window.GX10_CTLEXP_VERSAO = "0.11.2";
 window.GX10_CTLEXP = {
  "listas": {
   "funcNum": [

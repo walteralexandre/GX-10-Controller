@@ -18,6 +18,13 @@ This project is a work in progress. **Use it at your own risk.**
 
 
 
+v0.11.2 (2026-10-09)
+- current preset number and name shown above the effect chain
+- presets list: factory tab fixed, names kept in the browser between visits,
+  "Read names again" button, moved up in the menu
+- assign settings are now written as a whole block, which is what the pedal accepts
+- the page warns when js/gx10.ctlexp.js is older than index.html instead of failing silently
+
 v0.11.1 (2026-10-08)
 - presets list added (user and factory), click to load
 - knob and memory MIDI settings added
