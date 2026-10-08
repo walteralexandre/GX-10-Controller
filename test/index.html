@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BOSS GX-10 Controller</title>
+    <link rel="icon" type="image/png" href="img/icon.png">
     <style>
         :root {
             --bg-color: #12141c; --container-bg: #1c1f2b; --text-main: #f3f4f6; --text-muted: #9ca3af;
@@ -38,6 +39,32 @@
         .menu button:disabled { opacity: .35; cursor: not-allowed; }
         .menu .risca { height: 1px; background: var(--border-color); margin: 6px 4px; }
         .menu .marca { float: right; color: var(--accent-green); font-size: .75rem; }
+        .menu .grupo { padding: 7px 12px 3px; font-size: .68rem; color: var(--text-muted);
+                       text-transform: uppercase; letter-spacing: .09em; }
+        .menu button.sub { padding-left: 24px; }
+
+        /* ============ CTL/EXP ============ */
+        .tabela-ctl { width: 100%; border-collapse: collapse; font-size: .82rem; }
+        .tabela-ctl th { text-align: left; font-size: .68rem; color: var(--text-muted); font-weight: 600;
+                         text-transform: uppercase; letter-spacing: .07em; padding: 0 8px 8px; }
+        .tabela-ctl td { padding: 4px 8px; border-top: 1px solid rgba(255,255,255,.05); }
+        .tabela-ctl td.nome { font-weight: 600; white-space: nowrap; }
+        .tabela-ctl select { width: 100%; background: #0f1219; color: var(--text-main); font-size: .8rem;
+                             border: 1px solid var(--border-color); border-radius: 7px; padding: 5px 7px; }
+        .tabela-ctl select:disabled { opacity: .35; }
+        .tabela-ctl input[type=number] { width: 100%; background: #0f1219; color: var(--text-main); font-size: .8rem;
+                                         border: 1px solid var(--border-color); border-radius: 7px; padding: 5px 7px; }
+        .rolagem { overflow: auto; max-height: 62vh; }
+        .linha-assign td { vertical-align: middle; }
+        .linha-assign .num { color: var(--text-muted); font-family: "Courier New", monospace; }
+        .linha-assign.apagada { opacity: .45; }
+        .detalhe-assign { background: rgba(255,255,255,.03); }
+        .detalhe-assign .grade-det { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+                                     gap: 10px; padding: 10px 6px 14px; }
+        .detalhe-assign label { font-size: .7rem; color: var(--text-muted); display: block; margin-bottom: 3px; }
+        .btn-mini { padding: 3px 9px; font-size: .72rem; border-radius: 6px; cursor: pointer;
+                    border: 1px solid var(--border-color); background: rgba(255,255,255,.05); color: var(--text-main); }
+        .btn-mini:hover { background: var(--btn-hover); }
 
         .btn { padding: 9px 14px; font-size: .85rem; font-weight: 600; border: 1px solid var(--border-color);
                border-radius: 8px; cursor: pointer; background: rgba(255,255,255,.05); color: var(--text-main); }
@@ -204,6 +231,12 @@
                     <button id="btn-export">Export…</button>
                     <button id="btn-import">Import…</button>
                     <div class="risca"></div>
+                    <div class="grupo">CTL/EXP</div>
+                    <button id="btn-ctl-control" class="sub">Control</button>
+                    <button id="btn-ctl-assign" class="sub">Assign</button>
+                    <button id="btn-ctl-knob" class="sub">Knob</button>
+                    <button id="btn-ctl-midi" class="sub">MIDI</button>
+                    <div class="risca"></div>
                     <button id="btn-debug">Debug mode <span id="marca-debug" class="marca"></span></button>
                     <button id="btn-sobre">About</button>
                 </div>
@@ -311,8 +344,30 @@
         </div>
     </div>
 
+    <div id="cortina-control" class="cortina">
+        <div class="escolha" style="max-width:820px;">
+            <h3>CTL/EXP — Control</h3>
+            <div class="dica">What each footswitch and pedal does. <b>Memory</b> keeps the setting inside this
+                preset; <b>System</b> makes it the same in every preset.</div>
+            <div class="rolagem"><table class="tabela-ctl" id="tabela-control"></table></div>
+            <div class="rodape"><button class="btn" id="control-fecha">Close</button></div>
+        </div>
+    </div>
+
+    <div id="cortina-assign" class="cortina">
+        <div class="escolha" style="max-width:1000px;">
+            <h3>CTL/EXP — Assign</h3>
+            <div class="dica">Each line hooks a footswitch, a pedal or a MIDI message to one setting of this
+                preset. Open <b>more</b> for the finer details of a line.</div>
+            <div class="rolagem"><table class="tabela-ctl" id="tabela-assign"></table></div>
+            <div class="rodape"><button class="btn" id="assign-fecha">Close</button></div>
+        </div>
+    </div>
+
     <div id="cortina-sobre" class="cortina">
         <div class="escolha sobre" style="max-width:460px;">
+            <img src="img/icon-2.png" alt="" style="width:92px;height:auto;align-self:center;margin-bottom:12px;
+                 border-radius:18px;box-shadow:0 8px 22px rgba(0,0,0,.45);">
             <h3>BOSS GX-10 Controller</h3>
             <div class="dica">Editor for the BOSS GX-10 guitar effects processor.</div>
             <p>Edit your presets straight from the browser, over the USB cable: build the effect chain,
@@ -343,6 +398,7 @@
 
     <script src="js/gx10.class.js"></script>
     <script src="js/gx10.modules.js"></script>
+    <script src="js/gx10.ctlexp.js"></script>
     <script>
         // ================== Addresses (temporary memory) ==================
         const END_CADEIA = [0x10, 0x00, 0x0F, 0x0C];   // CHAIN TOP + NEXT ITEM0..48
@@ -364,8 +420,8 @@
         // antes de tirar o cabo: o Chrome no Windows congela se o dispositivo some
         // enquanto alguma página ainda tem a sessão MIDI aberta.
         const MIDI_OFF = /[?&]midi=off(&|$)/i.test(location.search);
-        const APP_VERSAO = "0.10.2";
-        const APP_DATA = "October 6, 2026";
+        const APP_VERSAO = "0.11.0";
+        const APP_DATA = "October 7, 2026";
 
         const pedal = new GX10();
         let cadeia = null, itens = [], ordem = [], selecionado = null;
@@ -1727,6 +1783,264 @@
         $("export-binario").onclick = () => exportar("binario");
         $("export-cancela").onclick = () => $("cortina-export").classList.remove("aberta");
 
+
+        // ================== CTL/EXP ==================
+        const CTLEXP = window.GX10_CTLEXP;
+        const END_SYSTEM_CONTROL = [0x00, 0x00, 0x10, 0x00];   // [SystemControl]
+        const TAM_SYSTEM_CONTROL = 102;
+        const OFS_CTL_MEM = 0x10;                              // controles dentro do [MemoryCommon]
+        const TAM_CTL_MEM = 0x24;                              // 0x10 … 0x33
+
+        /** Lê um trecho qualquer aceitando resposta em pedaços. */
+        async function lerTrecho(endereco, tamanho) {
+            const saida = [];
+            let guarda = 0;
+            while (saida.length < tamanho) {
+                const d = await pedal.requestData(GX10.addrAdd(endereco, saida.length),
+                                                  Math.min(PEDACO, tamanho - saida.length), 3000);
+                if (!d.length) throw new Error("The pedal sent nothing for " + hex(endereco) + ".");
+                saida.push(...d);
+                if (++guarda > 40) throw new Error("Too many partial answers from " + hex(endereco) + ".");
+            }
+            return saida.slice(0, tamanho);
+        }
+
+        /** <select> pronto, com os rótulos de uma lista e o valor atual. */
+        function criaSelect(lista, valor, aoMudar, base1) {
+            const sel = document.createElement("select");
+            lista.forEach((rotulo, i) => {
+                const op = document.createElement("option");
+                op.value = String(i);
+                op.textContent = base1 ? (i + 1) + "  " + rotulo : rotulo;
+                sel.appendChild(op);
+            });
+            sel.value = String(Math.max(0, Math.min(lista.length - 1, valor)));
+            sel.onchange = () => aoMudar(Number(sel.value));
+            return sel;
+        }
+
+        function criaNumero(min, max, valor, aoMudar, base1) {
+            const inp = document.createElement("input");
+            inp.type = "number";
+            inp.min = String(base1 ? min + 1 : min);
+            inp.max = String(base1 ? max + 1 : max);
+            inp.value = String(base1 ? valor + 1 : valor);
+            inp.onchange = () => {
+                let v = Number(inp.value) - (base1 ? 1 : 0);
+                v = Math.max(min, Math.min(max, isNaN(v) ? min : v));
+                inp.value = String(base1 ? v + 1 : v);
+                aoMudar(v);
+            };
+            return inp;
+        }
+
+        const celula = (linha, conteudo, classe) => {
+            const td = document.createElement("td");
+            if (classe) td.className = classe;
+            if (conteudo instanceof Node) td.appendChild(conteudo); else td.textContent = conteudo;
+            linha.appendChild(td);
+            return td;
+        };
+
+        // ---------- Control ----------
+        async function abreControl() {
+            fechaMenu();
+            let sis, mem;
+            lendo++;
+            abreProgresso("Reading the controls");
+            try {
+                progresso(0.1, "System settings…");
+                sis = await lerTrecho(END_SYSTEM_CONTROL, TAM_SYSTEM_CONTROL);
+                progresso(0.6, "This preset…");
+                mem = await lerTrecho(GX10.addrAdd(END_MEM_TEMP, OFS_CTL_MEM), TAM_CTL_MEM);
+            } catch (e) {
+                addLog(e.message, "error");
+                return;
+            } finally {
+                lendo--;
+                fechaProgresso();
+            }
+
+            const tabela = $("tabela-control");
+            tabela.innerHTML = "";
+            const cabeca = document.createElement("tr");
+            ["", "Kept in", "Function", "Mode"].forEach(t => {
+                const th = document.createElement("th");
+                th.textContent = t;
+                cabeca.appendChild(th);
+            });
+            tabela.appendChild(cabeca);
+
+            const bytePref = c => sis[c.sis.pref];                       // 0 = memory, 1 = system
+            const leFuncao = c => bytePref(c) ? sis[c.sis.funcao] : mem[c.mem.funcao - OFS_CTL_MEM];
+            const leModo = c => bytePref(c) ? sis[c.sis.modo] : mem[c.mem.modo - OFS_CTL_MEM];
+
+            CTLEXP.controles.forEach(c => {
+                const linha = document.createElement("tr");
+                celula(linha, c.rotulo, "nome");
+
+                const lista = CTLEXP.listas[c.lista];
+                const tdFuncao = document.createElement("td");
+                const tdModo = document.createElement("td");
+
+                const desenhaValores = () => {
+                    const noSistema = !!bytePref(c);
+                    tdFuncao.innerHTML = "";
+                    tdFuncao.appendChild(criaSelect(lista, leFuncao(c), v => {
+                        if (noSistema) { sis[c.sis.funcao] = v; mandaByte(END_SYSTEM_CONTROL, c.sis.funcao, v); }
+                        else { mem[c.mem.funcao - OFS_CTL_MEM] = v; mandaByte(END_MEM_TEMP, c.mem.funcao, v); }
+                        addLog(c.rotulo + " = " + lista[v] + (noSistema ? " (system)" : " (this preset)"), "raw");
+                    }));
+                    tdModo.innerHTML = "";
+                    if (c.modo) {
+                        tdModo.appendChild(criaSelect(CTLEXP.listas.modo, leModo(c), v => {
+                            if (noSistema) { sis[c.sis.modo] = v; mandaByte(END_SYSTEM_CONTROL, c.sis.modo, v); }
+                            else { mem[c.mem.modo - OFS_CTL_MEM] = v; mandaByte(END_MEM_TEMP, c.mem.modo, v); }
+                            addLog(c.rotulo + " mode = " + CTLEXP.listas.modo[v], "raw");
+                        }));
+                    } else {
+                        tdModo.textContent = "—";
+                        tdModo.style.color = "var(--text-muted)";
+                    }
+                };
+
+                const tdPref = document.createElement("td");
+                tdPref.appendChild(criaSelect(["This preset", "Every preset"], bytePref(c), v => {
+                    sis[c.sis.pref] = v;
+                    mandaByte(END_SYSTEM_CONTROL, c.sis.pref, v);
+                    addLog(c.rotulo + " now follows " + (v ? "the system" : "this preset") + ".", "raw");
+                    desenhaValores();
+                }));
+
+                linha.appendChild(tdPref);
+                linha.appendChild(tdFuncao);
+                linha.appendChild(tdModo);
+                desenhaValores();
+                tabela.appendChild(linha);
+            });
+
+            $("cortina-control").classList.add("aberta");
+        }
+
+        const mandaByte = (base, desloc, valor) => pedal.sendData(GX10.addrAdd(base, desloc), [valor]);
+
+        // ---------- Assign ----------
+        const baseDoAssign = i => CTLEXP.assign.desloc1 + i * CTLEXP.assign.passo;
+
+        function leCampo(dados, campo) {
+            return campo.tipo === "byte" ? dados[campo.desloc]
+                                         : nibblesParaValorSemDeslocamento(dados.slice(campo.desloc, campo.desloc + 4));
+        }
+        function escreveCampo(i, campo, valor) {
+            const end = GX10.addrAdd(END_MEM_TEMP, baseDoAssign(i) + campo.desloc);
+            const bytes = campo.tipo === "byte" ? [valor] : valorParaNibblesSemDeslocamento(valor, 4);
+            pedal.sendData(end, bytes);
+        }
+
+        /** Controle certo para o campo: lista, lista de alvos ou número. */
+        function controleDoCampo(i, campo, dados, aoMudar) {
+            const valor = leCampo(dados, campo);
+            const troca = v => { dados[campo.desloc] = campo.tipo === "byte" ? v : dados[campo.desloc];
+                                 escreveCampo(i, campo, v); if (aoMudar) aoMudar(v); };
+            if (campo.alvos) return criaSelect(CTLEXP.assign.alvos, valor, troca);
+            if (campo.chave === "fxItem") {
+                return criaSelect(Array.from({ length: 20 }, (_, k) => "Fx Item " + (k + 1)), valor, troca);
+            }
+            if (campo.lista) return criaSelect(campo.lista, valor, troca, false);
+            return criaNumero(campo.min, campo.max, valor, troca, campo.base1);
+        }
+
+        async function abreAssign() {
+            fechaMenu();
+            const tudo = [];
+            lendo++;
+            abreProgresso("Reading the assigns");
+            try {
+                for (let i = 0; i < CTLEXP.assign.total; i++) {
+                    tudo.push(await lerTrecho(GX10.addrAdd(END_MEM_TEMP, baseDoAssign(i)), 45));
+                    progresso((i + 1) / CTLEXP.assign.total, "Assign " + (i + 1) + "…");
+                }
+            } catch (e) {
+                addLog(e.message, "error");
+                return;
+            } finally {
+                lendo--;
+                fechaProgresso();
+            }
+
+            const campos = CTLEXP.assign.campos;
+            const acha = chave => campos.find(c => c.chave === chave);
+            const principais = ["sw", "fxItem", "target", "source", "mode"].map(acha);
+            const extras = campos.filter(c => !principais.includes(c));
+
+            const tabela = $("tabela-assign");
+            tabela.innerHTML = "";
+            const cabeca = document.createElement("tr");
+            ["", "On", "Block", "Target", "Source", "Mode", ""].forEach(t => {
+                const th = document.createElement("th");
+                th.textContent = t;
+                cabeca.appendChild(th);
+            });
+            tabela.appendChild(cabeca);
+
+            tudo.forEach((dados, i) => {
+                const linha = document.createElement("tr");
+                linha.className = "linha-assign" + (dados[0] ? "" : " apagada");
+                celula(linha, String(i + 1), "num");
+
+                principais.forEach(campo => {
+                    const td = document.createElement("td");
+                    td.appendChild(controleDoCampo(i, campo, dados, v => {
+                        if (campo.chave === "sw") linha.classList.toggle("apagada", !v);
+                    }));
+                    if (campo.chave === "target") td.style.minWidth = "260px";
+                    linha.appendChild(td);
+                });
+
+                const detalhe = document.createElement("tr");
+                detalhe.className = "detalhe-assign";
+                detalhe.style.display = "none";
+                const tdDet = document.createElement("td");
+                tdDet.colSpan = 7;
+                const grade = document.createElement("div");
+                grade.className = "grade-det";
+                extras.forEach(campo => {
+                    const caixa = document.createElement("div");
+                    const rot = document.createElement("label");
+                    rot.textContent = campo.rotulo;
+                    caixa.append(rot, controleDoCampo(i, campo, dados));
+                    grade.appendChild(caixa);
+                });
+                tdDet.appendChild(grade);
+                detalhe.appendChild(tdDet);
+
+                const btn = document.createElement("button");
+                btn.className = "btn-mini";
+                btn.textContent = "more";
+                btn.onclick = () => {
+                    const aberto = detalhe.style.display !== "none";
+                    detalhe.style.display = aberto ? "none" : "table-row";
+                    btn.textContent = aberto ? "more" : "less";
+                };
+                celula(linha, btn);
+
+                tabela.append(linha, detalhe);
+            });
+
+            $("cortina-assign").classList.add("aberta");
+        }
+
+        $("btn-ctl-control").onclick = abreControl;
+        $("btn-ctl-assign").onclick = abreAssign;
+        $("btn-ctl-knob").disabled = true;
+        $("btn-ctl-knob").dataset.tip = "Not built yet.";
+        $("btn-ctl-midi").disabled = true;
+        $("btn-ctl-midi").dataset.tip = "Not built yet.";
+        $("control-fecha").onclick = () => $("cortina-control").classList.remove("aberta");
+        $("assign-fecha").onclick = () => $("cortina-assign").classList.remove("aberta");
+        $("cortina-control").onclick = e => { if (e.target === $("cortina-control")) $("cortina-control").classList.remove("aberta"); };
+        $("cortina-assign").onclick = e => { if (e.target === $("cortina-assign")) $("cortina-assign").classList.remove("aberta"); };
+
         // ================== Tooltip of our own ==================
         // Replaces the browser's native tooltip: same texts (data-tip), nicer look,
         // and it works on elements that are drawn and redrawn all the time.
@@ -1789,6 +2103,8 @@
             $("btn-save-as").disabled = !ligado;
             $("btn-export").disabled = !ligado;
             $("btn-import").disabled = !ligado;
+            $("btn-ctl-control").disabled = !ligado;
+            $("btn-ctl-assign").disabled = !ligado;
         }
         function atualizaStatus() {
             const ligado = pedal.isConnected();
@@ -1863,6 +2179,8 @@
             $("cortina-sobre").classList.remove("aberta");
             $("cortina-salvar").classList.remove("aberta");
             $("cortina-export").classList.remove("aberta");
+            $("cortina-control").classList.remove("aberta");
+            $("cortina-assign").classList.remove("aberta");
         });
 
         pedal.onStateChange(({ isConnected, reason }) => {

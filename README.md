@@ -11,17 +11,19 @@ This project is a work in progress. **Use it at your own risk.**
 
 ## Notes
 
-- Click **Disconnect** before turning off your pedalboard or unplugging the USB cable. This helps prevent your browser from freezing.
+- Click **Disconnect** before turning off your pedalboard or unplugging the USB cable. This helps prevent your Chromium based browsers from freezing.
 
 
 ## Log
 
-v0.11.0 (2026-10-06)
-- randomize function created
-- import funcion created
+v0.11.0 (2026-10-07)
+- control functions added
+- assign functions added
 
 v0.10.2 (2026-10-06)
 - save and export functions fixed
+- randomize function created
+- import funcion created
 
 v0.10.1 (2026-10-05)
 - save and export functions created
