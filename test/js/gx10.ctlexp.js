@@ -11,9 +11,9 @@ window.GX10_CTLEXP = {
  "listas": {
   "funcNum": [
    "OFF",
-   "1",
-   "MEMORY -1",
-   "MEMORY +1",
+   "NUM 1",
+   "DOWN",
+   "UP",
    "BPM TAP",
    "TUNER",
    "MEMORY/MAN",
@@ -21,12 +21,12 @@ window.GX10_CTLEXP = {
    "MAN/TUNER",
    "AMP CTL 1",
    "AMP CTL 2",
-   "PFX",
+   "WAH",
    "DIV CH.SEL",
    "SEND/RETURN",
    "LOOP CTL",
-   "LOOP STOP",
-   "LOOP CLEAR",
+   "LOOPER STOP",
+   "LOOPER CLEAR",
    "MIDI START"
   ],
   "funcCNum": [
@@ -38,20 +38,20 @@ window.GX10_CTLEXP = {
    "MAN/TUNER",
    "AMP CTL 1",
    "AMP CTL 2",
-   "PFX",
+   "WAH",
    "DIV CH.SEL",
    "SEND/RETURN",
    "LOOP CTL",
-   "LOOP STOP",
-   "LOOP CLEAR",
+   "LOOPER STOP",
+   "LOOPER CLEAR",
    "MIDI START"
   ],
   "funcCtl": [
    "OFF",
-   "BANK DOWN",
-   "BANK UP",
-   "MEMORY -1",
-   "MEMORY +1",
+   "BANK ▼",
+   "BANK ▲",
+   "DOWN",
+   "UP",
    "BPM TAP",
    "TUNER",
    "MEMORY/MAN",
@@ -59,21 +59,21 @@ window.GX10_CTLEXP = {
    "MAN/TUNER",
    "AMP CTL 1",
    "AMP CTL 2",
-   "PFX",
+   "WAH",
    "DIV CH.SEL",
    "SEND/RETURN",
    "LOOP CTL",
-   "LOOP STOP",
-   "LOOP CLEAR",
+   "LOOPER STOP",
+   "LOOPER CLEAR",
    "MIDI START"
   ],
   "funcExp": [
    "OFF",
    "FOOT VOL",
-   "PEDAL FX",
-   "FV/PEDAL FX",
-   "FV+TUNER",
-   "FV+TUNE/PFX"
+   "WAH",
+   "FV/WAH",
+   "FV+TU",
+   "FV+TU/WAH"
   ],
   "modo": [
    "TOGGLE",
@@ -82,6 +82,13 @@ window.GX10_CTLEXP = {
   "preferencia": [
    "MEMORY",
    "SYSTEM"
+  ],
+  "comModo": [
+   "AMP CTL 1",
+   "AMP CTL 2",
+   "WAH",
+   "DIV CH.SEL",
+   "SEND/RETURN"
   ]
  },
  "controles": [
@@ -1339,5 +1346,494 @@ window.GX10_CTLEXP = {
    "AUTO WAH: WAVEFORM",
    "AUTO WAH: DIRECT MIX"
   ]
- }
+ },
+ "knobs": [
+  {
+   "rotulo": "Knob 1",
+   "fxItem": 105,
+   "alvo": 109
+  },
+  {
+   "rotulo": "Knob 2",
+   "fxItem": 106,
+   "alvo": 113
+  },
+  {
+   "rotulo": "Knob 3",
+   "fxItem": 107,
+   "alvo": 117
+  },
+  {
+   "rotulo": "Knob 4",
+   "fxItem": 108,
+   "alvo": 121
+  }
+ ],
+ "memoryMidi": [
+  {
+   "rotulo": "MIDI 1",
+   "campos": [
+    {
+     "chave": "ch",
+     "rotulo": "Channel",
+     "desloc": 53,
+     "tipo": "byte",
+     "lista": [
+      "OFF",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16"
+     ]
+    },
+    {
+     "chave": "bankMsb",
+     "rotulo": "Bank MSB",
+     "desloc": 54,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
+     "chave": "bankLsb",
+     "rotulo": "Bank LSB",
+     "desloc": 56,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
+     "chave": "pc",
+     "rotulo": "PC#",
+     "desloc": 58,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
+     "chave": "cc1",
+     "rotulo": "CC1#",
+     "desloc": 60,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
+     "chave": "cc1Val",
+     "rotulo": "CC1 value",
+     "desloc": 62,
+     "tipo": "byte",
+     "min": 0,
+     "max": 127
+    },
+    {
+     "chave": "cc2",
+     "rotulo": "CC2#",
+     "desloc": 63,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
+     "chave": "cc2Val",
+     "rotulo": "CC2 value",
+     "desloc": 65,
+     "tipo": "byte",
+     "min": 0,
+     "max": 127
+    }
+   ]
+  },
+  {
+   "rotulo": "MIDI 2",
+   "campos": [
+    {
+     "chave": "ch",
+     "rotulo": "Channel",
+     "desloc": 66,
+     "tipo": "byte",
+     "lista": [
+      "OFF",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16"
+     ]
+    },
+    {
+     "chave": "bankMsb",
+     "rotulo": "Bank MSB",
+     "desloc": 67,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
+     "chave": "bankLsb",
+     "rotulo": "Bank LSB",
+     "desloc": 69,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
+     "chave": "pc",
+     "rotulo": "PC#",
+     "desloc": 71,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
+     "chave": "cc1",
+     "rotulo": "CC1#",
+     "desloc": 73,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
+     "chave": "cc1Val",
+     "rotulo": "CC1 value",
+     "desloc": 75,
+     "tipo": "byte",
+     "min": 0,
+     "max": 127
+    },
+    {
+     "chave": "cc2",
+     "rotulo": "CC2#",
+     "desloc": 76,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
+     "chave": "cc2Val",
+     "rotulo": "CC2 value",
+     "desloc": 78,
+     "tipo": "byte",
+     "min": 0,
+     "max": 127
+    }
+   ]
+  },
+  {
+   "rotulo": "MIDI 3",
+   "campos": [
+    {
+     "chave": "ch",
+     "rotulo": "Channel",
+     "desloc": 79,
+     "tipo": "byte",
+     "lista": [
+      "OFF",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16"
+     ]
+    },
+    {
+     "chave": "bankMsb",
+     "rotulo": "Bank MSB",
+     "desloc": 80,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
+     "chave": "bankLsb",
+     "rotulo": "Bank LSB",
+     "desloc": 82,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
+     "chave": "pc",
+     "rotulo": "PC#",
+     "desloc": 84,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
+     "chave": "cc1",
+     "rotulo": "CC1#",
+     "desloc": 86,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
+     "chave": "cc1Val",
+     "rotulo": "CC1 value",
+     "desloc": 88,
+     "tipo": "byte",
+     "min": 0,
+     "max": 127
+    },
+    {
+     "chave": "cc2",
+     "rotulo": "CC2#",
+     "desloc": 89,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
+     "chave": "cc2Val",
+     "rotulo": "CC2 value",
+     "desloc": 91,
+     "tipo": "byte",
+     "min": 0,
+     "max": 127
+    }
+   ]
+  },
+  {
+   "rotulo": "MIDI 4",
+   "campos": [
+    {
+     "chave": "ch",
+     "rotulo": "Channel",
+     "desloc": 92,
+     "tipo": "byte",
+     "lista": [
+      "OFF",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16"
+     ]
+    },
+    {
+     "chave": "bankMsb",
+     "rotulo": "Bank MSB",
+     "desloc": 93,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
+     "chave": "bankLsb",
+     "rotulo": "Bank LSB",
+     "desloc": 95,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
+     "chave": "pc",
+     "rotulo": "PC#",
+     "desloc": 97,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
+     "chave": "cc1",
+     "rotulo": "CC1#",
+     "desloc": 99,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
+     "chave": "cc1Val",
+     "rotulo": "CC1 value",
+     "desloc": 101,
+     "tipo": "byte",
+     "min": 0,
+     "max": 127
+    },
+    {
+     "chave": "cc2",
+     "rotulo": "CC2#",
+     "desloc": 102,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
+     "chave": "cc2Val",
+     "rotulo": "CC2 value",
+     "desloc": 104,
+     "tipo": "byte",
+     "min": 0,
+     "max": 127
+    }
+   ]
+  }
+ ],
+ "presetsFabrica": [
+  "GX DUAL DRIVE",
+  "HEAVY METAL",
+  "STUDIO BLUES",
+  "JC CLEAN",
+  "LEAD DRIVE",
+  "CRUNCH LEAD",
+  "NEO SOUL",
+  "MODERN OD",
+  "MODERN DS",
+  "CLEAN+SHIMMER",
+  "MILD DRIVE",
+  "ACOUSTIC GUITAR",
+  "X-ULTRA FEED",
+  "X-OPTIMA SD-1",
+  "X-TITAN MDP",
+  "DUAL X LEAD",
+  "SLICER DRIVE",
+  "HUMANIZER AC",
+  "BRIGHT SITAR",
+  "AUTO WAH BOX",
+  "FUZZY ROCK",
+  "PHASER CLEAN",
+  "BG DRIVE",
+  "OCTAVE CLEAN",
+  "HI-GAIN LEAD",
+  "DIMENSION FL",
+  "DRIVE + OCT CLN",
+  "SYNTH LEAD",
+  "RICH CHORUS DS",
+  "BASIC GIG",
+  "ROTARY+ECHO",
+  "AMBIENT CLEAN",
+  "FUSION SOLO",
+  "TWEED DRIVE",
+  "FLYING OVERTONE",
+  "CONSOLE CLEAN",
+  "DUAL CRUNCH",
+  "FUZZ SOLO",
+  "BOOST BAR BROS",
+  "THE BELLS",
+  "WINDWARD",
+  "ANCIENT MOON",
+  "CAPO'S & NUTS",
+  "WINTER IN 2047",
+  "JAZZ CLUB",
+  "GITARRE SPIELEN",
+  "SLOW DANCE",
+  "OVERTONE ORGAN",
+  "NEW AGED BLUES",
+  "SPACE ECHO",
+  "CLEAR DRIVE",
+  "GOOD FEELING",
+  "SURF COWBOY",
+  "AMERICANA",
+  "TREBLE BOOST",
+  "DIGITAL OCEAN",
+  "FUNK DRIVE",
+  "SUPER CLEAN/DS",
+  "ANCIENT DREAM",
+  "OCTAVE FUNK",
+  "GRAVITY GAINS",
+  "AMBIENT LEAD",
+  "DJENT METAL",
+  "SKYBLUE PINK",
+  "FUZZY DIST",
+  "DIMI GILMORIX",
+  "A LIGHTER TOUCH",
+  "HARMONIC DIST",
+  "PROUD DAD",
+  "DRY CRUNCH",
+  "OCTAVE CRUNCH",
+  "FUSION SWELLS",
+  "LO-FI CLEAN",
+  "SLAP GUITAR",
+  "1993",
+  "OCTAVE ORGAN",
+  "BIG DRIVE",
+  "BLUE LAKE",
+  "FAIRY OF FOREST",
+  "HARMONIC DRIVE",
+  "PROG LEAD TONE",
+  "CRYSTAL CLEAN",
+  "CLEAN BOOSTER",
+  "BUBBLE DELAY",
+  "HOT COUNTRY",
+  "EXPENSIVE TASTE",
+  "SWAMP CHORUS",
+  "EVERY 00'S MOVIE",
+  "STUDIO BASS",
+  "ROCK BASS CRUNCH",
+  "CLEAN ROCK BASS",
+  "T WAH BASS",
+  "DIST ROCK BASS",
+  "MONO BASS CLOUD",
+  "SYNTHY OCT BASS",
+  "FUZZ BASS",
+  "LOOPER CLEAN",
+  "LOOPER CRUNCH",
+  "LOOPER DRIVE"
+ ]
 };

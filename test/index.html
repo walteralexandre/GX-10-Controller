@@ -6,14 +6,37 @@
     <title>BOSS GX-10 Controller</title>
     <link rel="icon" type="image/png" href="img/icon.png">
     <style>
+        /* Fontes locais: Roboto no geral, Roboto Mono no registro e nos números */
+        @font-face {
+            font-family: "Roboto";
+            src: url("fonts/roboto/Roboto-VariableFont_wdth,wght.ttf") format("truetype");
+            font-weight: 100 900; font-style: normal; font-display: swap;
+        }
+        @font-face {
+            font-family: "Roboto";
+            src: url("fonts/roboto/Roboto-Italic-VariableFont_wdth,wght.ttf") format("truetype");
+            font-weight: 100 900; font-style: italic; font-display: swap;
+        }
+        @font-face {
+            font-family: "Roboto Mono";
+            src: url("fonts/roboto_mono/RobotoMono-VariableFont_wght.ttf") format("truetype");
+            font-weight: 100 700; font-style: normal; font-display: swap;
+        }
+
         :root {
             --bg-color: #12141c; --container-bg: #1c1f2b; --text-main: #f3f4f6; --text-muted: #9ca3af;
             --accent-green: #10b981; --accent-red: #ef4444; --accent-blue: #3b82f6; --accent-amber: #f59e0b;
             --border-color: #2e354f; --btn-hover: #2d334a; --palco: #0e1017;
+
+            --fonte: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            --fonte-mono: "Roboto Mono", "Courier New", monospace;
+            --fundo-campo: #0f1219;
+            --raio: 8px;
+            --raio-grande: 12px;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-               background-color: var(--bg-color); color: var(--text-main); padding: 20px; }
+        body { font-family: var(--fonte); background-color: var(--bg-color); color: var(--text-main); padding: 20px; }
+        button, input, select, textarea { font-family: inherit; }
         .container { background-color: var(--container-bg); border: 1px solid var(--border-color);
                      border-radius: 12px; width: 100%; max-width: 1180px; margin: 0 auto; padding: 24px; position: relative; }
         header { margin-bottom: 18px; border-bottom: 1px solid var(--border-color); padding-bottom: 14px;
@@ -49,19 +72,36 @@
                          text-transform: uppercase; letter-spacing: .07em; padding: 0 8px 8px; }
         .tabela-ctl td { padding: 4px 8px; border-top: 1px solid rgba(255,255,255,.05); }
         .tabela-ctl td.nome { font-weight: 600; white-space: nowrap; }
-        .tabela-ctl select { width: 100%; background: #0f1219; color: var(--text-main); font-size: .8rem;
+        .tabela-ctl select { width: 100%; background: var(--fundo-campo); color: var(--text-main); font-size: .8rem;
                              border: 1px solid var(--border-color); border-radius: 7px; padding: 5px 7px; }
         .tabela-ctl select:disabled { opacity: .35; }
-        .tabela-ctl input[type=number] { width: 100%; background: #0f1219; color: var(--text-main); font-size: .8rem;
+        .tabela-ctl input[type=number] { width: 100%; background: var(--fundo-campo); color: var(--text-main); font-size: .8rem;
                                          border: 1px solid var(--border-color); border-radius: 7px; padding: 5px 7px; }
         .rolagem { overflow: auto; max-height: 62vh; }
         .linha-assign td { vertical-align: middle; }
-        .linha-assign .num { color: var(--text-muted); font-family: "Courier New", monospace; }
+        .linha-assign .num { color: var(--text-muted); font-family: var(--fonte-mono); }
         .linha-assign.apagada { opacity: .45; }
         .detalhe-assign { background: rgba(255,255,255,.03); }
         .detalhe-assign .grade-det { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
                                      gap: 10px; padding: 10px 6px 14px; }
         .detalhe-assign label { font-size: .7rem; color: var(--text-muted); display: block; margin-bottom: 3px; }
+        .abas { display: flex; gap: 6px; margin: 2px 0 12px; }
+        .abas button { padding: 7px 16px; font-size: .82rem; font-weight: 600; cursor: pointer; color: var(--text-muted);
+                       background: none; border: none; border-bottom: 2px solid transparent; }
+        .abas button.ativa { color: var(--text-main); border-bottom-color: var(--accent-blue); }
+        .tabela-presets { width: 100%; border-collapse: collapse; font-size: .82rem; }
+        .tabela-presets th { font-size: .68rem; color: var(--text-muted); text-transform: uppercase;
+                             letter-spacing: .07em; padding: 0 8px 8px; text-align: left; }
+        .tabela-presets td { padding: 0; border-top: 1px solid rgba(255,255,255,.05); }
+        .tabela-presets td.banco { color: var(--text-muted); font-family: var(--fonte-mono); padding: 6px 10px; width: 48px; }
+        .tabela-presets button { width: 100%; text-align: left; padding: 7px 10px; font-size: .8rem; cursor: pointer;
+                                 background: none; border: none; color: var(--text-main); border-radius: 6px; }
+        .tabela-presets button:hover { background: var(--btn-hover); }
+        .tabela-presets button.atual { background: rgba(59,130,246,.18); color: #fff; font-weight: 700; }
+        .tabela-presets button .n { color: var(--text-muted); font-family: var(--fonte-mono); margin-right: 8px; font-size: .72rem; }
+        .secao-midi { border: 1px solid var(--border-color); border-radius: var(--raio); padding: 10px 12px 14px; margin-bottom: 10px; }
+        .secao-midi h4 { font-size: .8rem; margin-bottom: 8px; color: var(--accent-blue); }
+
         .btn-mini { padding: 3px 9px; font-size: .72rem; border-radius: 6px; cursor: pointer;
                     border: 1px solid var(--border-color); background: rgba(255,255,255,.05); color: var(--text-main); }
         .btn-mini:hover { background: var(--btn-hover); }
@@ -126,7 +166,7 @@
         .escolha h3 { font-size: 1rem; margin-bottom: 4px; }
         .escolha .dica { font-size: .75rem; color: var(--text-muted); margin-bottom: 12px; }
         .escolha input[type=search] { width: 100%; padding: 9px 12px; border-radius: 8px; font-size: .85rem;
-                                      border: 1px solid var(--border-color); background: #0f1219; color: var(--text-main); margin-bottom: 12px; }
+                                      border: 1px solid var(--border-color); background: var(--fundo-campo); color: var(--text-main); margin-bottom: 12px; }
         .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 8px; overflow-y: auto; padding-right: 4px; }
         .ficha { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,.04); border: 1px solid var(--border-color);
                  border-radius: 8px; padding: 7px 9px; cursor: pointer; font-size: .74rem; text-align: left; color: var(--text-main); }
@@ -136,7 +176,7 @@
                        display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1; }
         .legenda-lista { display: grid; gap: 8px; margin-top: 6px; }
         .legenda-lista div { display: flex; align-items: center; gap: 10px; font-size: .82rem; }
-        .legenda-lista .amostra { font-family: "Courier New", monospace; font-weight: 700; min-width: 92px; }
+        .legenda-lista .amostra { font-family: var(--fonte-mono); font-weight: 700; min-width: 92px; }
 
         /* ============ Parameters ============ */
         .painel { margin-top: 16px; border: 1px solid var(--border-color); border-radius: 10px; padding: 16px;
@@ -147,7 +187,7 @@
                  padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,.04); }
         .param:last-child { border-bottom: none; }
         .param .rotulo { font-size: .85rem; cursor: help; }
-        .param .valor { font-size: .82rem; font-weight: 600; text-align: right; font-family: "Courier New", monospace; }
+        .param .valor { font-size: .82rem; font-weight: 600; text-align: right; font-family: var(--fonte-mono); }
         .param.travado { opacity: .5; }
         .param.piscou { background: rgba(16,185,129,.16); border-radius: 6px; transition: background .5s ease; }
         input[type=range] { width: 100%; accent-color: var(--accent-blue); cursor: pointer; }
@@ -164,7 +204,7 @@
         /* ============ Log ============ */
         #secao-log[hidden] { display: none; }
         .console-log { background: #0b0c10; border: 1px solid var(--border-color); border-radius: 8px; height: 180px;
-                       overflow-y: auto; padding: 10px; font-family: "Courier New", monospace; font-size: .75rem; line-height: 1.45; }
+                       overflow-y: auto; padding: 10px; font-family: var(--fonte-mono); font-size: .75rem; line-height: 1.45; }
         .log-entry { margin-bottom: 4px; }
         .log-time { color: var(--text-muted); margin-right: 6px; }
         .log-info { color: var(--accent-blue); } .log-success { color: var(--accent-green); }
@@ -182,17 +222,17 @@
         .escolha label.linha:hover { background: rgba(255,255,255,.04); }
         .escolha label.linha input { margin-top:3px; }
         .escolha label.linha small { display:block; color:var(--text-muted); font-size:.75rem; margin-top:2px; }
-        .escolha select { width:100%; background:#0f1219; color:var(--text-main); border:1px solid var(--border-color);
-                          border-radius:8px; padding:8px; font-size:.82rem; font-family:"Courier New", monospace; }
+        .escolha select { width:100%; background: var(--fundo-campo); color:var(--text-main); border:1px solid var(--border-color);
+                          border-radius:8px; padding:8px; font-size:.82rem; font-family: var(--fonte-mono); }
         .escolha .rodape { display:flex; justify-content:flex-end; gap:10px; margin-top:16px; }
         .escolha .perigo { background: rgba(239,68,68,.1); border:1px solid var(--accent-red); border-radius:8px;
                            padding:10px 12px; font-size:.8rem; color:#fecaca; line-height:1.5; }
-        .barra-progresso { height:8px; background:#0f1219; border:1px solid var(--border-color); border-radius:99px;
+        .barra-progresso { height:8px; background: var(--fundo-campo); border:1px solid var(--border-color); border-radius:99px;
                            overflow:hidden; margin-top:12px; }
         .barra-progresso i { display:block; height:100%; width:0; background:var(--accent-blue); transition:width .15s linear; }
         .destaque-preset { display:flex; align-items:baseline; gap:12px; margin:4px 0 10px; }
         .destaque-preset span:first-child { font-size:1.5rem; font-weight:800; color:var(--accent-blue);
-                                            font-family:"Courier New", monospace; }
+                                            font-family: var(--fonte-mono); }
         .destaque-preset span:last-child { font-size:1.1rem; font-weight:600; letter-spacing:.03em; }
 
         /* ============ Tooltip ============ */
@@ -230,6 +270,7 @@
                     <button id="btn-save-as">Save as…</button>
                     <button id="btn-export">Export…</button>
                     <button id="btn-import">Import…</button>
+                    <button id="btn-presets">Presets…</button>
                     <div class="risca"></div>
                     <div class="grupo">CTL/EXP</div>
                     <button id="btn-ctl-control" class="sub">Control</button>
@@ -325,8 +366,8 @@
                 <div class="dica" style="margin-bottom:6px;">Preset name</div>
                 <input type="text" id="confirma-nome" maxlength="16" spellcheck="false"
                        style="width:100%;padding:9px 12px;border-radius:8px;font-size:.9rem;letter-spacing:.04em;
-                              border:1px solid var(--border-color);background:#0f1219;color:var(--text-main);
-                              font-family:'Courier New',monospace;">
+                              border:1px solid var(--border-color);background: var(--fundo-campo);color:var(--text-main);
+                              font-family:var(--fonte-mono);">
                 <div class="dica" style="margin-top:5px;">Up to 16 characters. Leave it as it is to keep the name.</div>
             </div>
             <div class="rodape">
@@ -364,9 +405,40 @@
         </div>
     </div>
 
+    <div id="cortina-presets" class="cortina">
+        <div class="escolha" style="max-width:860px;">
+            <h3>Presets</h3>
+            <div class="dica">Click a preset to load it on the pedal.</div>
+            <div class="abas">
+                <button id="aba-user" class="ativa">User</button>
+                <button id="aba-fabrica">Factory</button>
+            </div>
+            <div class="rolagem"><table class="tabela-presets" id="tabela-presets"></table></div>
+            <div class="rodape"><button class="btn" id="presets-fecha">Close</button></div>
+        </div>
+    </div>
+
+    <div id="cortina-knob" class="cortina">
+        <div class="escolha" style="max-width:760px;">
+            <h3>CTL/EXP — Knob</h3>
+            <div class="dica">What each of the four knobs on the pedal turns while you play this preset.</div>
+            <div class="rolagem"><table class="tabela-ctl" id="tabela-knob"></table></div>
+            <div class="rodape"><button class="btn" id="knob-fecha">Close</button></div>
+        </div>
+    </div>
+
+    <div id="cortina-midi" class="cortina">
+        <div class="escolha" style="max-width:860px;">
+            <h3>CTL/EXP — MIDI</h3>
+            <div class="dica">Messages this preset sends out when it is selected. <b>OFF</b> (0) means nothing is sent.</div>
+            <div class="rolagem" id="lista-midi"></div>
+            <div class="rodape"><button class="btn" id="midi-fecha">Close</button></div>
+        </div>
+    </div>
+
     <div id="cortina-sobre" class="cortina">
         <div class="escolha sobre" style="max-width:460px;">
-            <img src="img/icon-2.png" alt="" style="width:92px;height:auto;align-self:center;margin-bottom:12px;
+            <img src="img/icon-2.png" alt="" style="width:200px;height:auto;align-self:center;margin-bottom:12px;
                  border-radius:18px;box-shadow:0 8px 22px rgba(0,0,0,.45);">
             <h3>BOSS GX-10 Controller</h3>
             <div class="dica">Editor for the BOSS GX-10 guitar effects processor.</div>
@@ -420,8 +492,8 @@
         // antes de tirar o cabo: o Chrome no Windows congela se o dispositivo some
         // enquanto alguma página ainda tem a sessão MIDI aberta.
         const MIDI_OFF = /[?&]midi=off(&|$)/i.test(location.search);
-        const APP_VERSAO = "0.11.0";
-        const APP_DATA = "October 7, 2026";
+        const APP_VERSAO = "0.11.1";
+        const APP_DATA = "October 8, 2026";
 
         const pedal = new GX10();
         let cadeia = null, itens = [], ordem = [], selecionado = null;
@@ -1369,17 +1441,20 @@
             return nomesDasMemorias;
         }
 
-        /** Tells the pedal to load a memory, so the display and the sound follow the save. */
-        async function selecionaMemoria(n) {
-            const v = n - 1;                       // Memory Number: 0..197 = U01-1…U66-3
+        /** Carrega uma memória pelo número do manual (0..197 usuário, 200..298 fábrica). */
+        async function selecionaNumero(v) {
             if (!pedal.sendData(END_MEMORY_NUMBER, [(v >> 12) & 0x0F, (v >> 8) & 0x0F, (v >> 4) & 0x0F, v & 0x0F])) {
-                addLog("Could not switch the pedal to " + rotuloDaMemoria(n) + ".", "warn");
-                return;
+                addLog("Could not switch the pedal to " + rotuloDoNumero(v) + ".", "warn");
+                return false;
             }
-            memoriaAtual = n;
+            memoriaAtual = v <= TOTAL_MEM_USER - 1 ? v + 1 : null;
             await new Promise(r => setTimeout(r, 350));    // a pedaleira carrega o preset
-            addLog("Pedal switched to " + rotuloDaMemoria(n) + ".", "info");
+            addLog("Pedal switched to " + rotuloDoNumero(v) + ".", "info");
+            return true;
         }
+
+        /** Tells the pedal to load a user memory (1..198), so display and sound follow the save. */
+        const selecionaMemoria = n => selecionaNumero(n - 1);
 
         /**
          * Copies the temporary memory into a user memory.
@@ -1864,7 +1939,7 @@
             const tabela = $("tabela-control");
             tabela.innerHTML = "";
             const cabeca = document.createElement("tr");
-            ["", "Kept in", "Function", "Mode"].forEach(t => {
+            ["", "Function", "Mode", "Preference"].forEach(t => {
                 const th = document.createElement("th");
                 th.textContent = t;
                 cabeca.appendChild(th);
@@ -1883,38 +1958,46 @@
                 const tdFuncao = document.createElement("td");
                 const tdModo = document.createElement("td");
 
+                // TOGGLE/MOMENT só faz sentido nas funções que ligam e desligam algo.
+                // A pedaleira esconde o campo nas outras, e aqui é igual.
+                const temModo = v => c.modo && CTLEXP.listas.comModo.includes(lista[v]);
+
+                const desenhaModo = () => {
+                    tdModo.innerHTML = "";
+                    const noSistema = !!bytePref(c);
+                    if (!temModo(leFuncao(c))) {
+                        tdModo.textContent = "—";
+                        tdModo.style.color = "var(--text-muted)";
+                        return;
+                    }
+                    tdModo.style.color = "";
+                    tdModo.appendChild(criaSelect(CTLEXP.listas.modo, leModo(c), v => {
+                        if (noSistema) { sis[c.sis.modo] = v; gravaControle(END_SYSTEM_CONTROL, c.sis.modo, v, c.rotulo + " mode"); }
+                        else { mem[c.mem.modo - OFS_CTL_MEM] = v; gravaControle(END_MEM_TEMP, c.mem.modo, v, c.rotulo + " mode"); }
+                    }));
+                };
+
                 const desenhaValores = () => {
                     const noSistema = !!bytePref(c);
                     tdFuncao.innerHTML = "";
                     tdFuncao.appendChild(criaSelect(lista, leFuncao(c), v => {
-                        if (noSistema) { sis[c.sis.funcao] = v; mandaByte(END_SYSTEM_CONTROL, c.sis.funcao, v); }
-                        else { mem[c.mem.funcao - OFS_CTL_MEM] = v; mandaByte(END_MEM_TEMP, c.mem.funcao, v); }
-                        addLog(c.rotulo + " = " + lista[v] + (noSistema ? " (system)" : " (this preset)"), "raw");
+                        if (noSistema) { sis[c.sis.funcao] = v; gravaControle(END_SYSTEM_CONTROL, c.sis.funcao, v, c.rotulo); }
+                        else { mem[c.mem.funcao - OFS_CTL_MEM] = v; gravaControle(END_MEM_TEMP, c.mem.funcao, v, c.rotulo); }
+                        desenhaModo();
                     }));
-                    tdModo.innerHTML = "";
-                    if (c.modo) {
-                        tdModo.appendChild(criaSelect(CTLEXP.listas.modo, leModo(c), v => {
-                            if (noSistema) { sis[c.sis.modo] = v; mandaByte(END_SYSTEM_CONTROL, c.sis.modo, v); }
-                            else { mem[c.mem.modo - OFS_CTL_MEM] = v; mandaByte(END_MEM_TEMP, c.mem.modo, v); }
-                            addLog(c.rotulo + " mode = " + CTLEXP.listas.modo[v], "raw");
-                        }));
-                    } else {
-                        tdModo.textContent = "—";
-                        tdModo.style.color = "var(--text-muted)";
-                    }
+                    desenhaModo();
                 };
 
                 const tdPref = document.createElement("td");
-                tdPref.appendChild(criaSelect(["This preset", "Every preset"], bytePref(c), v => {
+                tdPref.appendChild(criaSelect(CTLEXP.listas.preferencia, bytePref(c), v => {
                     sis[c.sis.pref] = v;
-                    mandaByte(END_SYSTEM_CONTROL, c.sis.pref, v);
-                    addLog(c.rotulo + " now follows " + (v ? "the system" : "this preset") + ".", "raw");
+                    gravaControle(END_SYSTEM_CONTROL, c.sis.pref, v, c.rotulo + " preference");
                     desenhaValores();
                 }));
 
-                linha.appendChild(tdPref);
                 linha.appendChild(tdFuncao);
                 linha.appendChild(tdModo);
+                linha.appendChild(tdPref);
                 desenhaValores();
                 tabela.appendChild(linha);
             });
@@ -1922,7 +2005,30 @@
             $("cortina-control").classList.add("aberta");
         }
 
-        const mandaByte = (base, desloc, valor) => pedal.sendData(GX10.addrAdd(base, desloc), [valor]);
+        /**
+         * Escreve e confere: manda os bytes, relê o mesmo endereço e avisa se a pedaleira
+         * não ficou com o que foi enviado. Sem isso, uma gravação recusada passa batida.
+         */
+        async function gravaEConfere(endereco, bytes, rotulo) {
+            if (!pedal.sendData(endereco, bytes)) { addLog("Could not send " + rotulo + ".", "error"); return false; }
+            addLog(rotulo + " ← " + hex(bytes) + "  (" + hex(endereco) + ")", "raw");
+            await new Promise(r => setTimeout(r, 60));
+            lendo++;
+            try {
+                const lidos = await pedal.requestData(endereco, bytes.length, 2000);
+                const igual = bytes.every((b, i) => b === lidos[i]);
+                if (!igual) addLog("The pedal did not take " + rotulo + ": sent " + hex(bytes) + ", kept " + hex(lidos) + ".", "warn");
+                return igual;
+            } catch (e) {
+                addLog("Could not check " + rotulo + ": " + e.message, "warn");
+                return false;
+            } finally {
+                lendo--;
+            }
+        }
+
+        const gravaControle = (base, desloc, valor, rotulo) =>
+            gravaEConfere(GX10.addrAdd(base, desloc), [valor], rotulo);
 
         // ---------- Assign ----------
         const baseDoAssign = i => CTLEXP.assign.desloc1 + i * CTLEXP.assign.passo;
@@ -1931,10 +2037,14 @@
             return campo.tipo === "byte" ? dados[campo.desloc]
                                          : nibblesParaValorSemDeslocamento(dados.slice(campo.desloc, campo.desloc + 4));
         }
+        function bytesDoCampo(campo, valor) {
+            if (campo.tipo === "byte") return [valor];
+            if (campo.tipo === "nibbles2") return valorParaNibblesSemDeslocamento(valor, 2);
+            return valorParaNibblesSemDeslocamento(valor, 4);
+        }
         function escreveCampo(i, campo, valor) {
             const end = GX10.addrAdd(END_MEM_TEMP, baseDoAssign(i) + campo.desloc);
-            const bytes = campo.tipo === "byte" ? [valor] : valorParaNibblesSemDeslocamento(valor, 4);
-            pedal.sendData(end, bytes);
+            gravaEConfere(end, bytesDoCampo(campo, valor), "assign " + (i + 1) + " " + campo.rotulo);
         }
 
         /** Controle certo para o campo: lista, lista de alvos ou número. */
@@ -2032,14 +2142,199 @@
 
         $("btn-ctl-control").onclick = abreControl;
         $("btn-ctl-assign").onclick = abreAssign;
-        $("btn-ctl-knob").disabled = true;
-        $("btn-ctl-knob").dataset.tip = "Not built yet.";
-        $("btn-ctl-midi").disabled = true;
-        $("btn-ctl-midi").dataset.tip = "Not built yet.";
+        $("btn-ctl-knob").onclick = abreKnob;
+        $("btn-ctl-midi").onclick = abreMidi;
         $("control-fecha").onclick = () => $("cortina-control").classList.remove("aberta");
         $("assign-fecha").onclick = () => $("cortina-assign").classList.remove("aberta");
         $("cortina-control").onclick = e => { if (e.target === $("cortina-control")) $("cortina-control").classList.remove("aberta"); };
         $("cortina-assign").onclick = e => { if (e.target === $("cortina-assign")) $("cortina-assign").classList.remove("aberta"); };
+
+
+        // ================== Presets ==================
+        let abaPresets = "user";
+
+        function desenhaPresets() {
+            const tabela = $("tabela-presets");
+            tabela.innerHTML = "";
+            const cabeca = document.createElement("tr");
+            ["", "1", "2", "3"].forEach(t => {
+                const th = document.createElement("th");
+                th.textContent = t;
+                cabeca.appendChild(th);
+            });
+            tabela.appendChild(cabeca);
+
+            const usuario = abaPresets === "user";
+            const bancos = usuario ? 66 : 33;
+            const nomes = usuario ? (nomesDasMemorias || []) : CTLEXP.presetsFabrica;
+            const numeroBase = usuario ? 0 : 200;
+
+            for (let banco = 0; banco < bancos; banco++) {
+                const linha = document.createElement("tr");
+                const td = document.createElement("td");
+                td.className = "banco";
+                td.textContent = (usuario ? "U" : "P") + String(banco + 1).padStart(2, "0");
+                linha.appendChild(td);
+
+                for (let n = 0; n < 3; n++) {
+                    const indice = banco * 3 + n;
+                    const numero = numeroBase + indice;
+                    const cel = document.createElement("td");
+                    const b = document.createElement("button");
+                    b.innerHTML = '<span class="n">' + (n + 1) + "</span>";
+                    b.appendChild(document.createTextNode(nomes[indice] || "—"));
+                    if (memoriaAtual !== null && usuario && memoriaAtual - 1 === indice) b.classList.add("atual");
+                    b.onclick = () => carregaPreset(numero);
+                    cel.appendChild(b);
+                    linha.appendChild(cel);
+                }
+                tabela.appendChild(linha);
+            }
+        }
+
+        async function carregaPreset(numero) {
+            $("cortina-presets").classList.remove("aberta");
+            try {
+                lendo++;
+                let ok;
+                try { ok = await selecionaNumero(numero); } finally { lendo--; }
+                if (!ok) return;
+                clearTimeout(recargaPendente);
+                await lerCadeia();
+            } catch (e) {
+                addLog(e.message, "error");
+            }
+        }
+
+        $("btn-presets").onclick = async () => {
+            fechaMenu();
+            try {
+                lendo++;
+                try { await leMemoriaAtual(); } finally { lendo--; }
+                if (abaPresets === "user") await carregaNomes();     // mostra a barra de progresso
+                desenhaPresets();
+                $("cortina-presets").classList.add("aberta");
+            } catch (e) {
+                addLog(e.message, "error");
+            }
+        };
+        $("aba-user").onclick = async () => {
+            abaPresets = "user";
+            $("aba-user").classList.add("ativa");
+            $("aba-fabrica").classList.remove("ativa");
+            await carregaNomes();
+            desenhaPresets();
+        };
+        $("aba-fabrica").onclick = () => {
+            abaPresets = "fabrica";
+            $("aba-fabrica").classList.add("ativa");
+            $("aba-user").classList.remove("ativa");
+            desenhaPresets();
+        };
+        $("presets-fecha").onclick = () => $("cortina-presets").classList.remove("aberta");
+        $("cortina-presets").onclick = e => { if (e.target === $("cortina-presets")) $("cortina-presets").classList.remove("aberta"); };
+
+        // ================== CTL/EXP — Knob ==================
+        const OFS_KNOB = 0x69, TAM_KNOB = 0x14;        // 0x69 … 0x7C
+
+        async function abreKnob() {
+            fechaMenu();
+            let dados;
+            lendo++;
+            abreProgresso("Reading the knobs");
+            try {
+                dados = await lerTrecho(GX10.addrAdd(END_MEM_TEMP, OFS_KNOB), TAM_KNOB);
+            } catch (e) {
+                addLog(e.message, "error");
+                return;
+            } finally {
+                lendo--;
+                fechaProgresso();
+            }
+
+            const tabela = $("tabela-knob");
+            tabela.innerHTML = "";
+            const cabeca = document.createElement("tr");
+            ["", "Block", "Turns"].forEach(t => {
+                const th = document.createElement("th");
+                th.textContent = t;
+                cabeca.appendChild(th);
+            });
+            tabela.appendChild(cabeca);
+
+            CTLEXP.knobs.forEach(k => {
+                const linha = document.createElement("tr");
+                celula(linha, k.rotulo, "nome");
+
+                const bloco = dados[k.fxItem - OFS_KNOB];
+                celula(linha, criaSelect(Array.from({ length: 20 }, (_, i) => "Fx Item " + (i + 1)), bloco, v => {
+                    gravaEConfere(GX10.addrAdd(END_MEM_TEMP, k.fxItem), [v], k.rotulo + " block");
+                }));
+
+                const alvo = nibblesParaValorSemDeslocamento(dados.slice(k.alvo - OFS_KNOB, k.alvo - OFS_KNOB + 4));
+                const td = celula(linha, criaSelect(CTLEXP.assign.alvos, alvo, v => {
+                    gravaEConfere(GX10.addrAdd(END_MEM_TEMP, k.alvo), valorParaNibblesSemDeslocamento(v, 4), k.rotulo);
+                }));
+                td.style.minWidth = "300px";
+                tabela.appendChild(linha);
+            });
+
+            $("cortina-knob").classList.add("aberta");
+        }
+
+        // ================== CTL/EXP — MIDI ==================
+        const OFS_MIDI = 0x35, TAM_MIDI = 13 * 4;      // 4 blocos de 13 bytes
+
+        async function abreMidi() {
+            fechaMenu();
+            let dados;
+            lendo++;
+            abreProgresso("Reading the MIDI settings");
+            try {
+                dados = await lerTrecho(GX10.addrAdd(END_MEM_TEMP, OFS_MIDI), TAM_MIDI);
+            } catch (e) {
+                addLog(e.message, "error");
+                return;
+            } finally {
+                lendo--;
+                fechaProgresso();
+            }
+
+            const caixa = $("lista-midi");
+            caixa.innerHTML = "";
+            CTLEXP.memoryMidi.forEach(bloco => {
+                const secao = document.createElement("div");
+                secao.className = "secao-midi";
+                const t = document.createElement("h4");
+                t.textContent = bloco.rotulo;
+                const grade = document.createElement("div");
+                grade.className = "grade-det";
+
+                bloco.campos.forEach(campo => {
+                    const i = campo.desloc - OFS_MIDI;
+                    const valor = campo.tipo === "byte" ? dados[i]
+                                : nibblesParaValorSemDeslocamento(dados.slice(i, i + 2));
+                    const troca = v => gravaEConfere(GX10.addrAdd(END_MEM_TEMP, campo.desloc),
+                                                     bytesDoCampo(campo, v), bloco.rotulo + " " + campo.rotulo);
+                    const item = document.createElement("div");
+                    const rot = document.createElement("label");
+                    rot.textContent = campo.rotulo + (campo.zeroOff ? "  (0 = OFF)" : "");
+                    item.append(rot, campo.lista ? criaSelect(campo.lista, valor, troca)
+                                                 : criaNumero(campo.min, campo.max, valor, troca, false));
+                    grade.appendChild(item);
+                });
+
+                secao.append(t, grade);
+                caixa.appendChild(secao);
+            });
+
+            $("cortina-midi").classList.add("aberta");
+        }
+
+        $("knob-fecha").onclick = () => $("cortina-knob").classList.remove("aberta");
+        $("midi-fecha").onclick = () => $("cortina-midi").classList.remove("aberta");
+        $("cortina-knob").onclick = e => { if (e.target === $("cortina-knob")) $("cortina-knob").classList.remove("aberta"); };
+        $("cortina-midi").onclick = e => { if (e.target === $("cortina-midi")) $("cortina-midi").classList.remove("aberta"); };
 
         // ================== Tooltip of our own ==================
         // Replaces the browser's native tooltip: same texts (data-tip), nicer look,
@@ -2105,6 +2400,9 @@
             $("btn-import").disabled = !ligado;
             $("btn-ctl-control").disabled = !ligado;
             $("btn-ctl-assign").disabled = !ligado;
+            $("btn-ctl-knob").disabled = !ligado;
+            $("btn-ctl-midi").disabled = !ligado;
+            $("btn-presets").disabled = !ligado;
         }
         function atualizaStatus() {
             const ligado = pedal.isConnected();
@@ -2181,6 +2479,9 @@
             $("cortina-export").classList.remove("aberta");
             $("cortina-control").classList.remove("aberta");
             $("cortina-assign").classList.remove("aberta");
+            $("cortina-presets").classList.remove("aberta");
+            $("cortina-knob").classList.remove("aberta");
+            $("cortina-midi").classList.remove("aberta");
         });
 
         pedal.onStateChange(({ isConnected, reason }) => {
