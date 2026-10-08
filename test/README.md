@@ -18,7 +18,7 @@ This project is a work in progress. **Use it at your own risk.**
 
 
 
-v0.11.2 (2026-10-09)
+v0.11.2 (2026-10-08)
 - current preset number and name shown above the effect chain
 - presets list: factory tab fixed, names kept in the browser between visits,
   "Read names again" button, moved up in the menu
