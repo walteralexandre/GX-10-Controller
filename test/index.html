@@ -81,6 +81,9 @@
         .linha-assign td { vertical-align: middle; }
         .linha-assign .num { color: var(--text-muted); font-family: var(--fonte-mono); }
         .linha-assign.apagada { opacity: .45; }
+        .tabela-ctl tr.desativada { opacity: .4; }
+        .tabela-ctl tr.desativada td.nome::after { content: " (not in use now)"; font-size: .68rem;
+                                                   color: var(--text-muted); font-weight: 400; }
         .detalhe-assign { background: rgba(255,255,255,.03); }
         .detalhe-assign .grade-det { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
                                      gap: 10px; padding: 10px 6px 14px; }
@@ -158,6 +161,8 @@
         .canal { display: flex; align-items: center; }
         .canal .etiqueta { font-size: .6rem; font-weight: 800; color: var(--text-muted); width: 16px;
                            text-align: center; flex: none; }
+        .canal:not(.mudo) .etiqueta { color: var(--accent-green); }
+        .canal.mudo { opacity: .35; filter: grayscale(.7); }
         .canais::before, .canais::after { content: ""; position: absolute; width: 2px; background: #3a4258; }
         .canais::before { left: 0; top: 32px; bottom: 32px; }
         .canais::after { right: 0; top: 32px; bottom: 32px; }
@@ -230,8 +235,9 @@
         .escolha select { width:100%; background: var(--fundo-campo); color:var(--text-main); border:1px solid var(--border-color);
                           border-radius:8px; padding:8px; font-size:.82rem; font-family: var(--fonte-mono); }
         .escolha .rodape { display:flex; justify-content:flex-end; gap:10px; margin-top:16px; }
-        .escolha .perigo { background: rgba(239,68,68,.1); border:1px solid var(--accent-red); border-radius:8px;
-                           padding:10px 12px; font-size:.8rem; color:#fecaca; line-height:1.5; }
+        .escolha .perigo { background: rgba(245,158,11,.1); border:1px solid var(--accent-amber); border-radius:8px;
+                           padding:10px 12px; font-size:.8rem; color:#fde68a; line-height:1.5; }
+        .btn-atencao { border-color: var(--accent-amber); color: var(--accent-amber); }
         .barra-progresso { height:8px; background: var(--fundo-campo); border:1px solid var(--border-color); border-radius:99px;
                            overflow:hidden; margin-top:12px; }
         .barra-progresso i { display:block; height:100%; width:0; background:var(--accent-blue); transition:width .15s linear; }
@@ -339,7 +345,7 @@
             </div>
             <div class="rodape">
                 <button class="btn" id="salvar-cancela">Cancel</button>
-                <button class="btn btn-remove" id="salvar-ok">Save</button>
+                <button class="btn btn-atencao" id="salvar-ok">Save</button>
             </div>
         </div>
     </div>
@@ -381,7 +387,7 @@
             </div>
             <div class="rodape">
                 <button class="btn" id="confirma-nao">Cancel</button>
-                <button class="btn btn-remove" id="confirma-sim">Overwrite</button>
+                <button class="btn btn-atencao" id="confirma-sim">Overwrite</button>
             </div>
         </div>
     </div>
@@ -397,8 +403,9 @@
     <div id="cortina-control" class="cortina">
         <div class="escolha" style="max-width:820px;">
             <h3>CTL/EXP — Control</h3>
-            <div class="dica">What each footswitch and pedal does. <b>Memory</b> keeps the setting inside this
-                preset; <b>System</b> makes it the same in every preset.</div>
+            <div class="dica">What each footswitch and pedal does. <b>MEMORY</b> keeps the setting inside this
+                preset; <b>SYSTEM</b> makes it the same in every preset.<br>
+                The pedal is in <b id="control-modo">—</b> mode, so the rows it is not using right now are greyed out.</div>
             <div class="rolagem"><table class="tabela-ctl" id="tabela-control"></table></div>
             <div class="rodape"><button class="btn" id="control-fecha">Close</button></div>
         </div>
@@ -408,7 +415,8 @@
         <div class="escolha" style="max-width:1000px;">
             <h3>CTL/EXP — Assign</h3>
             <div class="dica">Each line hooks a footswitch, a pedal or a MIDI message to one setting of this
-                preset. Open <b>more</b> for the finer details of a line.</div>
+                preset. The pages are the same ones the pedal shows.</div>
+            <div class="abas" id="abas-assign"></div>
             <div class="rolagem"><table class="tabela-ctl" id="tabela-assign"></table></div>
             <div class="rodape"><button class="btn" id="assign-fecha">Close</button></div>
         </div>
@@ -498,17 +506,20 @@
         // Divider, Splitter and Mixer work as one set: they come and go together, only one per chain.
         const TIPO_DIVIDER = 29, TIPO_SPLITTER = 30, TIPO_MIXER = 31;
         const TIPOS_DO_GRUPO = [TIPO_DIVIDER, TIPO_SPLITTER, TIPO_MIXER];
+        // Divider, Splitter e Mixer estão sempre ligados: não têm liga/desliga.
+        const semLigaDesliga = typeId => TIPOS_DO_GRUPO.includes(typeId);
 
         const DEBUG = /[?&]debug=(true|1)(&|$)/i.test(location.search);
         // Com ?midi=off a página NÃO pede acesso MIDI. Serve para largar o aparelho
         // antes de tirar o cabo: o Chrome no Windows congela se o dispositivo some
         // enquanto alguma página ainda tem a sessão MIDI aberta.
         const MIDI_OFF = /[?&]midi=off(&|$)/i.test(location.search);
-        const APP_VERSAO = "0.11.2";
+        const APP_VERSAO = "0.11.3";
         const APP_DATA = "October 8, 2026";
 
         const pedal = new GX10();
         let cadeia = null, itens = [], ordem = [], selecionado = null;
+        let canalAtivo = "AB";     // "A", "B" ou "AB" (os dois), conforme o Divider
 
         const $ = id => document.getElementById(id);
         const consoleLog = $("console-log"), cadeiaEl = $("cadeia"), painelEl = $("painel");
@@ -611,6 +622,7 @@
                     itens.push({ slot, typeId: d[0], ligado: d[1] === 1 });
                 }
                 ordem = ordemDaCadeia();
+                await leCanalAtivo();
                 addLog("Chain: " + ordem.map(id => nomeDoBloco(id)).join(" > "), "raw");
                 desenhaCadeia();
                 addLog("Chain loaded.", "success");
@@ -646,6 +658,25 @@
             } catch (e) {
                 $("preset-numero").textContent = "—";
                 $("preset-nome").textContent = "";
+            }
+        }
+
+        /**
+         * O Divider em SINGLE manda o som por um canal só; em DUAL, pelos dois.
+         * Guardamos isso para a cadeia mostrar qual caminho está tocando.
+         */
+        async function leCanalAtivo() {
+            canalAtivo = "AB";
+            const div = ordem.find(id => itens[id] && itens[id].typeId === TIPO_DIVIDER);
+            if (div === undefined) return;
+            try {
+                const d = await pedal.requestData(GX10.addrAdd(enderecoDoItem(div), 0x03), 8, 2500);
+                if (d.length < 8) return;
+                const modo = nibblesParaValor(d.slice(0, 4));        // 0 = SINGLE, 1 = DUAL
+                const canal = nibblesParaValor(d.slice(4, 8));       // 0 = A, 1 = B
+                canalAtivo = modo === 0 ? (canal === 1 ? "B" : "A") : "AB";
+            } catch (e) {
+                /* sem resposta: deixa os dois acesos */
             }
         }
 
@@ -692,10 +723,12 @@
             const mod = item ? moduloPorTipo.get(item.typeId) : null;
             const cor = mod ? mod.color : "#6b7280";
             const div = document.createElement("div");
-            div.className = "bloco" + (item && !item.ligado ? " desligado" : "") + (selecionado === id ? " selecionado" : "");
+            const apagado = item && !item.ligado && !semLigaDesliga(item.typeId);
+            div.className = "bloco" + (apagado ? " desligado" : "") + (selecionado === id ? " selecionado" : "");
             div.style.background = cor;
             div.style.color = corDoTexto(cor);
-            div.dataset.tip = (mod ? mod.name : "unknown type") + " · Fx Item " + (id + 1) + " · " + (item && item.ligado ? "ON" : "OFF");
+            div.dataset.tip = (mod ? mod.name : "unknown type") + " · Fx Item " + (id + 1) +
+                              (semLigaDesliga(item ? item.typeId : -1) ? "" : " · " + (item && item.ligado ? "ON" : "OFF"));
             div.draggable = true;
 
             const abrev = document.createElement("div");
@@ -704,7 +737,7 @@
             abrev.style.fontSize = tamanhoDaLetra(abrev.textContent);
             const num = document.createElement("div");
             num.className = "num";
-            num.textContent = !item ? "id " + id : (item.ligado ? "" : "OFF");
+            num.textContent = !item ? "id " + id : (item.ligado || semLigaDesliga(item.typeId) ? "" : "OFF");
             div.append(abrev, num);
 
             const fechar = document.createElement("button");
@@ -782,7 +815,10 @@
                 canais.className = "canais";
                 [["A", f.canalA, f.div], ["B", f.canalB, f.spl]].forEach(([letra, lista, comecaApos]) => {
                     const canal = document.createElement("div");
-                    canal.className = "canal";
+                    const tocando = canalAtivo === "AB" || canalAtivo === letra;
+                    canal.className = "canal" + (tocando ? "" : " mudo");
+                    canal.dataset.tip = tocando ? "Channel " + letra + " is playing."
+                                                : "Channel " + letra + " is muted: the Divider is sending the signal to " + canalAtivo + ".";
                     const etiqueta = document.createElement("span");
                     etiqueta.className = "etiqueta";
                     etiqueta.textContent = letra;
@@ -990,10 +1026,12 @@
                     catch (e) { addLog("Could not read the BPM: " + e.message, "warn"); }
                 }
 
-                painel.appendChild(criaControle({
-                    endereco: GX10.addrAdd(base, 0x01), umByte: true, p: P_ONOFF,
-                    valor: item.ligado ? 1 : 0, chave: "onoff"
-                }));
+                if (!semLigaDesliga(item.typeId)) {
+                    painel.appendChild(criaControle({
+                        endereco: GX10.addrAdd(base, 0x01), umByte: true, p: P_ONOFF,
+                        valor: item.ligado ? 1 : 0, chave: "onoff"
+                    }));
+                }
 
                 proprios.sort((a, b) => a[1].paramIndex - b[1].paramIndex).forEach(([chave, p]) => {
                     const n = dados.slice((p.paramIndex - 1) * 4, (p.paramIndex - 1) * 4 + 4);
@@ -1251,6 +1289,15 @@
 
         function espelhaMudanca(endereco, dados) {
             const addr = linear(endereco);
+
+            // Diálogo de CTL/EXP aberto: se a mensagem mexeu no que ele mostra, redesenha.
+            if (dialogoPrecisaRecarregar(addr, dados.length)) {
+                clearTimeout(recarregaDialogo);
+                recarregaDialogo = setTimeout(() => {
+                    if (dialogoAberto && lendo === 0) dialogoAberto.recarrega();
+                }, 300);
+                return "CTL/EXP setting";
+            }
 
             const doMaster = espelhaMaster(addr, dados);
             if (addr < BASE_CADEIA + TAM_CADEIA && addr + dados.length > BASE_CADEIA) {
@@ -1959,6 +2006,39 @@
             return sel;
         }
 
+        /** <select> onde o valor MIDI não é a posição na lista (as listas da GX-10 são filtradas). */
+        function criaSelectPares(pares, valor, aoMudar) {
+            const sel = document.createElement("select");
+            pares.forEach(([v, rotulo]) => {
+                const op = document.createElement("option");
+                op.value = String(v);
+                op.textContent = rotulo;
+                sel.appendChild(op);
+            });
+            sel.value = String(valor);
+            sel.onchange = () => aoMudar(Number(sel.value));
+            return sel;
+        }
+
+        // Diálogo de CTL/EXP aberto: guarda as faixas de endereço que ele mostra e como
+        // se redesenhar, para refletir o que for mexido na própria pedaleira.
+        let dialogoAberto = null;
+        let recarregaDialogo = null;
+
+        function fechaDialogoCtl(id) {
+            dialogoAberto = null;
+            clearTimeout(recarregaDialogo);
+            $(id).classList.remove("aberta");
+        }
+
+        function dialogoPrecisaRecarregar(addr, tamanho) {
+            if (!dialogoAberto) return false;
+            return dialogoAberto.faixas.some(([endereco, quantos]) => {
+                const base = linear(endereco);
+                return addr < base + quantos && addr + tamanho > base;
+            });
+        }
+
         function criaNumero(min, max, valor, aoMudar, base1) {
             const inp = document.createElement("input");
             inp.type = "number";
@@ -1986,6 +2066,14 @@
         async function abreControl() {
             fechaMenu();
             if (!dadosCtlExpOk()) return;
+            if (!await desenhaControl()) return;
+            dialogoAberto = { faixas: [[END_SYSTEM_CONTROL, TAM_SYSTEM_CONTROL],
+                                       [GX10.addrAdd(END_MEM_TEMP, OFS_CTL_MEM), TAM_CTL_MEM]],
+                              recarrega: desenhaControl };
+            $("cortina-control").classList.add("aberta");
+        }
+
+        async function desenhaControl() {
             let sis, mem;
             lendo++;
             abreProgresso("Reading the controls");
@@ -1996,11 +2084,19 @@
                 mem = await lerTrecho(GX10.addrAdd(END_MEM_TEMP, OFS_CTL_MEM), TAM_CTL_MEM);
             } catch (e) {
                 addLog(e.message, "error");
-                return;
+                return false;
             } finally {
                 lendo--;
                 fechaProgresso();
             }
+
+            // O modo de operação decide quais pés estão em uso agora.
+            const modo = sis[CTLEXP.controlModeDesloc];
+            $("control-modo").textContent = CTLEXP.listas.controlMode[modo] || "?";
+            const emUso = grupo => grupo === "sempre"
+                || (grupo === "memory" && modo === 0)
+                || (grupo === "manual" && (modo === 1 || modo === 3))
+                || (grupo === "banknum" && modo === 2);
 
             const tabela = $("tabela-control");
             tabela.innerHTML = "";
@@ -2018,48 +2114,55 @@
 
             CTLEXP.controles.forEach(c => {
                 const linha = document.createElement("tr");
+                const ativa = emUso(c.grupo);
+                if (!ativa) linha.classList.add("desativada");
                 celula(linha, c.rotulo, "nome");
 
-                const lista = CTLEXP.listas[c.lista];
+                const pares = CTLEXP.listas[c.lista];
+                const rotuloDe = v => (pares.find(x => x[0] === v) || [v, "? (" + v + ")"])[1];
                 const tdFuncao = document.createElement("td");
                 const tdModo = document.createElement("td");
 
-                // TOGGLE/MOMENT só faz sentido nas funções que ligam e desligam algo.
-                // A pedaleira esconde o campo nas outras, e aqui é igual.
-                const temModo = v => c.modo && CTLEXP.listas.comModo.includes(lista[v]);
+                // TOGGLE/MOMENT só existe nas funções que ligam e desligam algo
+                const temModo = v => c.mem.modo !== null && CTLEXP.listas.comModo.includes(rotuloDe(v));
 
                 const desenhaModo = () => {
                     tdModo.innerHTML = "";
-                    const noSistema = !!bytePref(c);
                     if (!temModo(leFuncao(c))) {
                         tdModo.textContent = "—";
                         tdModo.style.color = "var(--text-muted)";
                         return;
                     }
                     tdModo.style.color = "";
-                    tdModo.appendChild(criaSelect(CTLEXP.listas.modo, leModo(c), v => {
-                        if (noSistema) { sis[c.sis.modo] = v; gravaControle(END_SYSTEM_CONTROL, c.sis.modo, v, c.rotulo + " mode"); }
+                    const sel = criaSelect(CTLEXP.listas.modo, leModo(c), v => {
+                        if (bytePref(c)) { sis[c.sis.modo] = v; gravaControle(END_SYSTEM_CONTROL, c.sis.modo, v, c.rotulo + " mode"); }
                         else { mem[c.mem.modo - OFS_CTL_MEM] = v; gravaControle(END_MEM_TEMP, c.mem.modo, v, c.rotulo + " mode"); }
-                    }));
+                    });
+                    sel.disabled = !ativa;
+                    tdModo.appendChild(sel);
                 };
 
                 const desenhaValores = () => {
                     const noSistema = !!bytePref(c);
                     tdFuncao.innerHTML = "";
-                    tdFuncao.appendChild(criaSelect(lista, leFuncao(c), v => {
+                    const sel = criaSelectPares(pares, leFuncao(c), v => {
                         if (noSistema) { sis[c.sis.funcao] = v; gravaControle(END_SYSTEM_CONTROL, c.sis.funcao, v, c.rotulo); }
                         else { mem[c.mem.funcao - OFS_CTL_MEM] = v; gravaControle(END_MEM_TEMP, c.mem.funcao, v, c.rotulo); }
                         desenhaModo();
-                    }));
+                    });
+                    sel.disabled = !ativa;
+                    tdFuncao.appendChild(sel);
                     desenhaModo();
                 };
 
                 const tdPref = document.createElement("td");
-                tdPref.appendChild(criaSelect(CTLEXP.listas.preferencia, bytePref(c), v => {
+                const selPref = criaSelect(CTLEXP.listas.preferencia, bytePref(c), v => {
                     sis[c.sis.pref] = v;
                     gravaControle(END_SYSTEM_CONTROL, c.sis.pref, v, c.rotulo + " preference");
                     desenhaValores();
-                }));
+                });
+                selPref.disabled = !ativa;
+                tdPref.appendChild(selPref);
 
                 linha.appendChild(tdFuncao);
                 linha.appendChild(tdModo);
@@ -2067,8 +2170,7 @@
                 desenhaValores();
                 tabela.appendChild(linha);
             });
-
-            $("cortina-control").classList.add("aberta");
+            return true;
         }
 
         /**
@@ -2098,10 +2200,12 @@
 
         // ---------- Assign ----------
         const baseDoAssign = i => CTLEXP.assign.desloc1 + i * CTLEXP.assign.passo;
+        const campoPor = chave => CTLEXP.assign.campos.find(c => c.chave === chave);
 
         function leCampo(dados, campo) {
-            return campo.tipo === "byte" ? dados[campo.desloc]
-                                         : nibblesParaValorSemDeslocamento(dados.slice(campo.desloc, campo.desloc + 4));
+            if (campo.tipo === "byte") return dados[campo.desloc];
+            const quantos = campo.tipo === "nibbles2" ? 2 : 4;
+            return nibblesParaValorSemDeslocamento(dados.slice(campo.desloc, campo.desloc + quantos));
         }
         function bytesDoCampo(campo, valor) {
             if (campo.tipo === "byte") return [valor];
@@ -2118,21 +2222,63 @@
                                  "assign " + (i + 1) + " " + campo.rotulo);
         }
 
-        /** Controle certo para o campo: lista, lista de alvos ou número. */
-        function controleDoCampo(i, campo, dados, aoMudar) {
-            const valor = leCampo(dados, campo);
-            const troca = v => { escreveCampo(i, dados, campo, v); if (aoMudar) aoMudar(v); };
-            if (campo.alvos) return criaSelect(CTLEXP.assign.alvos, valor, troca);
-            if (campo.chave === "fxItem") {
-                return criaSelect(Array.from({ length: 20 }, (_, k) => "Fx Item " + (k + 1)), valor, troca);
-            }
-            if (campo.lista) return criaSelect(campo.lista, valor, troca, false);
-            return criaNumero(campo.min, campo.max, valor, troca, campo.base1);
+        // ---------- blocos da cadeia e os parâmetros de cada um ----------
+        /** Só os blocos que existem neste preset, com o nome do efeito (e número quando repete). */
+        function blocosDaCadeia() {
+            const vistos = {};
+            return ordem
+                .filter(id => id >= 0 && id < TOTAL_FX_ITENS && itens[id])
+                .map(id => {
+                    const mod = moduloPorTipo.get(itens[id].typeId);
+                    const nome = mod ? mod.name : "type " + itens[id].typeId;
+                    vistos[nome] = (vistos[nome] || 0) + 1;
+                    return { id, typeId: itens[id].typeId, nome, ordem: vistos[nome] };
+                })
+                .map((b, _, todos) => {
+                    const repetido = todos.filter(x => x.nome === b.nome).length > 1;
+                    return { valor: b.id, typeId: b.typeId, rotulo: b.nome + (repetido ? " " + b.ordem : "") };
+                });
         }
+
+        /** Parâmetros que podem ser controlados num bloco: ON/OFF + os do tipo do efeito. */
+        function alvosDoTipo(typeId) {
+            const lista = [[1, "ON/OFF"]];
+            (CTLEXP.alvosPorTipo[String(typeId)] || []).forEach(a => lista.push(a));
+            return lista;
+        }
+        /** Nome de um alvo qualquer, para quando o valor guardado não é do bloco escolhido. */
+        function nomeDoAlvo(indice) {
+            if (indice === 0) return "— none —";
+            for (const [tipo, lista] of Object.entries(CTLEXP.alvosPorTipo)) {
+                const a = lista.find(x => x[0] === indice);
+                if (a) {
+                    const mod = moduloPorTipo.get(Number(tipo));
+                    return (mod ? mod.name : "type " + tipo) + ": " + a[1];
+                }
+            }
+            for (const [cat, lista] of Object.entries(CTLEXP.alvosGlobais)) {
+                const a = lista.find(x => x[0] === indice);
+                if (a) return (cat === "EFFECT(RENAMED WITH TYPE)" ? "" : cat + ": ") + a[1];
+            }
+            return "target " + indice;
+        }
+
+        let paginaAssign = 0;
+        let dadosAssign = null;
 
         async function abreAssign() {
             fechaMenu();
             if (!dadosCtlExpOk()) return;
+            if (!await leAssigns()) return;
+            desenhaAssign();
+            dialogoAberto = {
+                faixas: [[GX10.addrAdd(END_MEM_TEMP, baseDoAssign(0)), CTLEXP.assign.total * CTLEXP.assign.passo]],
+                recarrega: async () => { if (await leAssigns()) desenhaAssign(); }
+            };
+            $("cortina-assign").classList.add("aberta");
+        }
+
+        async function leAssigns() {
             const tudo = [];
             lendo++;
             abreProgresso("Reading the assigns");
@@ -2141,85 +2287,117 @@
                     tudo.push(await lerTrecho(GX10.addrAdd(END_MEM_TEMP, baseDoAssign(i)), 45));
                     progresso((i + 1) / CTLEXP.assign.total, "Assign " + (i + 1) + "…");
                 }
+                dadosAssign = tudo;
+                // Os quatro últimos bytes não estão no manual; a pedaleira mostra ali
+                // INPUT SENS e BANK MSB/LSB. Ficam no registro para a gente descobrir.
+                addLog("Assign 1, bytes 0x29-0x2C (undocumented): " + hex(tudo[0].slice(0x29, 0x2D)), "raw");
+                return true;
             } catch (e) {
                 addLog(e.message, "error");
-                return;
+                return false;
             } finally {
                 lendo--;
                 fechaProgresso();
             }
+        }
 
-            const campos = CTLEXP.assign.campos;
-            const acha = chave => campos.find(c => c.chave === chave);
-            const principais = ["sw", "fxItem", "target", "source", "mode"].map(acha);
-            const extras = campos.filter(c => !principais.includes(c));
+        function desenhaAssign() {
+            const abas = $("abas-assign");
+            abas.innerHTML = "";
+            CTLEXP.assign.paginas.forEach((pg, i) => {
+                const b = document.createElement("button");
+                b.textContent = pg.rotulo;
+                if (i === paginaAssign) b.classList.add("ativa");
+                b.onclick = () => { paginaAssign = i; desenhaAssign(); };
+                abas.appendChild(b);
+            });
 
+            const pagina = CTLEXP.assign.paginas[paginaAssign];
             const tabela = $("tabela-assign");
             tabela.innerHTML = "";
             const cabeca = document.createElement("tr");
-            ["", "On", "Block", "Target", "Source", "Mode", ""].forEach(t => {
+            ["#"].concat(pagina.colunas.map(c => c[0])).forEach(t => {
                 const th = document.createElement("th");
                 th.textContent = t;
                 cabeca.appendChild(th);
             });
             tabela.appendChild(cabeca);
 
-            tudo.forEach((dados, i) => {
+            const blocos = blocosDaCadeia();
+
+            dadosAssign.forEach((dados, i) => {
                 const linha = document.createElement("tr");
                 linha.className = "linha-assign" + (dados[0] ? "" : " apagada");
                 celula(linha, String(i + 1), "num");
 
-                principais.forEach(campo => {
+                pagina.colunas.forEach(([rotulo, chave]) => {
                     const td = document.createElement("td");
+
+                    if (chave === "__naoMapeado") {
+                        td.textContent = "—";
+                        td.style.color = "var(--text-muted)";
+                        td.dataset.tip = "The MIDI documentation does not say where the pedal keeps this one.";
+                        linha.appendChild(td);
+                        return;
+                    }
+
+                    if (chave === "__bloco") {
+                        const campoBloco = campoPor("fxItem");
+                        const atual = leCampo(dados, campoBloco);
+                        const opcoes = blocos.slice();
+                        if (!opcoes.some(b => b.valor === atual)) {
+                            opcoes.unshift({ valor: atual, typeId: -1, rotulo: "Fx Item " + (atual + 1) + " (not in this preset)" });
+                        }
+                        const sel = document.createElement("select");
+                        opcoes.forEach(b => {
+                            const op = document.createElement("option");
+                            op.value = String(b.valor);
+                            op.textContent = b.rotulo;
+                            sel.appendChild(op);
+                        });
+                        sel.value = String(atual);
+                        sel.onchange = async () => {
+                            await escreveCampo(i, dados, campoBloco, Number(sel.value));
+                            desenhaAssign();                      // a lista de parâmetros muda junto
+                        };
+                        td.appendChild(sel);
+                        td.style.minWidth = "180px";
+                        linha.appendChild(td);
+                        return;
+                    }
+
+                    if (chave === "target") {
+                        const campoAlvo = campoPor("target");
+                        const bloco = leCampo(dados, campoPor("fxItem"));
+                        const tipo = itens[bloco] ? itens[bloco].typeId : -1;
+                        const atual = leCampo(dados, campoAlvo);
+                        const pares = [[0, "— none —"]].concat(alvosDoTipo(tipo));
+                        if (!pares.some(x => x[0] === atual)) pares.push([atual, nomeDoAlvo(atual)]);
+                        const sel = criaSelectPares(pares, atual, v => escreveCampo(i, dados, campoAlvo, v));
+                        td.appendChild(sel);
+                        td.style.minWidth = "230px";
+                        linha.appendChild(td);
+                        return;
+                    }
+
+                    const campo = campoPor(chave);
                     td.appendChild(controleDoCampo(i, campo, dados, v => {
-                        if (campo.chave === "sw") linha.classList.toggle("apagada", !v);
+                        if (chave === "sw") linha.classList.toggle("apagada", !v);
                     }));
-                    if (campo.chave === "target") td.style.minWidth = "260px";
                     linha.appendChild(td);
                 });
 
-                const detalhe = document.createElement("tr");
-                detalhe.className = "detalhe-assign";
-                detalhe.style.display = "none";
-                const tdDet = document.createElement("td");
-                tdDet.colSpan = 7;
-                const grade = document.createElement("div");
-                grade.className = "grade-det";
-                extras.forEach(campo => {
-                    const caixa = document.createElement("div");
-                    const rot = document.createElement("label");
-                    rot.textContent = campo.rotulo;
-                    caixa.append(rot, controleDoCampo(i, campo, dados));
-                    grade.appendChild(caixa);
-                });
-                tdDet.appendChild(grade);
-                detalhe.appendChild(tdDet);
-
-                const btn = document.createElement("button");
-                btn.className = "btn-mini";
-                btn.textContent = "more";
-                btn.onclick = () => {
-                    const aberto = detalhe.style.display !== "none";
-                    detalhe.style.display = aberto ? "none" : "table-row";
-                    btn.textContent = aberto ? "more" : "less";
-                };
-                celula(linha, btn);
-
-                tabela.append(linha, detalhe);
+                tabela.appendChild(linha);
             });
-
-            $("cortina-assign").classList.add("aberta");
         }
 
-        $("btn-ctl-control").onclick = abreControl;
-        $("btn-ctl-assign").onclick = abreAssign;
-        $("btn-ctl-knob").onclick = abreKnob;
-        $("btn-ctl-midi").onclick = abreMidi;
-        $("control-fecha").onclick = () => $("cortina-control").classList.remove("aberta");
-        $("assign-fecha").onclick = () => $("cortina-assign").classList.remove("aberta");
-        $("cortina-control").onclick = e => { if (e.target === $("cortina-control")) $("cortina-control").classList.remove("aberta"); };
-        $("cortina-assign").onclick = e => { if (e.target === $("cortina-assign")) $("cortina-assign").classList.remove("aberta"); };
-
+        /** Controle certo para o campo: lista, número. */
+        function controleDoCampo(i, campo, dados, aoMudar) {
+            const valor = leCampo(dados, campo);
+            const troca = v => { escreveCampo(i, dados, campo, v); if (aoMudar) aoMudar(v); };
+            if (campo.lista) return criaSelect(campo.lista, valor, troca, false);
+            return criaNumero(campo.min, campo.max, valor, troca, campo.base1);
+        }
 
         // ================== Presets ==================
         let abaPresets = "user";
@@ -2315,6 +2493,13 @@
         async function abreKnob() {
             fechaMenu();
             if (!dadosCtlExpOk()) return;
+            if (!await desenhaKnob()) return;
+            dialogoAberto = { faixas: [[GX10.addrAdd(END_MEM_TEMP, OFS_KNOB), TAM_KNOB]],
+                              recarrega: desenhaKnob };
+            $("cortina-knob").classList.add("aberta");
+        }
+
+        async function desenhaKnob() {
             let dados;
             lendo++;
             abreProgresso("Reading the knobs");
@@ -2322,7 +2507,7 @@
                 dados = await lerTrecho(GX10.addrAdd(END_MEM_TEMP, OFS_KNOB), TAM_KNOB);
             } catch (e) {
                 addLog(e.message, "error");
-                return;
+                return false;
             } finally {
                 lendo--;
                 fechaProgresso();
@@ -2331,31 +2516,42 @@
             const tabela = $("tabela-knob");
             tabela.innerHTML = "";
             const cabeca = document.createElement("tr");
-            ["", "Block", "Turns"].forEach(t => {
+            ["", "Block", "Parameter"].forEach(t => {
                 const th = document.createElement("th");
                 th.textContent = t;
                 cabeca.appendChild(th);
             });
             tabela.appendChild(cabeca);
 
+            const blocos = blocosDaCadeia();
+
             CTLEXP.knobs.forEach(k => {
                 const linha = document.createElement("tr");
                 celula(linha, k.rotulo, "nome");
 
                 const bloco = dados[k.fxItem - OFS_KNOB];
-                celula(linha, criaSelect(Array.from({ length: 20 }, (_, i) => "Fx Item " + (i + 1)), bloco, v => {
-                    gravaEConfere(GX10.addrAdd(END_MEM_TEMP, k.fxItem), [v], k.rotulo + " block");
-                }));
-
                 const alvo = nibblesParaValorSemDeslocamento(dados.slice(k.alvo - OFS_KNOB, k.alvo - OFS_KNOB + 4));
-                const td = celula(linha, criaSelect(CTLEXP.assign.alvos, alvo, v => {
+
+                const opcoes = blocos.slice();
+                if (!opcoes.some(b => b.valor === bloco)) {
+                    opcoes.unshift({ valor: bloco, typeId: -1, rotulo: "Fx Item " + (bloco + 1) + " (not in this preset)" });
+                }
+                const selBloco = criaSelectPares(opcoes.map(b => [b.valor, b.rotulo]), bloco, async v => {
+                    await gravaEConfere(GX10.addrAdd(END_MEM_TEMP, k.fxItem), [v], k.rotulo + " block");
+                    desenhaKnob();                       // a lista de parâmetros acompanha o bloco
+                });
+                celula(linha, selBloco);
+
+                const tipo = itens[bloco] ? itens[bloco].typeId : -1;
+                const pares = [[0, "— none —"]].concat(alvosDoTipo(tipo));
+                if (!pares.some(x => x[0] === alvo)) pares.push([alvo, nomeDoAlvo(alvo)]);
+                const td = celula(linha, criaSelectPares(pares, alvo, v => {
                     gravaEConfere(GX10.addrAdd(END_MEM_TEMP, k.alvo), valorParaNibblesSemDeslocamento(v, 4), k.rotulo);
                 }));
-                td.style.minWidth = "300px";
+                td.style.minWidth = "260px";
                 tabela.appendChild(linha);
             });
-
-            $("cortina-knob").classList.add("aberta");
+            return true;
         }
 
         // ================== CTL/EXP — MIDI ==================
@@ -2364,6 +2560,13 @@
         async function abreMidi() {
             fechaMenu();
             if (!dadosCtlExpOk()) return;
+            if (!await desenhaMidi()) return;
+            dialogoAberto = { faixas: [[GX10.addrAdd(END_MEM_TEMP, OFS_MIDI), TAM_MIDI]],
+                              recarrega: desenhaMidi };
+            $("cortina-midi").classList.add("aberta");
+        }
+
+        async function desenhaMidi() {
             let dados;
             lendo++;
             abreProgresso("Reading the MIDI settings");
@@ -2371,47 +2574,52 @@
                 dados = await lerTrecho(GX10.addrAdd(END_MEM_TEMP, OFS_MIDI), TAM_MIDI);
             } catch (e) {
                 addLog(e.message, "error");
-                return;
+                return false;
             } finally {
                 lendo--;
                 fechaProgresso();
             }
 
+            // Mesma cara dos parâmetros de efeito: nome, barra e valor.
             const caixa = $("lista-midi");
             caixa.innerHTML = "";
-            CTLEXP.memoryMidi.forEach(bloco => {
-                const secao = document.createElement("div");
-                secao.className = "secao-midi";
-                const t = document.createElement("h4");
-                t.textContent = bloco.rotulo;
-                const grade = document.createElement("div");
-                grade.className = "grade-det";
+            const painel = document.createElement("div");
+            painel.className = "painel";
+            painel.style.marginTop = "0";
 
+            CTLEXP.memoryMidi.forEach((bloco, n) => {
                 bloco.campos.forEach(campo => {
                     const i = campo.desloc - OFS_MIDI;
                     const valor = campo.tipo === "byte" ? dados[i]
                                 : nibblesParaValorSemDeslocamento(dados.slice(i, i + 2));
-                    const troca = v => gravaEConfere(GX10.addrAdd(END_MEM_TEMP, campo.desloc),
-                                                     bytesDoCampo(campo, v), bloco.rotulo + " " + campo.rotulo);
-                    const item = document.createElement("div");
-                    const rot = document.createElement("label");
-                    rot.textContent = campo.rotulo + (campo.zeroOff ? "  (0 = OFF)" : "");
-                    item.append(rot, campo.lista ? criaSelect(campo.lista, valor, troca)
-                                                 : criaNumero(campo.min, campo.max, valor, troca, false));
-                    grade.appendChild(item);
+                    const p = {
+                        name: (n + 1) + ":" + campo.rotulo.toUpperCase(),
+                        description: campo.zeroOff ? "0 means OFF — nothing is sent." : "",
+                        min: campo.lista ? 0 : campo.min,
+                        max: campo.lista ? campo.lista.length - 1 : campo.max,
+                        options: campo.lista ? campo.lista.map((r, k) => ({ value: k, label: r })) : undefined
+                    };
+                    painel.appendChild(criaControle({
+                        endereco: GX10.addrAdd(END_MEM_TEMP, campo.desloc), p, valor,
+                        umByte: campo.tipo === "byte", semDeslocamento: campo.tipo !== "byte", nibbles: 2
+                    }));
                 });
-
-                secao.append(t, grade);
-                caixa.appendChild(secao);
             });
 
-            $("cortina-midi").classList.add("aberta");
+            caixa.appendChild(painel);
+            return true;
         }
 
-        $("knob-fecha").onclick = () => $("cortina-knob").classList.remove("aberta");
-        $("midi-fecha").onclick = () => $("cortina-midi").classList.remove("aberta");
-        $("cortina-knob").onclick = e => { if (e.target === $("cortina-knob")) $("cortina-knob").classList.remove("aberta"); };
-        $("cortina-midi").onclick = e => { if (e.target === $("cortina-midi")) $("cortina-midi").classList.remove("aberta"); };
+        $("btn-ctl-control").onclick = abreControl;
+        $("btn-ctl-assign").onclick = abreAssign;
+        $("btn-ctl-knob").onclick = abreKnob;
+        $("btn-ctl-midi").onclick = abreMidi;
+
+        ["control", "assign", "knob", "midi"].forEach(nome => {
+            const cortina = "cortina-" + nome;
+            $(nome + "-fecha").onclick = () => fechaDialogoCtl(cortina);
+            $(cortina).onclick = e => { if (e.target === $(cortina)) fechaDialogoCtl(cortina); };
+        });
 
         // ================== Tooltip of our own ==================
         // Replaces the browser's native tooltip: same texts (data-tip), nicer look,
@@ -2554,11 +2762,8 @@
             $("cortina-sobre").classList.remove("aberta");
             $("cortina-salvar").classList.remove("aberta");
             $("cortina-export").classList.remove("aberta");
-            $("cortina-control").classList.remove("aberta");
-            $("cortina-assign").classList.remove("aberta");
+            ["cortina-control", "cortina-assign", "cortina-knob", "cortina-midi"].forEach(fechaDialogoCtl);
             $("cortina-presets").classList.remove("aberta");
-            $("cortina-knob").classList.remove("aberta");
-            $("cortina-midi").classList.remove("aberta");
         });
 
         pedal.onStateChange(({ isConnected, reason }) => {

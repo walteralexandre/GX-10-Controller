@@ -7,74 +7,220 @@
  * Os nomes das linhas seguem o que aparece na tela da pedaleira (GX-10); o manual
  * chama de BankDown/BankUp, Manual Num1/2, CNum, Ctl1-3, Exp1Sw, Exp1 e Exp2.
  */
-window.GX10_CTLEXP_VERSAO = "0.11.2";
+window.GX10_CTLEXP_VERSAO = "0.11.3";
 window.GX10_CTLEXP = {
  "listas": {
-  "funcNum": [
-   "OFF",
-   "NUM 1",
-   "DOWN",
-   "UP",
-   "BPM TAP",
-   "TUNER",
-   "MEMORY/MAN",
-   "TUNER/MAN",
-   "MAN/TUNER",
-   "AMP CTL 1",
-   "AMP CTL 2",
-   "WAH",
-   "DIV CH.SEL",
-   "SEND/RETURN",
-   "LOOP CTL",
-   "LOOPER STOP",
-   "LOOPER CLEAR",
-   "MIDI START"
+  "funcDownUp": [
+   [
+    0,
+    "OFF"
+   ],
+   [
+    2,
+    "DOWN"
+   ],
+   [
+    3,
+    "UP"
+   ],
+   [
+    4,
+    "BPM TAP"
+   ],
+   [
+    5,
+    "TUNER"
+   ],
+   [
+    6,
+    "MEMORY/MAN"
+   ],
+   [
+    7,
+    "TUNER/MAN"
+   ],
+   [
+    8,
+    "MAN/TUNER"
+   ],
+   [
+    11,
+    "WAH"
+   ],
+   [
+    12,
+    "DIV CH.SEL"
+   ],
+   [
+    13,
+    "SEND/RETURN"
+   ],
+   [
+    14,
+    "LOOP CTL"
+   ],
+   [
+    15,
+    "LOOP STOP"
+   ],
+   [
+    16,
+    "LOOP CLEAR"
+   ],
+   [
+    17,
+    "MIDI START"
+   ]
   ],
-  "funcCNum": [
-   "OFF",
-   "BPM TAP",
-   "TUNER",
-   "MEMORY/MAN",
-   "TUNER/MAN",
-   "MAN/TUNER",
-   "AMP CTL 1",
-   "AMP CTL 2",
-   "WAH",
-   "DIV CH.SEL",
-   "SEND/RETURN",
-   "LOOP CTL",
-   "LOOPER STOP",
-   "LOOPER CLEAR",
-   "MIDI START"
+  "funcManual": [
+   [
+    0,
+    "OFF"
+   ],
+   [
+    1,
+    "BPM TAP"
+   ],
+   [
+    2,
+    "TUNER"
+   ],
+   [
+    3,
+    "MEMORY/MAN"
+   ],
+   [
+    4,
+    "TUNER/MAN"
+   ],
+   [
+    5,
+    "MAN/TUNER"
+   ],
+   [
+    8,
+    "WAH"
+   ],
+   [
+    9,
+    "DIV CH.SEL"
+   ],
+   [
+    10,
+    "SEND/RETURN"
+   ],
+   [
+    11,
+    "LOOP CTL"
+   ],
+   [
+    12,
+    "LOOP STOP"
+   ],
+   [
+    13,
+    "LOOP CLEAR"
+   ],
+   [
+    14,
+    "MIDI START"
+   ]
   ],
   "funcCtl": [
-   "OFF",
-   "BANK ▼",
-   "BANK ▲",
-   "DOWN",
-   "UP",
-   "BPM TAP",
-   "TUNER",
-   "MEMORY/MAN",
-   "TUNER/MAN",
-   "MAN/TUNER",
-   "AMP CTL 1",
-   "AMP CTL 2",
-   "WAH",
-   "DIV CH.SEL",
-   "SEND/RETURN",
-   "LOOP CTL",
-   "LOOPER STOP",
-   "LOOPER CLEAR",
-   "MIDI START"
+   [
+    0,
+    "OFF"
+   ],
+   [
+    1,
+    "BANK DOWN"
+   ],
+   [
+    2,
+    "BANK UP"
+   ],
+   [
+    3,
+    "DOWN"
+   ],
+   [
+    4,
+    "UP"
+   ],
+   [
+    5,
+    "BPM TAP"
+   ],
+   [
+    6,
+    "TUNER"
+   ],
+   [
+    7,
+    "MEMORY/MAN"
+   ],
+   [
+    8,
+    "TUNER/MAN"
+   ],
+   [
+    9,
+    "MAN/TUNER"
+   ],
+   [
+    12,
+    "WAH"
+   ],
+   [
+    13,
+    "DIV CH.SEL"
+   ],
+   [
+    14,
+    "SEND/RETURN"
+   ],
+   [
+    15,
+    "LOOP CTL"
+   ],
+   [
+    16,
+    "LOOP STOP"
+   ],
+   [
+    17,
+    "LOOP CLEAR"
+   ],
+   [
+    18,
+    "MIDI START"
+   ]
   ],
   "funcExp": [
-   "OFF",
-   "FOOT VOL",
-   "WAH",
-   "FV/WAH",
-   "FV+TU",
-   "FV+TU/WAH"
+   [
+    0,
+    "OFF"
+   ],
+   [
+    1,
+    "FOOT VOL"
+   ],
+   [
+    2,
+    "WAH"
+   ],
+   [
+    3,
+    "FV/WAH"
+   ],
+   [
+    4,
+    "FV+TU"
+   ],
+   [
+    5,
+    "FV+TU/WAH"
+   ]
   ],
   "modo": [
    "TOGGLE",
@@ -85,32 +231,24 @@ window.GX10_CTLEXP = {
    "SYSTEM"
   ],
   "comModo": [
-   "AMP CTL 1",
-   "AMP CTL 2",
+   "TUNER",
    "WAH",
    "DIV CH.SEL",
-   "SEND/RETURN"
+   "SEND/RETURN",
+   "MIDI START"
+  ],
+  "controlMode": [
+   "MEMORY",
+   "MANUAL",
+   "BANK/NUM",
+   "MANUAL2"
   ]
  },
  "controles": [
   {
-   "rotulo": "▼ (down)",
-   "lista": "funcNum",
-   "modo": false,
-   "mem": {
-    "funcao": 20,
-    "modo": 38
-   },
-   "sis": {
-    "pref": 4,
-    "funcao": 22,
-    "modo": 40
-   }
-  },
-  {
-   "rotulo": "▲ (up)",
-   "lista": "funcNum",
-   "modo": false,
+   "rotulo": "UP",
+   "lista": "funcDownUp",
+   "grupo": "memory",
    "mem": {
     "funcao": 21,
     "modo": 39
@@ -122,23 +260,23 @@ window.GX10_CTLEXP = {
    }
   },
   {
-   "rotulo": "MANUAL ▼",
-   "lista": "funcCNum",
-   "modo": false,
+   "rotulo": "DOWN",
+   "lista": "funcDownUp",
+   "grupo": "memory",
    "mem": {
-    "funcao": 23,
-    "modo": 41
+    "funcao": 20,
+    "modo": 38
    },
    "sis": {
-    "pref": 7,
-    "funcao": 25,
-    "modo": 43
+    "pref": 4,
+    "funcao": 22,
+    "modo": 40
    }
   },
   {
-   "rotulo": "MANUAL ▲",
-   "lista": "funcCNum",
-   "modo": false,
+   "rotulo": "MANUAL UP",
+   "lista": "funcManual",
+   "grupo": "manual",
    "mem": {
     "funcao": 24,
     "modo": 42
@@ -150,23 +288,23 @@ window.GX10_CTLEXP = {
    }
   },
   {
-   "rotulo": "CURNUM",
-   "lista": "funcCNum",
-   "modo": false,
+   "rotulo": "MANUAL DOWN",
+   "lista": "funcManual",
+   "grupo": "manual",
    "mem": {
-    "funcao": 22,
-    "modo": 40
+    "funcao": 23,
+    "modo": 41
    },
    "sis": {
-    "pref": 6,
-    "funcao": 24,
-    "modo": 42
+    "pref": 7,
+    "funcao": 25,
+    "modo": 43
    }
   },
   {
-   "rotulo": "CTL1",
+   "rotulo": "CTL 1",
    "lista": "funcCtl",
-   "modo": true,
+   "grupo": "sempre",
    "mem": {
     "funcao": 27,
     "modo": 45
@@ -178,9 +316,9 @@ window.GX10_CTLEXP = {
    }
   },
   {
-   "rotulo": "CTL2",
+   "rotulo": "CTL 2",
    "lista": "funcCtl",
-   "modo": true,
+   "grupo": "sempre",
    "mem": {
     "funcao": 28,
     "modo": 46
@@ -192,9 +330,9 @@ window.GX10_CTLEXP = {
    }
   },
   {
-   "rotulo": "CTL3",
+   "rotulo": "CTL 3",
    "lista": "funcCtl",
-   "modo": true,
+   "grupo": "sempre",
    "mem": {
     "funcao": 29,
     "modo": 47
@@ -206,9 +344,9 @@ window.GX10_CTLEXP = {
    }
   },
   {
-   "rotulo": "EXP1 SW",
+   "rotulo": "EXP 1 SW",
    "lista": "funcCtl",
-   "modo": true,
+   "grupo": "sempre",
    "mem": {
     "funcao": 31,
     "modo": 49
@@ -220,9 +358,9 @@ window.GX10_CTLEXP = {
    }
   },
   {
-   "rotulo": "EXP1 PEDAL",
+   "rotulo": "EXP 1 PEDAL",
    "lista": "funcExp",
-   "modo": false,
+   "grupo": "sempre",
    "mem": {
     "funcao": 32,
     "modo": null
@@ -234,9 +372,9 @@ window.GX10_CTLEXP = {
    }
   },
   {
-   "rotulo": "EXP2",
+   "rotulo": "EXP 2",
    "lista": "funcExp",
-   "modo": false,
+   "grupo": "sempre",
    "mem": {
     "funcao": 33,
     "modo": null
@@ -245,6 +383,20 @@ window.GX10_CTLEXP = {
     "pref": 17,
     "funcao": 35,
     "modo": null
+   }
+  },
+  {
+   "rotulo": "CUR NUM",
+   "lista": "funcManual",
+   "grupo": "banknum",
+   "mem": {
+    "funcao": 22,
+    "modo": 40
+   },
+   "sis": {
+    "pref": 6,
+    "funcao": 24,
+    "modo": 42
    }
   }
  ],
@@ -604,748 +756,125 @@ window.GX10_CTLEXP = {
   "total": 20,
   "passo": 64,
   "desloc1": 256,
-  "alvos": [
-   "— none —",
-   "EFFECT(RENAMED WITH TYPE): ON/OFF",
-   "AC GUITAR SIM: BODY",
-   "AC GUITAR SIM: LOW",
-   "AC GUITAR SIM: HIGH",
-   "AC GUITAR SIM: LEVEL",
-   "AC RESONANCE: TYPE",
-   "AC RESONANCE: RESONANCE",
-   "AC RESONANCE: TONE",
-   "AC RESONANCE: LEVEL",
-   "SLOW GEAR: SENS",
-   "SLOW GEAR: RISE TIME",
-   "SLOW GEAR: LEVEL",
-   "BASS SLOW GEAR: SENS",
-   "BASS SLOW GEAR: RISE TIME",
-   "BASS SLOW GEAR: LEVEL",
-   "DEFRETTER: SENS",
-   "DEFRETTER: DEPTH",
-   "DEFRETTER: TONE",
-   "DEFRETTER: EFFECT LEVEL",
-   "DEFRETTER: ATTACK",
-   "DEFRETTER: RESONANCE",
-   "DEFRETTER: DIRECT MIX",
-   "BASS DEFRETTER: SENS",
-   "BASS DEFRETTER: ATTACK",
-   "BASS DEFRETTER: TONE",
-   "BASS DEFRETTER: EFFECT LEVEL",
-   "BASS DEFRETTER: DIRECT MIX",
-   "WAH: WAH TYPE",
-   "WAH: PEDAL POSITION",
-   "WAH: PEDAL MIN",
-   "WAH: PEDAL MAX",
-   "WAH: EFFECT LEVEL",
-   "WAH: DIRECT MIX",
-   "BASS WAH: PEDAL POS",
-   "BASS WAH: PEDAL MIN",
-   "BASS WAH: PEDAL MAX",
-   "BASS WAH: EFFECT LEVEL",
-   "BASS WAH: DIRECT MIX",
-   "TOUCH WAH: FILTER MODE",
-   "TOUCH WAH: POLARITY",
-   "TOUCH WAH: SENS",
-   "TOUCH WAH: FREQUENCY",
-   "TOUCH WAH: RESONANCE",
-   "TOUCH WAH: DECAY",
-   "TOUCH WAH: EFFECT LEVEL",
-   "TOUCH WAH: DIRECT MIX",
-   "BASS TOUCH WAH: FILTER MODE",
-   "BASS TOUCH WAH: POLARITY",
-   "BASS TOUCH WAH: SENS",
-   "BASS TOUCH WAH: FREQUENCY",
-   "BASS TOUCH WAH: RESONANCE",
-   "BASS TOUCH WAH: DECAY",
-   "BASS TOUCH WAH: EFFECT LEVEL",
-   "BASS TOUCH WAH: DIRECT MIX",
-   "COMPRESSOR: TYPE",
-   "COMPRESSOR: SUSTAIN",
-   "COMPRESSOR: ATTACK",
-   "COMPRESSOR: LEVEL",
-   "COMPRESSOR: TONE",
-   "COMPRESSOR: DIRECT MIX",
-   "X COMP: ATTACK",
-   "X COMP: LEVEL",
-   "X COMP: TONE",
-   "X COMP: RATIO",
-   "X COMP: DIRECT MIX",
-   "X COMP: SUSTAIN",
-   "BASS X COMP: ATTACK",
-   "BASS X COMP: LEVEL",
-   "BASS X COMP: TONE",
-   "BASS X COMP: RATIO",
-   "BASS X COMP: DIRECT MIX",
-   "BASS X COMP: THRESHOLD",
-   "BOOSTER: TYPE",
-   "BOOSTER: BOOST",
-   "BOOSTER: TONE",
-   "BOOSTER: EFFECT LEVEL",
-   "BOOSTER: BOTTOM",
-   "BOOSTER: DIRECT MIX",
-   "BOOSTER: SOLO SW",
-   "BOOSTER: SOLO LEVEL",
-   "OVERDRIVE: TYPE",
-   "OVERDRIVE: DRIVE",
-   "OVERDRIVE: TONE",
-   "OVERDRIVE: EFFECT LEVEL",
-   "OVERDRIVE: BOTTOM",
-   "OVERDRIVE: DIRECT MIX",
-   "OVERDRIVE: SOLO SW",
-   "OVERDRIVE: SOLO LEVEL",
-   "BASS OVERDRIVE: DRIVE",
-   "BASS OVERDRIVE: TONE",
-   "BASS OVERDRIVE: EFFECT LEVEL",
-   "BASS OVERDRIVE: BOTTOM",
-   "BASS OVERDRIVE: DIRECT MIX",
-   "BASS OVERDRIVE: SOLO SW",
-   "BASS OVERDRIVE: SOLO LEVEL",
-   "X OVERDRIVE: DRIVE",
-   "X OVERDRIVE: TONE",
-   "X OVERDRIVE: EFFECT LEVEL",
-   "X OVERDRIVE: BOTTOM",
-   "X OVERDRIVE: DIRECT MIX",
-   "X OVERDRIVE: SOLO SW",
-   "X OVERDRIVE: SOLO LEVEL",
-   "X BASS OVERDRIVE: DRIVE",
-   "X BASS OVERDRIVE: TONE",
-   "X BASS OVERDRIVE: EFFECT LEVEL",
-   "X BASS OVERDRIVE: BOTTOM",
-   "X BASS OVERDRIVE: DIRECT MIX",
-   "X BASS OVERDRIVE: SOLO SW",
-   "X BASS OVERDRIVE: SOLO LEVEL",
-   "X DISTORTION: DRIVE",
-   "X DISTORTION: TONE",
-   "X DISTORTION: EFFECT LEVEL",
-   "X DISTORTION: BOTTOM",
-   "X DISTORTION: DIRECT MIX",
-   "X DISTORTION: SOLO SW",
-   "X DISTORTION: SOLO LEVEL",
-   "METAL DIST: TYPE",
-   "METAL DIST: DIST",
-   "METAL DIST: TONE",
-   "METAL DIST: EFFECT LEVEL",
-   "METAL DIST: BOTTOM",
-   "METAL DIST: DIRECT MIX",
-   "METAL DIST: SOLO SW",
-   "METAL DIST: SOLO LEVEL",
-   "BASS METAL DIST: DIST",
-   "BASS METAL DIST: TONE",
-   "BASS METAL DIST: EFFECT LEVEL",
-   "BASS METAL DIST: BOTTOM",
-   "BASS METAL DIST: DIRECT MIX",
-   "BASS METAL DIST: SOLO SW",
-   "BASS METAL DIST: SOLO LEVEL",
-   "DISTORTION: TYPE",
-   "DISTORTION: DIST",
-   "DISTORTION: TONE",
-   "DISTORTION: EFFECT LEVEL",
-   "DISTORTION: BOTTOM",
-   "DISTORTION: DIRECT MIX",
-   "DISTORTION: SOLO SW",
-   "DISTORTION: SOLO LEVEL",
-   "BASS DISTORTION: TYPE",
-   "BASS DISTORTION: DRIVE",
-   "BASS DISTORTION: TONE",
-   "BASS DISTORTION: EFFECT LEVEL",
-   "BASS DISTORTION: BOTTOM",
-   "BASS DISTORTION: DIRECT MIX",
-   "BASS DISTORTION: SOLO SW",
-   "BASS DISTORTION: SOLO LEVEL",
-   "FUZZ: TYPE",
-   "FUZZ: FUZZ",
-   "FUZZ: TONE",
-   "FUZZ: EFFECT LEVEL",
-   "FUZZ: BOTTOM",
-   "FUZZ: DIRECT MIX",
-   "FUZZ: SOLO SW",
-   "FUZZ: SOLO LEVEL",
-   "BASS FUZZ: FUZZ",
-   "BASS FUZZ: TONE",
-   "BASS FUZZ: EFFECT LEVEL",
-   "BASS FUZZ: BOTTOM",
-   "BASS FUZZ: DIRECT MIX",
-   "BASS FUZZ: SOLO SW",
-   "BASS FUZZ: SOLO LEVEL",
-   "PREAMP: TYPE",
-   "PREAMP: GAIN",
-   "PREAMP: LEVEL",
-   "PREAMP: BASS",
-   "PREAMP: MIDDLE",
-   "PREAMP: TREBLE",
-   "PREAMP: PRESENCE",
-   "PREAMP: GAIN SW",
-   "PREAMP: SOLO SW",
-   "PREAMP: SOLO LEVEL",
-   "PREAMP: BRIGHT SW",
-   "PREAMP: SAG",
-   "PREAMP: RESONANCE",
-   "PREAMP: DIRECT MIX",
-   "PREAMP: SP TYPE",
-   "PREAMP: MIC TYPE",
-   "PREAMP: MIC DISTANCE",
-   "PREAMP: MIC POSITION",
-   "PREAMP: MIC LEVEL",
-   "BASS PREAMP: TYPE",
-   "BASS PREAMP: GAIN",
-   "BASS PREAMP: LEVEL",
-   "BASS PREAMP: BASS",
-   "BASS PREAMP: MIDDLE",
-   "BASS PREAMP: TREBLE",
-   "BASS PREAMP: PRESENCE",
-   "BASS PREAMP: GAIN SW",
-   "BASS PREAMP: SOLO SW",
-   "BASS PREAMP: SOLO LEVEL",
-   "BASS PREAMP: BRIGHT SW",
-   "BASS PREAMP: SAG",
-   "BASS PREAMP: RESONANCE",
-   "BASS PREAMP: DIRECT MIX",
-   "BASS PREAMP: SP TYPE",
-   "BASS PREAMP: MIC TYPE",
-   "BASS PREAMP: MIC DISTANCE",
-   "BASS PREAMP: MIC POSITION",
-   "BASS PREAMP: MIC LEVEL",
-   "NOISE SUPRESS: THRESHOLD",
-   "NOISE SUPRESS: RELEASE",
-   "NOISE SUPRESS: DETECT",
-   "DIVIDER: MODE",
-   "DIVIDER: CH SELECT",
-   "DIVIDER: MIX MODE",
-   "DIVIDER: A:DYNAMIC",
-   "DIVIDER: A:DYNAMIC SENS",
-   "DIVIDER: A:FILTER",
-   "DIVIDER: A:CUTOFF FREQ",
-   "DIVIDER: B:DYNAMIC",
-   "DIVIDER: B:DYNAMIC SENS",
-   "DIVIDER: B:FILTER",
-   "DIVIDER: B:CUTOFF FREQ",
-   "MIXER: MODE",
-   "MIXER: A LEVEL",
-   "MIXER: B LEVEL",
-   "MIXER: A/B BALANCE",
-   "MIXER: SPREAD",
-   "PARAMET EQ: LOW GAIN",
-   "PARAMET EQ: HIGH GAIN",
-   "PARAMET EQ: LEVEL",
-   "PARAMET EQ: LOW-MID FREQ",
-   "PARAMET EQ: LOW-MID Q",
-   "PARAMET EQ: LOW-MID GAIN",
-   "PARAMET EQ: HIGH-MID FREQ",
-   "PARAMET EQ: HIGH-MID Q",
-   "PARAMET EQ: HIGH-MID GAIN",
-   "PARAMET EQ: LOW CUT",
-   "PARAMET EQ: HIGH CUT",
-   "GRAPHIC EQ: 31.5Hz",
-   "GRAPHIC EQ: 63Hz",
-   "GRAPHIC EQ: 125Hz",
-   "GRAPHIC EQ: 250Hz",
-   "GRAPHIC EQ: 500Hz",
-   "GRAPHIC EQ: 1kHz",
-   "GRAPHIC EQ: 2kHz",
-   "GRAPHIC EQ: 4kHz",
-   "GRAPHIC EQ: 8kHz",
-   "GRAPHIC EQ: 16kHz",
-   "GRAPHIC EQ: LEVEL",
-   "CHORUS: TYPE",
-   "CHORUS: DIRECT LEVEL",
-   "CHORUS: RATE",
-   "CHORUS: DEPTH",
-   "CHORUS: EFFECT LEVEL",
-   "CHORUS: LOW CUT",
-   "CHORUS: HIGH CUT",
-   "CHORUS: PRE-DELAY",
-   "CHORUS: WAVEFORM",
-   "CHORUS: 1:RATE",
-   "CHORUS: 1:DEPTH",
-   "CHORUS: 1:EFFECT LEVEL",
-   "CHORUS: 1:PRE-DELAY",
-   "CHORUS: 1:WAVEFORM",
-   "CHORUS: 1:LOW CUT",
-   "CHORUS: 1:HIGH CUT",
-   "CHORUS: 2:RATE",
-   "CHORUS: 2:DEPTH",
-   "CHORUS: 2:EFFECT LEVEL",
-   "CHORUS: 2:PRE-DELAY",
-   "CHORUS: 2:WAVEFORM",
-   "CHORUS: 2:LOW CUT",
-   "CHORUS: 2:HIGH CUT",
-   "CHORUS: OUTPUT MODE",
-   "BASS CHORUS: TYPE",
-   "BASS CHORUS: RATE",
-   "BASS CHORUS: DEPTH",
-   "BASS CHORUS: EFFECT LEVEL",
-   "BASS CHORUS: LOW CUT",
-   "BASS CHORUS: HIGH CUT",
-   "BASS CHORUS: DIRECT LEVEL",
-   "PRIME CHORUS: RATE",
-   "PRIME CHORUS: DEPTH",
-   "PRIME CHORUS: EFFECT LEVEL",
-   "PRIME CHORUS: PRE-DELAY",
-   "PRIME CHORUS: WAVEFORM",
-   "PRIME CHORUS: LOW CUT",
-   "PRIME CHORUS: HIGH CUT",
-   "PRIME CHORUS: SWEETNESS",
-   "PRIME CHORUS: BELL",
-   "PRIME CHORUS: OUTPUT MODE",
-   "OVERTONE: LOWER LEVEL",
-   "OVERTONE: UPPER LEVEL",
-   "OVERTONE: UNISON LEVEL",
-   "OVERTONE: DIRECT LEVEL",
-   "OVERTONE: DETUNE",
-   "OVERTONE: OUTPUT MODE",
-   "OVERTONE: LOW",
-   "OVERTONE: HIGH",
-   "DELAY: TIME",
-   "DELAY: FEEDBACK",
-   "DELAY: EFFECT LEVEL",
-   "DELAY: DIRECT LEVEL",
-   "DELAY: HIGH CUT",
-   "DELAY: CARRYOVER",
-   "DELAY PLUS: TYPE",
-   "DELAY PLUS: DIRECT LEVEL",
-   "DELAY PLUS: MOD RATE",
-   "DELAY PLUS: MOD DEPTH",
-   "DELAY PLUS: DUCK SENS",
-   "DELAY PLUS: DUCK PRE DPT",
-   "DELAY PLUS: DUCK POST DPT",
-   "DELAY PLUS: CARRYOVER",
-   "DELAY PLUS: TIME",
-   "DELAY PLUS: FEEDBACK",
-   "DELAY PLUS: EFFECT LEVEL",
-   "DELAY PLUS: HIGH CUT",
-   "DELAY PLUS: TAP TIME",
-   "DELAY PLUS: AUTO TRIGGER",
-   "DELAY PLUS: MODE",
-   "DELAY PLUS: 1:TYPE",
-   "DELAY PLUS: 1:TIME",
-   "DELAY PLUS: 1:FEEDBACK",
-   "DELAY PLUS: 1:EFFECT LEVEL",
-   "DELAY PLUS: 1:HIGH CUT",
-   "DELAY PLUS: 2:HIGH CUT",
-   "DELAY PLUS: 2:TYPE",
-   "DELAY PLUS: 2:TIME",
-   "DELAY PLUS: 2:FEEDBACK",
-   "DELAY PLUS: 2:EFFECT LEVEL",
-   "ANALOG DELAY: TYPE",
-   "ANALOG DELAY: TIME",
-   "ANALOG DELAY: FEEDBACK",
-   "ANALOG DELAY: EFFECT LEVEL",
-   "ANALOG DELAY: DIRECT LEVEL",
-   "ANALOG DELAY: HIGH CUT",
-   "ANALOG DELAY: MOD RATE",
-   "ANALOG DELAY: MOD DEPTH",
-   "ANALOG DELAY: DUCK SENS",
-   "ANALOG DELAY: DUCK PRE DPT",
-   "ANALOG DELAY: DUCK POST DPT",
-   "ANALOG DELAY: CARRYOVER",
-   "SPACE ECHO: TIME",
-   "SPACE ECHO: FEEDBACK",
-   "SPACE ECHO: EFFECT LEVEL",
-   "SPACE ECHO: DIRECT LEVEL",
-   "SPACE ECHO: HIGH CUT",
-   "SPACE ECHO: MOD RATE",
-   "SPACE ECHO: MOD DEPTH",
-   "SPACE ECHO: DUCK SENS",
-   "SPACE ECHO: DUCK PRE DPT",
-   "SPACE ECHO: DUCK POST DPT",
-   "SPACE ECHO: HEAD",
-   "SPACE ECHO: WOW FLUTTER",
-   "SPACE ECHO: CARRYOVER",
-   "SHIMMER DLY: TIME",
-   "SHIMMER DLY: FEEDBACK",
-   "SHIMMER DLY: EFFECT LEVEL",
-   "SHIMMER DLY: DIRECT LEVEL",
-   "SHIMMER DLY: HIGH CUT",
-   "SHIMMER DLY: MOD RATE",
-   "SHIMMER DLY: MOD DEPTH",
-   "SHIMMER DLY: DUCK SENS",
-   "SHIMMER DLY: DUCK PRE DPT",
-   "SHIMMER DLY: DUCK POST DPT",
-   "SHIMMER DLY: PITCH",
-   "SHIMMER DLY: PITCH BALANCE",
-   "SHIMMER DLY: PITCH FEEDBACK",
-   "SHIMMER DLY: CARRYOVER",
-   "TWIST: MODE",
-   "TWIST: TRIGGER",
-   "TWIST: LEVEL",
-   "TWIST: RISE TIME",
-   "TWIST: FALL TIME",
-   "TWIST: FADE TIME",
-   "TWIST: CARRYOVER",
-   "WARP: TIME",
-   "WARP: TRIGGER",
-   "WARP: LEVEL",
-   "WARP: CARRYOVER",
-   "REVERB: TYPE",
-   "REVERB: TIME",
-   "REVERB: PRE-DELAY",
-   "REVERB: EFFECT LEVEL",
-   "REVERB: DENSITY",
-   "REVERB: LOW CUT",
-   "REVERB: HIGH CUT",
-   "REVERB: DIRECT LEVEL",
-   "REVERB: CARRYOVER",
-   "REVERB PLUS: TYPE",
-   "REVERB PLUS: TIME",
-   "REVERB PLUS: TONE",
-   "REVERB PLUS: EFFECT LEVEL",
-   "REVERB PLUS: DENSITY",
-   "REVERB PLUS: PRE-DELAY",
-   "REVERB PLUS: LOW CUT",
-   "REVERB PLUS: HIGH CUT",
-   "REVERB PLUS: LOW DAMP",
-   "REVERB PLUS: HIGH DAMP",
-   "REVERB PLUS: MOD RATE",
-   "REVERB PLUS: MOD DEPTH",
-   "REVERB PLUS: DUCK SENS",
-   "REVERB PLUS: DUCK PRE DPT",
-   "REVERB PLUS: DUCK POST DPT",
-   "REVERB PLUS: DIRECT LEVEL",
-   "REVERB PLUS: CARRYOVER",
-   "SHIMMER REV: TIME",
-   "SHIMMER REV: TONE",
-   "SHIMMER REV: EFFECT LEVEL",
-   "SHIMMER REV: DENSITY",
-   "SHIMMER REV: PRE-DELAY",
-   "SHIMMER REV: LOW CUT",
-   "SHIMMER REV: HIGH CUT",
-   "SHIMMER REV: LOW DAMP",
-   "SHIMMER REV: HIGH DAMP",
-   "SHIMMER REV: MOD RATE",
-   "SHIMMER REV: MOD DEPTH",
-   "SHIMMER REV: DUCK SENS",
-   "SHIMMER REV: DUCK PRE DPT",
-   "SHIMMER REV: DUCK POST DPT",
-   "SHIMMER REV: DIRECT LEVEL",
-   "SHIMMER REV: 1:PITCH",
-   "SHIMMER REV: 2:PITCH",
-   "SHIMMER REV: 1:LEVEL",
-   "SHIMMER REV: 2:LEVEL",
-   "SHIMMER REV: CARRYOVER",
-   "TERA ECHO: MODE",
-   "TERA ECHO: SPREAD TIME",
-   "TERA ECHO: FEEDBACK",
-   "TERA ECHO: EFFECT LEVEL",
-   "TERA ECHO: TONE",
-   "TERA ECHO: DIRECT LEVEL",
-   "TERA ECHO: TRIGGER",
-   "TERA ECHO: CARRYOVER",
-   "FLANGER: RATE",
-   "FLANGER: DEPTH",
-   "FLANGER: RESONANCE",
-   "FLANGER: MANUAL",
-   "FLANGER: STEP RATE",
-   "FLANGER: LOW CUT",
-   "FLANGER: EFFECT LEVEL",
-   "FLANGER: DIRECT MIX",
-   "BASS FLANGER: RATE",
-   "BASS FLANGER: DEPTH",
-   "BASS FLANGER: RESONANCE",
-   "BASS FLANGER: MANUAL",
-   "BASS FLANGER: STEP RATE",
-   "BASS FLANGER: LOW CUT",
-   "BASS FLANGER: EFFECT LEVEL",
-   "BASS FLANGER: DIRECT MIX",
-   "PRIME FLANGER: RATE",
-   "PRIME FLANGER: DEPTH",
-   "PRIME FLANGER: RESONANCE",
-   "PRIME FLANGER: MANUAL",
-   "PRIME FLANGER: TURBO",
-   "PRIME FLANGER: WAVEFORM",
-   "PRIME FLANGER: STEP RATE",
-   "PRIME FLANGER: SEPARATION",
-   "PRIME FLANGER: EFFECT LEVEL",
-   "PRIME FLANGER: LOW DAMP",
-   "PRIME FLANGER: HIGH DAMP",
-   "PRIME FLANGER: DIRECT MIX",
-   "PRIME FLANGER: LOW CUT",
-   "PRIME FLANGER: HIGH CUT",
-   "BASS PRIME FL: RATE",
-   "BASS PRIME FL: DEPTH",
-   "BASS PRIME FL: RESONANCE",
-   "BASS PRIME FL: MANUAL",
-   "BASS PRIME FL: TURBO",
-   "BASS PRIME FL: WAVEFORM",
-   "BASS PRIME FL: STEP RATE",
-   "BASS PRIME FL: SEPARATION",
-   "BASS PRIME FL: EFFECT LEVEL",
-   "BASS PRIME FL: LOW DAMP",
-   "BASS PRIME FL: HIGH DAMP",
-   "BASS PRIME FL: DIRECT MIX",
-   "BASS PRIME FL: LOW CUT",
-   "BASS PRIME FL: HIGH CUT",
-   "PAN: RATE",
-   "PAN: DEPTH",
-   "PAN: WAVEFORM",
-   "PAN: EFFECT LEVEL",
-   "PAN: DIRECT MIX",
-   "PEDAL BEND: PITCH MIN",
-   "PEDAL BEND: PITCH MAX",
-   "PEDAL BEND: PEDAL POSITION",
-   "PEDAL BEND: EFFECT LEVEL",
-   "PEDAL BEND: DIRECT MIX",
-   "BASS PEDAL BEND: PITCH MIN",
-   "BASS PEDAL BEND: PITCH MAX",
-   "BASS PEDAL BEND: PEDAL POSITION",
-   "BASS PEDAL BEND: EFFECT LEVEL",
-   "BASS PEDAL BEND: DIRECT MIX",
-   "FOOT VOLUME: PEDAL POSITION",
-   "FOOT VOLUME: VOLUME MIN",
-   "FOOT VOLUME: VOLUME MAX",
-   "FOOT VOLUME: CURVE",
-   "HARMONIST: VOICE",
-   "HARMONIST: 1:HARMONY",
-   "HARMONIST: 1:LEVEL",
-   "HARMONIST: 1:PRE-DELAY",
-   "HARMONIST: 1:FEEDBACK",
-   "HARMONIST: 2:HARMONY",
-   "HARMONIST: 2:LEVEL",
-   "HARMONIST: 2:PRE-DELAY",
-   "HARMONIST: DIRECT LEVEL",
-   "HARMONIST: 1:C",
-   "HARMONIST: 1:Db",
-   "HARMONIST: 1:D",
-   "HARMONIST: 1:Eb",
-   "HARMONIST: 1:E",
-   "HARMONIST: 1:F",
-   "HARMONIST: 1:F#",
-   "HARMONIST: 1:G",
-   "HARMONIST: 1:Ab",
-   "HARMONIST: 1:A",
-   "HARMONIST: 1:Bb",
-   "HARMONIST: 1:B",
-   "HARMONIST: 2:C",
-   "HARMONIST: 2:Db",
-   "HARMONIST: 2:D",
-   "HARMONIST: 2:Eb",
-   "HARMONIST: 2:E",
-   "HARMONIST: 2:F",
-   "HARMONIST: 2:F#",
-   "HARMONIST: 2:G",
-   "HARMONIST: 2:Ab",
-   "HARMONIST: 2:A",
-   "HARMONIST: 2:Bb",
-   "HARMONIST: 2:B",
-   "BASS HARMONIST: VOICE",
-   "BASS HARMONIST: 1:HARMONY",
-   "BASS HARMONIST: 1:LEVEL",
-   "BASS HARMONIST: 1:PRE-DELAY",
-   "BASS HARMONIST: 1:FEEDBACK",
-   "BASS HARMONIST: 2:HARMONY",
-   "BASS HARMONIST: 2:LEVEL",
-   "BASS HARMONIST: 2:PRE-DELAY",
-   "BASS HARMONIST: DIRECT LEVEL",
-   "BASS HARMONIST: 1:C",
-   "BASS HARMONIST: 1:Db",
-   "BASS HARMONIST: 1:D",
-   "BASS HARMONIST: 1:Eb",
-   "BASS HARMONIST: 1:E",
-   "BASS HARMONIST: 1:F",
-   "BASS HARMONIST: 1:F#",
-   "BASS HARMONIST: 1:G",
-   "BASS HARMONIST: 1:Ab",
-   "BASS HARMONIST: 1:A",
-   "BASS HARMONIST: 1:Bb",
-   "BASS HARMONIST: 1:B",
-   "BASS HARMONIST: 2:C",
-   "BASS HARMONIST: 2:Db",
-   "BASS HARMONIST: 2:D",
-   "BASS HARMONIST: 2:Eb",
-   "BASS HARMONIST: 2:E",
-   "BASS HARMONIST: 2:F",
-   "BASS HARMONIST: 2:F#",
-   "BASS HARMONIST: 2:G",
-   "BASS HARMONIST: 2:Ab",
-   "BASS HARMONIST: 2:A",
-   "BASS HARMONIST: 2:Bb",
-   "BASS HARMONIST: 2:B",
-   "OCTAVE: -2 OCT",
-   "OCTAVE: -1 OCT",
-   "OCTAVE: DIRECT LEVEL",
-   "POLY OCTAVE: RANGE",
-   "POLY OCTAVE: OCTAVE LEVEL",
-   "POLY OCTAVE: DIRECT LEVEL",
-   "BASS OCTAVE: -2 OCT",
-   "BASS OCTAVE: -1 OCT",
-   "BASS OCTAVE: DIRECT LEVEL",
-   "CLASSIC VIBE: MODE",
-   "CLASSIC VIBE: RATE",
-   "CLASSIC VIBE: DEPTH",
-   "CLASSIC VIBE: EFFECT LEVEL",
-   "PHASER: STAGE",
-   "PHASER: RATE",
-   "PHASER: DEPTH",
-   "PHASER: RESONANCE",
-   "PHASER: MANUAL",
-   "PHASER: STEP RATE",
-   "PHASER: EFFECT LEVEL",
-   "PHASER: DIRECT MIX",
-   "BASS PHASER: STAGE",
-   "BASS PHASER: RATE",
-   "BASS PHASER: DEPTH",
-   "BASS PHASER: RESONANCE",
-   "BASS PHASER: MANUAL",
-   "BASS PHASER: STEP RATE",
-   "BASS PHASER: EFFECT LEVEL",
-   "BASS PHASER: DIRECT MIX",
-   "PRIME PHASER: STAGE",
-   "PRIME PHASER: RATE",
-   "PRIME PHASER: DEPTH",
-   "PRIME PHASER: RESONANCE",
-   "PRIME PHASER: MANUAL",
-   "PRIME PHASER: WAVEFORM",
-   "PRIME PHASER: STEP RATE",
-   "PRIME PHASER: BI-PHASE",
-   "PRIME PHASER: SEPARATION",
-   "PRIME PHASER: LOW DAMP",
-   "PRIME PHASER: HIGH DAMP",
-   "PRIME PHASER: LOW CUT",
-   "PRIME PHASER: HIGH CUT",
-   "PRIME PHASER: EFFECT LEVEL",
-   "PRIME PHASER: DIRECT MIX",
-   "BASS PRIME PH: STAGE",
-   "BASS PRIME PH: RATE",
-   "BASS PRIME PH: DEPTH",
-   "BASS PRIME PH: RESONANCE",
-   "BASS PRIME PH: MANUAL",
-   "BASS PRIME PH: WAVEFORM",
-   "BASS PRIME PH: STEP RATE",
-   "BASS PRIME PH: BI-PHASE",
-   "BASS PRIME PH: SEPARATION",
-   "BASS PRIME PH: LOW DAMP",
-   "BASS PRIME PH: HIGH DAMP",
-   "BASS PRIME PH: LOW CUT",
-   "BASS PRIME PH: HIGH CUT",
-   "BASS PRIME PH: EFFECT LEVEL",
-   "BASS PRIME PH: DIRECT MIX",
-   "SCRIPT PH: RATE",
-   "SCRIPT PH: DEPTH",
-   "SCRIPT PH: EFFECT LEVEL",
-   "SCRIPT PH: DIRECT MIX",
-   "PITCH SHIFTER: VOICE",
-   "PITCH SHIFTER: DIRECT LEVEL",
-   "PITCH SHIFTER: 1:PITCH",
-   "PITCH SHIFTER: 1:MODE",
-   "PITCH SHIFTER: 1:FINE",
-   "PITCH SHIFTER: 1:PRE-DELAY",
-   "PITCH SHIFTER: 1:LEVEL",
-   "PITCH SHIFTER: 1:FEEDBACK",
-   "PITCH SHIFTER: 2:PITCH",
-   "PITCH SHIFTER: 2:MODE",
-   "PITCH SHIFTER: 2:FINE",
-   "PITCH SHIFTER: 2:PRE-DELAY",
-   "PITCH SHIFTER: 2:LEVEL",
-   "BASS PITCH SHIFT: VOICE",
-   "BASS PITCH SHIFT: DIRECT LEVEL",
-   "BASS PITCH SHIFT: 1:PITCH",
-   "BASS PITCH SHIFT: 1:MODE",
-   "BASS PITCH SHIFT: 1:FINE",
-   "BASS PITCH SHIFT: 1:PRE-DELAY",
-   "BASS PITCH SHIFT: 1:LEVEL",
-   "BASS PITCH SHIFT: 1:FEEDBACK",
-   "BASS PITCH SHIFT: 2:PITCH",
-   "BASS PITCH SHIFT: 2:MODE",
-   "BASS PITCH SHIFT: 2:FINE",
-   "BASS PITCH SHIFT: 2:PRE-DELAY",
-   "BASS PITCH SHIFT: 2:LEVEL",
-   "RING MOD: INTELLIGENT",
-   "RING MOD: FREQUENCY",
-   "RING MOD: MOD RATE",
-   "RING MOD: MOD DEPTH",
-   "RING MOD: EFFECT LEVEL",
-   "RING MOD: DIRECT MIX",
-   "ROTARY: SPEED SELECT",
-   "ROTARY: SLOW RATE",
-   "ROTARY: FAST RATE",
-   "ROTARY: EFFECT LEVEL",
-   "ROTARY: RISE TIME",
-   "ROTARY: FALL TIME",
-   "ROTARY: MIC DISTANCE",
-   "ROTARY: ROTOR/HORN",
-   "ROTARY: DRIVE",
-   "ROTARY: DIRECT MIX",
-   "TREMOLO: RATE",
-   "TREMOLO: DEPTH",
-   "TREMOLO: WAVEFORM",
-   "TREMOLO: EFFECT LEVEL",
-   "TREMOLO: TRIGGER",
-   "TREMOLO: RISE TIME",
-   "TREMOLO: DIRECT MIX",
-   "VIBRATO: RATE",
-   "VIBRATO: DEPTH",
-   "VIBRATO: TRIGGER",
-   "VIBRATO: RISE TIME",
-   "VIBRATO: EFFECT LEVEL",
-   "PRIME VIB: RATE",
-   "PRIME VIB: DEPTH",
-   "PRIME VIB: COLOR",
-   "PRIME VIB: EFFECT LEVEL",
-   "PRIME VIB: TRIGGER",
-   "PRIME VIB: RISE TIME",
-   "PRIME VIB: DIRECT MIX",
-   "S-BEND: TRIGGER",
-   "S-BEND: PITCH",
-   "S-BEND: RISE TIME",
-   "S-BEND: FALL TIME",
-   "BASS S-BEND: TRIGGER",
-   "BASS S-BEND: PITCH",
-   "BASS S-BEND: RISE TIME",
-   "BASS S-BEND: FALL TIME",
-   "PHRASE LOOP: LOOP LEVEL",
-   "SEND/RETURN: MODE",
-   "SEND/RETURN: SEND LEVEL",
-   "SEND/RETURN: RET LEVEL",
-   "SEND/RETURN: ADJUST",
-   "SEND/RETURN: INVERT",
-   "MASTER: MEMORY LEVEL",
-   "MASTER: BPM",
-   "MASTER: KEY",
-   "MASTER: INPUT SETTING",
-   "MASTER: AMP CTL1",
-   "MASTER: AMP CTL2",
-   "TUNER: ON/OFF",
-   "N/A: N/A",
-   "N/A: N/A",
-   "SLICER: PATTERN",
-   "SLICER: RATE",
-   "SLICER: TRIGGER",
-   "SLICER: EFFECT LEVEL",
-   "SLICER: ATTACK",
-   "SLICER: DUTY",
-   "SLICER: DIRECT MIX",
-   "HUMANIZER: MODE",
-   "HUMANIZER: VOWEL1",
-   "HUMANIZER: VOWEL2",
-   "HUMANIZER: SENS",
-   "HUMANIZER: RATE",
-   "HUMANIZER: DEPTH",
-   "HUMANIZER: MANUAL",
-   "HUMANIZER: LEVEL",
-   "FEEDBACKER: MODE",
-   "FEEDBACKER: TRIGGER",
-   "FEEDBACKER: DEPTH",
-   "FEEDBACKER: RISE TIME",
-   "FEEDBACKER: OCT RISE TIME",
-   "FEEDBACKER: FEEDBACK",
-   "FEEDBACKER: OCT FEEDBACK",
-   "FEEDBACKER: VIB RATE",
-   "FEEDBACKER: VIB DEPTH",
-   "SITAR SIM: SENS",
-   "SITAR SIM: DEPTH",
-   "SITAR SIM: TONE",
-   "SITAR SIM: EFFECT LEVEL",
-   "SITAR SIM: RESONANCE",
-   "SITAR SIM: BUZZ",
-   "SITAR SIM: DIRECT MIX",
-   "AUTO WAH: FILTER MODE",
-   "AUTO WAH: RATE",
-   "AUTO WAH: DEPTH",
-   "AUTO WAH: EFFECT LEVEL",
-   "AUTO WAH: FREQUENCY",
-   "AUTO WAH: RESONANCE",
-   "AUTO WAH: WAVEFORM",
-   "AUTO WAH: DIRECT MIX"
+  "paginas": [
+   {
+    "rotulo": "Page 1",
+    "colunas": [
+     [
+      "On/Off",
+      "sw"
+     ],
+     [
+      "Source",
+      "source"
+     ],
+     [
+      "Mode",
+      "mode"
+     ],
+     [
+      "Category",
+      "__bloco"
+     ],
+     [
+      "Parameter",
+      "target"
+     ]
+    ]
+   },
+   {
+    "rotulo": "Page 2",
+    "colunas": [
+     [
+      "Act low",
+      "actLo"
+     ],
+     [
+      "Act high",
+      "actHi"
+     ],
+     [
+      "Target min",
+      "targetMin"
+     ],
+     [
+      "Target max",
+      "targetMax"
+     ]
+    ]
+   },
+   {
+    "rotulo": "Page 3",
+    "colunas": [
+     [
+      "Int pedal trigger",
+      "intTrigger"
+     ],
+     [
+      "Int pedal time",
+      "intTime"
+     ],
+     [
+      "Int pedal curve",
+      "intCurve"
+     ]
+    ]
+   },
+   {
+    "rotulo": "Page 4",
+    "colunas": [
+     [
+      "Wave form",
+      "waveform"
+     ],
+     [
+      "Wave rate",
+      "waveRate"
+     ],
+     [
+      "Input sens",
+      "__naoMapeado"
+     ]
+    ]
+   },
+   {
+    "rotulo": "Page 5",
+    "colunas": [
+     [
+      "MIDI channel",
+      "midiCh"
+     ],
+     [
+      "CC#",
+      "midiCc"
+     ],
+     [
+      "CC min",
+      "ccMin"
+     ],
+     [
+      "CC max",
+      "ccMax"
+     ]
+    ]
+   },
+   {
+    "rotulo": "Page 6",
+    "colunas": [
+     [
+      "PC#",
+      "midiPc"
+     ],
+     [
+      "Bank MSB",
+      "__naoMapeado"
+     ],
+     [
+      "Bank LSB",
+      "__naoMapeado"
+     ]
+    ]
+   }
   ]
  },
  "knobs": [
@@ -1376,7 +905,7 @@ window.GX10_CTLEXP = {
    "campos": [
     {
      "chave": "ch",
-     "rotulo": "Channel",
+     "rotulo": "CH",
      "desloc": 53,
      "tipo": "byte",
      "lista": [
@@ -1400,8 +929,17 @@ window.GX10_CTLEXP = {
      ]
     },
     {
+     "chave": "pc",
+     "rotulo": "PC#",
+     "desloc": 58,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
      "chave": "bankMsb",
-     "rotulo": "Bank MSB",
+     "rotulo": "BANK MSB",
      "desloc": 54,
      "tipo": "nibbles2",
      "min": 0,
@@ -1410,17 +948,8 @@ window.GX10_CTLEXP = {
     },
     {
      "chave": "bankLsb",
-     "rotulo": "Bank LSB",
+     "rotulo": "BANK LSB",
      "desloc": 56,
-     "tipo": "nibbles2",
-     "min": 0,
-     "max": 128,
-     "zeroOff": true
-    },
-    {
-     "chave": "pc",
-     "rotulo": "PC#",
-     "desloc": 58,
      "tipo": "nibbles2",
      "min": 0,
      "max": 128,
@@ -1437,7 +966,7 @@ window.GX10_CTLEXP = {
     },
     {
      "chave": "cc1Val",
-     "rotulo": "CC1 value",
+     "rotulo": "CC1 VALUE",
      "desloc": 62,
      "tipo": "byte",
      "min": 0,
@@ -1454,7 +983,7 @@ window.GX10_CTLEXP = {
     },
     {
      "chave": "cc2Val",
-     "rotulo": "CC2 value",
+     "rotulo": "CC2 VALUE",
      "desloc": 65,
      "tipo": "byte",
      "min": 0,
@@ -1467,7 +996,7 @@ window.GX10_CTLEXP = {
    "campos": [
     {
      "chave": "ch",
-     "rotulo": "Channel",
+     "rotulo": "CH",
      "desloc": 66,
      "tipo": "byte",
      "lista": [
@@ -1491,8 +1020,17 @@ window.GX10_CTLEXP = {
      ]
     },
     {
+     "chave": "pc",
+     "rotulo": "PC#",
+     "desloc": 71,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
      "chave": "bankMsb",
-     "rotulo": "Bank MSB",
+     "rotulo": "BANK MSB",
      "desloc": 67,
      "tipo": "nibbles2",
      "min": 0,
@@ -1501,17 +1039,8 @@ window.GX10_CTLEXP = {
     },
     {
      "chave": "bankLsb",
-     "rotulo": "Bank LSB",
+     "rotulo": "BANK LSB",
      "desloc": 69,
-     "tipo": "nibbles2",
-     "min": 0,
-     "max": 128,
-     "zeroOff": true
-    },
-    {
-     "chave": "pc",
-     "rotulo": "PC#",
-     "desloc": 71,
      "tipo": "nibbles2",
      "min": 0,
      "max": 128,
@@ -1528,7 +1057,7 @@ window.GX10_CTLEXP = {
     },
     {
      "chave": "cc1Val",
-     "rotulo": "CC1 value",
+     "rotulo": "CC1 VALUE",
      "desloc": 75,
      "tipo": "byte",
      "min": 0,
@@ -1545,7 +1074,7 @@ window.GX10_CTLEXP = {
     },
     {
      "chave": "cc2Val",
-     "rotulo": "CC2 value",
+     "rotulo": "CC2 VALUE",
      "desloc": 78,
      "tipo": "byte",
      "min": 0,
@@ -1558,7 +1087,7 @@ window.GX10_CTLEXP = {
    "campos": [
     {
      "chave": "ch",
-     "rotulo": "Channel",
+     "rotulo": "CH",
      "desloc": 79,
      "tipo": "byte",
      "lista": [
@@ -1582,8 +1111,17 @@ window.GX10_CTLEXP = {
      ]
     },
     {
+     "chave": "pc",
+     "rotulo": "PC#",
+     "desloc": 84,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
      "chave": "bankMsb",
-     "rotulo": "Bank MSB",
+     "rotulo": "BANK MSB",
      "desloc": 80,
      "tipo": "nibbles2",
      "min": 0,
@@ -1592,17 +1130,8 @@ window.GX10_CTLEXP = {
     },
     {
      "chave": "bankLsb",
-     "rotulo": "Bank LSB",
+     "rotulo": "BANK LSB",
      "desloc": 82,
-     "tipo": "nibbles2",
-     "min": 0,
-     "max": 128,
-     "zeroOff": true
-    },
-    {
-     "chave": "pc",
-     "rotulo": "PC#",
-     "desloc": 84,
      "tipo": "nibbles2",
      "min": 0,
      "max": 128,
@@ -1619,7 +1148,7 @@ window.GX10_CTLEXP = {
     },
     {
      "chave": "cc1Val",
-     "rotulo": "CC1 value",
+     "rotulo": "CC1 VALUE",
      "desloc": 88,
      "tipo": "byte",
      "min": 0,
@@ -1636,7 +1165,7 @@ window.GX10_CTLEXP = {
     },
     {
      "chave": "cc2Val",
-     "rotulo": "CC2 value",
+     "rotulo": "CC2 VALUE",
      "desloc": 91,
      "tipo": "byte",
      "min": 0,
@@ -1649,7 +1178,7 @@ window.GX10_CTLEXP = {
    "campos": [
     {
      "chave": "ch",
-     "rotulo": "Channel",
+     "rotulo": "CH",
      "desloc": 92,
      "tipo": "byte",
      "lista": [
@@ -1673,8 +1202,17 @@ window.GX10_CTLEXP = {
      ]
     },
     {
+     "chave": "pc",
+     "rotulo": "PC#",
+     "desloc": 97,
+     "tipo": "nibbles2",
+     "min": 0,
+     "max": 128,
+     "zeroOff": true
+    },
+    {
      "chave": "bankMsb",
-     "rotulo": "Bank MSB",
+     "rotulo": "BANK MSB",
      "desloc": 93,
      "tipo": "nibbles2",
      "min": 0,
@@ -1683,17 +1221,8 @@ window.GX10_CTLEXP = {
     },
     {
      "chave": "bankLsb",
-     "rotulo": "Bank LSB",
+     "rotulo": "BANK LSB",
      "desloc": 95,
-     "tipo": "nibbles2",
-     "min": 0,
-     "max": 128,
-     "zeroOff": true
-    },
-    {
-     "chave": "pc",
-     "rotulo": "PC#",
-     "desloc": 97,
      "tipo": "nibbles2",
      "min": 0,
      "max": 128,
@@ -1710,7 +1239,7 @@ window.GX10_CTLEXP = {
     },
     {
      "chave": "cc1Val",
-     "rotulo": "CC1 value",
+     "rotulo": "CC1 VALUE",
      "desloc": 101,
      "tipo": "byte",
      "min": 0,
@@ -1727,7 +1256,7 @@ window.GX10_CTLEXP = {
     },
     {
      "chave": "cc2Val",
-     "rotulo": "CC2 value",
+     "rotulo": "CC2 VALUE",
      "desloc": 104,
      "tipo": "byte",
      "min": 0,
@@ -1836,5 +1365,3142 @@ window.GX10_CTLEXP = {
   "LOOPER CLEAN",
   "LOOPER CRUNCH",
   "LOOPER DRIVE"
- ]
+ ],
+ "controlModeDesloc": 52,
+ "alvosPorTipo": {
+  "0": [
+   [
+    2,
+    "BODY"
+   ],
+   [
+    3,
+    "LOW"
+   ],
+   [
+    4,
+    "HIGH"
+   ],
+   [
+    5,
+    "LEVEL"
+   ]
+  ],
+  "1": [
+   [
+    6,
+    "TYPE"
+   ],
+   [
+    7,
+    "RESONANCE"
+   ],
+   [
+    8,
+    "TONE"
+   ],
+   [
+    9,
+    "LEVEL"
+   ]
+  ],
+  "70": [
+   [
+    10,
+    "SENS"
+   ],
+   [
+    11,
+    "RISE TIME"
+   ],
+   [
+    12,
+    "LEVEL"
+   ]
+  ],
+  "71": [
+   [
+    13,
+    "SENS"
+   ],
+   [
+    14,
+    "RISE TIME"
+   ],
+   [
+    15,
+    "LEVEL"
+   ]
+  ],
+  "11": [
+   [
+    16,
+    "SENS"
+   ],
+   [
+    17,
+    "DEPTH"
+   ],
+   [
+    18,
+    "TONE"
+   ],
+   [
+    19,
+    "EFFECT LEVEL"
+   ],
+   [
+    20,
+    "ATTACK"
+   ],
+   [
+    21,
+    "RESONANCE"
+   ],
+   [
+    22,
+    "DIRECT MIX"
+   ]
+  ],
+  "12": [
+   [
+    23,
+    "SENS"
+   ],
+   [
+    24,
+    "ATTACK"
+   ],
+   [
+    25,
+    "TONE"
+   ],
+   [
+    26,
+    "EFFECT LEVEL"
+   ],
+   [
+    27,
+    "DIRECT MIX"
+   ]
+  ],
+  "53": [
+   [
+    28,
+    "WAH TYPE"
+   ],
+   [
+    29,
+    "PEDAL POSITION"
+   ],
+   [
+    30,
+    "PEDAL MIN"
+   ],
+   [
+    31,
+    "PEDAL MAX"
+   ],
+   [
+    32,
+    "EFFECT LEVEL"
+   ],
+   [
+    33,
+    "DIRECT MIX"
+   ]
+  ],
+  "54": [
+   [
+    34,
+    "PEDAL POSITION"
+   ],
+   [
+    35,
+    "PEDAL MIN"
+   ],
+   [
+    36,
+    "PEDAL MAX"
+   ],
+   [
+    37,
+    "EFFECT LEVEL"
+   ],
+   [
+    38,
+    "DIRECT MIX"
+   ]
+  ],
+  "72": [
+   [
+    39,
+    "FILTER MODE"
+   ],
+   [
+    40,
+    "POLARITY"
+   ],
+   [
+    41,
+    "SENS"
+   ],
+   [
+    42,
+    "FREQUENCY"
+   ],
+   [
+    43,
+    "RESONANCE"
+   ],
+   [
+    44,
+    "DECAY"
+   ],
+   [
+    45,
+    "EFFECT LEVEL"
+   ],
+   [
+    46,
+    "DIRECT MIX"
+   ]
+  ],
+  "73": [
+   [
+    47,
+    "FILTER MODE"
+   ],
+   [
+    48,
+    "POLARITY"
+   ],
+   [
+    49,
+    "SENS"
+   ],
+   [
+    50,
+    "FREQUENCY"
+   ],
+   [
+    51,
+    "RESONANCE"
+   ],
+   [
+    52,
+    "DECAY"
+   ],
+   [
+    53,
+    "EFFECT LEVEL"
+   ],
+   [
+    54,
+    "DIRECT MIX"
+   ]
+  ],
+  "8": [
+   [
+    55,
+    "TYPE"
+   ],
+   [
+    56,
+    "SUSTAIN"
+   ],
+   [
+    57,
+    "ATTACK"
+   ],
+   [
+    58,
+    "LEVEL"
+   ],
+   [
+    59,
+    "TONE"
+   ],
+   [
+    60,
+    "DIRECT MIX"
+   ]
+  ],
+  "9": [
+   [
+    61,
+    "ATTACK"
+   ],
+   [
+    62,
+    "LEVEL"
+   ],
+   [
+    63,
+    "TONE"
+   ],
+   [
+    64,
+    "RATIO"
+   ],
+   [
+    65,
+    "DIRECT MIX"
+   ],
+   [
+    66,
+    "SUSTAIN"
+   ]
+  ],
+  "10": [
+   [
+    67,
+    "ATTACK"
+   ],
+   [
+    68,
+    "LEVEL"
+   ],
+   [
+    69,
+    "TONE"
+   ],
+   [
+    70,
+    "RATIO"
+   ],
+   [
+    71,
+    "DIRECT MIX"
+   ],
+   [
+    72,
+    "THRESHOLD"
+   ]
+  ],
+  "36": [
+   [
+    73,
+    "TYPE"
+   ],
+   [
+    74,
+    "BOOST"
+   ],
+   [
+    75,
+    "TONE"
+   ],
+   [
+    76,
+    "EFFECT LEVEL"
+   ],
+   [
+    77,
+    "BOTTOM"
+   ],
+   [
+    78,
+    "DIRECT MIX"
+   ],
+   [
+    79,
+    "SOLO SW"
+   ],
+   [
+    80,
+    "SOLO LEVEL"
+   ]
+  ],
+  "37": [
+   [
+    81,
+    "TYPE"
+   ],
+   [
+    82,
+    "DRIVE"
+   ],
+   [
+    83,
+    "TONE"
+   ],
+   [
+    84,
+    "EFFECT LEVEL"
+   ],
+   [
+    85,
+    "BOTTOM"
+   ],
+   [
+    86,
+    "DIRECT MIX"
+   ],
+   [
+    87,
+    "SOLO SW"
+   ],
+   [
+    88,
+    "SOLO LEVEL"
+   ]
+  ],
+  "38": [
+   [
+    89,
+    "DRIVE"
+   ],
+   [
+    90,
+    "TONE"
+   ],
+   [
+    91,
+    "EFFECT LEVEL"
+   ],
+   [
+    92,
+    "BOTTOM"
+   ],
+   [
+    93,
+    "DIRECT MIX"
+   ],
+   [
+    94,
+    "SOLO SW"
+   ],
+   [
+    95,
+    "SOLO LEVEL"
+   ]
+  ],
+  "43": [
+   [
+    96,
+    "DRIVE"
+   ],
+   [
+    97,
+    "TONE"
+   ],
+   [
+    98,
+    "EFFECT LEVEL"
+   ],
+   [
+    99,
+    "BOTTOM"
+   ],
+   [
+    100,
+    "DIRECT MIX"
+   ],
+   [
+    101,
+    "SOLO SW"
+   ],
+   [
+    102,
+    "SOLO LEVEL"
+   ]
+  ],
+  "44": [
+   [
+    103,
+    "DRIVE"
+   ],
+   [
+    104,
+    "TONE"
+   ],
+   [
+    105,
+    "EFFECT LEVEL"
+   ],
+   [
+    106,
+    "BOTTOM"
+   ],
+   [
+    107,
+    "DIRECT MIX"
+   ],
+   [
+    108,
+    "SOLO SW"
+   ],
+   [
+    109,
+    "SOLO LEVEL"
+   ]
+  ],
+  "45": [
+   [
+    110,
+    "DRIVE"
+   ],
+   [
+    111,
+    "TONE"
+   ],
+   [
+    112,
+    "EFFECT LEVEL"
+   ],
+   [
+    113,
+    "BOTTOM"
+   ],
+   [
+    114,
+    "DIRECT MIX"
+   ],
+   [
+    115,
+    "SOLO SW"
+   ],
+   [
+    116,
+    "SOLO LEVEL"
+   ]
+  ],
+  "46": [
+   [
+    117,
+    "TYPE"
+   ],
+   [
+    118,
+    "DIST"
+   ],
+   [
+    119,
+    "TONE"
+   ],
+   [
+    120,
+    "EFFECT LEVEL"
+   ],
+   [
+    121,
+    "BOTTOM"
+   ],
+   [
+    122,
+    "DIRECT MIX"
+   ],
+   [
+    123,
+    "SOLO SW"
+   ],
+   [
+    124,
+    "SOLO LEVEL"
+   ]
+  ],
+  "47": [
+   [
+    125,
+    "DIST"
+   ],
+   [
+    126,
+    "TONE"
+   ],
+   [
+    127,
+    "EFFECT LEVEL"
+   ],
+   [
+    128,
+    "BOTTOM"
+   ],
+   [
+    129,
+    "DIRECT MIX"
+   ],
+   [
+    130,
+    "SOLO SW"
+   ],
+   [
+    131,
+    "SOLO LEVEL"
+   ]
+  ],
+  "39": [
+   [
+    132,
+    "TYPE"
+   ],
+   [
+    133,
+    "DIST"
+   ],
+   [
+    134,
+    "TONE"
+   ],
+   [
+    135,
+    "EFFECT LEVEL"
+   ],
+   [
+    136,
+    "BOTTOM"
+   ],
+   [
+    137,
+    "DIRECT MIX"
+   ],
+   [
+    138,
+    "SOLO SW"
+   ],
+   [
+    139,
+    "SOLO LEVEL"
+   ]
+  ],
+  "40": [
+   [
+    140,
+    "TYPE"
+   ],
+   [
+    141,
+    "DRIVE"
+   ],
+   [
+    142,
+    "TONE"
+   ],
+   [
+    143,
+    "EFFECT LEVEL"
+   ],
+   [
+    144,
+    "BOTTOM"
+   ],
+   [
+    145,
+    "DIRECT MIX"
+   ],
+   [
+    146,
+    "SOLO SW"
+   ],
+   [
+    147,
+    "SOLO LEVEL"
+   ]
+  ],
+  "41": [
+   [
+    148,
+    "TYPE"
+   ],
+   [
+    149,
+    "FUZZ"
+   ],
+   [
+    150,
+    "TONE"
+   ],
+   [
+    151,
+    "EFFECT LEVEL"
+   ],
+   [
+    152,
+    "BOTTOM"
+   ],
+   [
+    153,
+    "DIRECT MIX"
+   ],
+   [
+    154,
+    "SOLO SW"
+   ],
+   [
+    155,
+    "SOLO LEVEL"
+   ]
+  ],
+  "42": [
+   [
+    156,
+    "FUZZ"
+   ],
+   [
+    157,
+    "TONE"
+   ],
+   [
+    158,
+    "EFFECT LEVEL"
+   ],
+   [
+    159,
+    "BOTTOM"
+   ],
+   [
+    160,
+    "DIRECT MIX"
+   ],
+   [
+    161,
+    "SOLO SW"
+   ],
+   [
+    162,
+    "SOLO LEVEL"
+   ]
+  ],
+  "2": [
+   [
+    163,
+    "TYPE"
+   ],
+   [
+    164,
+    "GAIN"
+   ],
+   [
+    165,
+    "LEVEL"
+   ],
+   [
+    166,
+    "BASS"
+   ],
+   [
+    167,
+    "MIDDLE"
+   ],
+   [
+    168,
+    "TREBLE"
+   ],
+   [
+    169,
+    "PRESENCE"
+   ],
+   [
+    170,
+    "GAIN SW"
+   ],
+   [
+    171,
+    "SOLO SW"
+   ],
+   [
+    172,
+    "SOLO LEVEL"
+   ],
+   [
+    173,
+    "BRIGHT SW"
+   ],
+   [
+    174,
+    "SAG"
+   ],
+   [
+    175,
+    "RESONANCE"
+   ],
+   [
+    176,
+    "DIRECT MIX"
+   ],
+   [
+    177,
+    "SP TYPE"
+   ],
+   [
+    178,
+    "MIC TYPE"
+   ],
+   [
+    179,
+    "MIC DISTANCE"
+   ],
+   [
+    180,
+    "MIC POSITION"
+   ],
+   [
+    181,
+    "MIC LEVEL"
+   ]
+  ],
+  "3": [
+   [
+    182,
+    "TYPE"
+   ],
+   [
+    183,
+    "GAIN"
+   ],
+   [
+    184,
+    "LEVEL"
+   ],
+   [
+    185,
+    "BASS"
+   ],
+   [
+    186,
+    "MIDDLE"
+   ],
+   [
+    187,
+    "TREBLE"
+   ],
+   [
+    188,
+    "PRESENCE"
+   ],
+   [
+    189,
+    "GAIN SW"
+   ],
+   [
+    190,
+    "SOLO SW"
+   ],
+   [
+    191,
+    "SOLO LEVEL"
+   ],
+   [
+    192,
+    "BRIGHT SW"
+   ],
+   [
+    193,
+    "SAG"
+   ],
+   [
+    194,
+    "RESONANCE"
+   ],
+   [
+    195,
+    "DIRECT MIX"
+   ],
+   [
+    196,
+    "SP TYPE"
+   ],
+   [
+    197,
+    "MIC TYPE"
+   ],
+   [
+    198,
+    "MIC DISTANCE"
+   ],
+   [
+    199,
+    "MIC POSITION"
+   ],
+   [
+    200,
+    "MIC LEVEL"
+   ]
+  ],
+  "32": [
+   [
+    201,
+    "THRESHOLD"
+   ],
+   [
+    202,
+    "RELEASE"
+   ],
+   [
+    203,
+    "DETECT"
+   ]
+  ],
+  "29": [
+   [
+    204,
+    "MODE"
+   ],
+   [
+    205,
+    "CH SELECT"
+   ],
+   [
+    206,
+    "MIX MODE"
+   ],
+   [
+    207,
+    "A:DYNAMIC"
+   ],
+   [
+    208,
+    "A:DYNAMIC SENS"
+   ],
+   [
+    209,
+    "A:FILTER"
+   ],
+   [
+    210,
+    "A:CUTOFF FREQ"
+   ],
+   [
+    211,
+    "B:DYNAMIC"
+   ],
+   [
+    212,
+    "B:DYNAMIC SENS"
+   ],
+   [
+    213,
+    "B:FILTER"
+   ],
+   [
+    214,
+    "B:CUTOFF FREQ"
+   ]
+  ],
+  "31": [
+   [
+    215,
+    "MODE"
+   ],
+   [
+    216,
+    "A LEVEL"
+   ],
+   [
+    217,
+    "B LEVEL"
+   ],
+   [
+    218,
+    "A/B BALANCE"
+   ],
+   [
+    219,
+    "SPREAD"
+   ]
+  ],
+  "20": [
+   [
+    220,
+    "LOW GAIN"
+   ],
+   [
+    221,
+    "HIGH GAIN"
+   ],
+   [
+    222,
+    "LEVEL"
+   ],
+   [
+    223,
+    "LOW-MID FREQ"
+   ],
+   [
+    224,
+    "LOW-MID Q"
+   ],
+   [
+    225,
+    "LOW-MID GAIN"
+   ],
+   [
+    226,
+    "HIGH-MID FREQ"
+   ],
+   [
+    227,
+    "HIGH-MID Q"
+   ],
+   [
+    228,
+    "HIGH-MID GAIN"
+   ],
+   [
+    229,
+    "LOW CUT"
+   ],
+   [
+    230,
+    "HIGH CUT"
+   ]
+  ],
+  "21": [
+   [
+    231,
+    "31.5Hz"
+   ],
+   [
+    232,
+    "63Hz"
+   ],
+   [
+    233,
+    "125Hz"
+   ],
+   [
+    234,
+    "250Hz"
+   ],
+   [
+    235,
+    "500Hz"
+   ],
+   [
+    236,
+    "1kHz"
+   ],
+   [
+    237,
+    "2kHz"
+   ],
+   [
+    238,
+    "4kHz"
+   ],
+   [
+    239,
+    "8kHz"
+   ],
+   [
+    240,
+    "16kHz"
+   ],
+   [
+    241,
+    "LEVEL"
+   ]
+  ],
+  "4": [
+   [
+    242,
+    "TYPE"
+   ],
+   [
+    243,
+    "DIRECT LEVEL"
+   ],
+   [
+    244,
+    "RATE"
+   ],
+   [
+    245,
+    "DEPTH"
+   ],
+   [
+    246,
+    "EFFECT LEVEL"
+   ],
+   [
+    247,
+    "LOW CUT"
+   ],
+   [
+    248,
+    "HIGH CUT"
+   ],
+   [
+    249,
+    "PRE-DELAY"
+   ],
+   [
+    250,
+    "WAVEFORM"
+   ],
+   [
+    251,
+    "1:RATE"
+   ],
+   [
+    252,
+    "1:DEPTH"
+   ],
+   [
+    253,
+    "1:EFFECT LEVEL"
+   ],
+   [
+    254,
+    "1:PRE-DELAY"
+   ],
+   [
+    255,
+    "1:WAVEFORM"
+   ],
+   [
+    256,
+    "1:LOW CUT"
+   ],
+   [
+    257,
+    "1:HIGH CUT"
+   ],
+   [
+    258,
+    "2:RATE"
+   ],
+   [
+    259,
+    "2:DEPTH"
+   ],
+   [
+    260,
+    "2:EFFECT LEVEL"
+   ],
+   [
+    261,
+    "2:PRE-DELAY"
+   ],
+   [
+    262,
+    "2:WAVEFORM"
+   ],
+   [
+    263,
+    "2:LOW CUT"
+   ],
+   [
+    264,
+    "2:HIGH CUT"
+   ],
+   [
+    265,
+    "OUTPUT MODE"
+   ]
+  ],
+  "5": [
+   [
+    266,
+    "TYPE"
+   ],
+   [
+    267,
+    "RATE"
+   ],
+   [
+    268,
+    "DEPTH"
+   ],
+   [
+    269,
+    "EFFECT LEVEL"
+   ],
+   [
+    270,
+    "LOW CUT"
+   ],
+   [
+    271,
+    "HIGH CUT"
+   ],
+   [
+    272,
+    "DIRECT LEVEL"
+   ]
+  ],
+  "6": [
+   [
+    273,
+    "RATE"
+   ],
+   [
+    274,
+    "DEPTH"
+   ],
+   [
+    275,
+    "EFFECT LEVEL"
+   ],
+   [
+    276,
+    "PRE-DELAY"
+   ],
+   [
+    277,
+    "WAVEFORM"
+   ],
+   [
+    278,
+    "LOW CUT"
+   ],
+   [
+    279,
+    "HIGH CUT"
+   ],
+   [
+    280,
+    "SWEETNESS"
+   ],
+   [
+    281,
+    "BELL"
+   ],
+   [
+    282,
+    "OUTPUT MODE"
+   ]
+  ],
+  "48": [
+   [
+    283,
+    "LOWER LEVEL"
+   ],
+   [
+    284,
+    "UPPER LEVEL"
+   ],
+   [
+    285,
+    "UNISON LEVEL"
+   ],
+   [
+    286,
+    "DIRECT LEVEL"
+   ],
+   [
+    287,
+    "DETUNE"
+   ],
+   [
+    288,
+    "OUTPUT MODE"
+   ],
+   [
+    289,
+    "LOW"
+   ],
+   [
+    290,
+    "HIGH"
+   ]
+  ],
+  "13": [
+   [
+    291,
+    "TIME"
+   ],
+   [
+    292,
+    "FEEDBACK"
+   ],
+   [
+    293,
+    "EFFECT LEVEL"
+   ],
+   [
+    294,
+    "DIRECT LEVEL"
+   ],
+   [
+    295,
+    "HIGH CUT"
+   ],
+   [
+    296,
+    "CARRYOVER"
+   ]
+  ],
+  "14": [
+   [
+    297,
+    "TYPE"
+   ],
+   [
+    298,
+    "DIRECT LEVEL"
+   ],
+   [
+    299,
+    "MOD RATE"
+   ],
+   [
+    300,
+    "MOD DEPTH"
+   ],
+   [
+    301,
+    "DUCK SENS"
+   ],
+   [
+    302,
+    "DUCK PRE"
+   ],
+   [
+    303,
+    "DUCK POST"
+   ],
+   [
+    304,
+    "CARRYOVER"
+   ],
+   [
+    305,
+    "TIME"
+   ],
+   [
+    306,
+    "FEEDBACK"
+   ],
+   [
+    307,
+    "EFFECT LEVEL"
+   ],
+   [
+    308,
+    "HIGH CUT"
+   ],
+   [
+    309,
+    "TAP TIME"
+   ],
+   [
+    310,
+    "AUTO TRIGGER"
+   ],
+   [
+    311,
+    "MODE"
+   ],
+   [
+    312,
+    "1:TYPE"
+   ],
+   [
+    313,
+    "1:TIME"
+   ],
+   [
+    314,
+    "1:FEEDBACK"
+   ],
+   [
+    315,
+    "1:EFFECT LEVEL"
+   ],
+   [
+    316,
+    "1:HIGH CUT"
+   ],
+   [
+    317,
+    "2:HIGH CUT"
+   ],
+   [
+    318,
+    "2:TYPE"
+   ],
+   [
+    319,
+    "2:TIME"
+   ],
+   [
+    320,
+    "2:FEEDBACK"
+   ],
+   [
+    321,
+    "2:EFFECT LEVEL"
+   ]
+  ],
+  "15": [
+   [
+    322,
+    "TYPE"
+   ],
+   [
+    323,
+    "TIME"
+   ],
+   [
+    324,
+    "FEEDBACK"
+   ],
+   [
+    325,
+    "EFFECT LEVEL"
+   ],
+   [
+    326,
+    "DIRECT LEVEL"
+   ],
+   [
+    327,
+    "HIGH CUT"
+   ],
+   [
+    328,
+    "MOD RATE"
+   ],
+   [
+    329,
+    "MOD DEPTH"
+   ],
+   [
+    330,
+    "DUCK SENS"
+   ],
+   [
+    331,
+    "DUCK PRE"
+   ],
+   [
+    332,
+    "DUCK POST"
+   ],
+   [
+    333,
+    "CARRYOVER"
+   ]
+  ],
+  "16": [
+   [
+    334,
+    "TIME"
+   ],
+   [
+    335,
+    "FEEDBACK"
+   ],
+   [
+    336,
+    "EFFECT LEVEL"
+   ],
+   [
+    337,
+    "DIRECT LEVEL"
+   ],
+   [
+    338,
+    "HIGH CUT"
+   ],
+   [
+    339,
+    "MOD RATE"
+   ],
+   [
+    340,
+    "MOD DEPTH"
+   ],
+   [
+    341,
+    "DUCK SENS"
+   ],
+   [
+    342,
+    "DUCK PRE"
+   ],
+   [
+    343,
+    "DUCK POST"
+   ],
+   [
+    344,
+    "HEAD"
+   ],
+   [
+    345,
+    "WOW FLUTTER"
+   ],
+   [
+    346,
+    "CARRYOVER"
+   ]
+  ],
+  "17": [
+   [
+    347,
+    "TIME"
+   ],
+   [
+    348,
+    "FEEDBACK"
+   ],
+   [
+    349,
+    "EFFECT LEVEL"
+   ],
+   [
+    350,
+    "DIRECT LEVEL"
+   ],
+   [
+    351,
+    "HIGH CUT"
+   ],
+   [
+    352,
+    "MOD RATE"
+   ],
+   [
+    353,
+    "MOD DEPTH"
+   ],
+   [
+    354,
+    "DUCK SENS"
+   ],
+   [
+    355,
+    "DUCK PRE"
+   ],
+   [
+    356,
+    "DUCK POST"
+   ],
+   [
+    357,
+    "PITCH"
+   ],
+   [
+    358,
+    "PITCH BALANCE"
+   ],
+   [
+    359,
+    "PITCH FEEDBACK"
+   ],
+   [
+    360,
+    "CARRYOVER"
+   ]
+  ],
+  "18": [
+   [
+    361,
+    "MODE"
+   ],
+   [
+    362,
+    "TRIGGER"
+   ],
+   [
+    363,
+    "LEVEL"
+   ],
+   [
+    364,
+    "RISE TIME"
+   ],
+   [
+    365,
+    "FALL TIME"
+   ],
+   [
+    366,
+    "FADE TIME"
+   ],
+   [
+    367,
+    "CARRYOVER"
+   ]
+  ],
+  "19": [
+   [
+    368,
+    "TIME"
+   ],
+   [
+    369,
+    "TRIGGER"
+   ],
+   [
+    370,
+    "LEVEL"
+   ],
+   [
+    371,
+    "CARRYOVER"
+   ]
+  ],
+  "62": [
+   [
+    372,
+    "TYPE"
+   ],
+   [
+    373,
+    "TIME"
+   ],
+   [
+    374,
+    "PRE-DELAY"
+   ],
+   [
+    375,
+    "EFFECT LEVEL"
+   ],
+   [
+    376,
+    "DENSITY"
+   ],
+   [
+    377,
+    "LOW CUT"
+   ],
+   [
+    378,
+    "HIGH CUT"
+   ],
+   [
+    379,
+    "DIRECT LEVEL"
+   ],
+   [
+    380,
+    "CARRYOVER"
+   ]
+  ],
+  "63": [
+   [
+    381,
+    "TYPE"
+   ],
+   [
+    382,
+    "TIME"
+   ],
+   [
+    383,
+    "TONE"
+   ],
+   [
+    384,
+    "EFFECT LEVEL"
+   ],
+   [
+    385,
+    "DENSITY"
+   ],
+   [
+    386,
+    "PRE-DELAY"
+   ],
+   [
+    387,
+    "LOW CUT"
+   ],
+   [
+    388,
+    "HIGH CUT"
+   ],
+   [
+    389,
+    "LOW DAMP"
+   ],
+   [
+    390,
+    "HIGH DAMP"
+   ],
+   [
+    391,
+    "MOD RATE"
+   ],
+   [
+    392,
+    "MOD DEPTH"
+   ],
+   [
+    393,
+    "DUCK SENS"
+   ],
+   [
+    394,
+    "DUCK PRE"
+   ],
+   [
+    395,
+    "DUCK POST"
+   ],
+   [
+    396,
+    "DIRECT LEVEL"
+   ],
+   [
+    397,
+    "CARRYOVER"
+   ]
+  ],
+  "64": [
+   [
+    398,
+    "TIME"
+   ],
+   [
+    399,
+    "TONE"
+   ],
+   [
+    400,
+    "EFFECT LEVEL"
+   ],
+   [
+    401,
+    "DENSITY"
+   ],
+   [
+    402,
+    "PRE-DELAY"
+   ],
+   [
+    403,
+    "LOW CUT"
+   ],
+   [
+    404,
+    "HIGH CUT"
+   ],
+   [
+    405,
+    "LOW DAMP"
+   ],
+   [
+    406,
+    "HIGH DAMP"
+   ],
+   [
+    407,
+    "MOD RATE"
+   ],
+   [
+    408,
+    "MOD DEPTH"
+   ],
+   [
+    409,
+    "DUCK SENS"
+   ],
+   [
+    410,
+    "DUCK PRE"
+   ],
+   [
+    411,
+    "DUCK POST"
+   ],
+   [
+    412,
+    "DIRECT LEVEL"
+   ],
+   [
+    413,
+    "1:PITCH"
+   ],
+   [
+    414,
+    "2:PITCH"
+   ],
+   [
+    415,
+    "1:LEVEL"
+   ],
+   [
+    416,
+    "2:LEVEL"
+   ],
+   [
+    417,
+    "CARRYOVER"
+   ]
+  ],
+  "65": [
+   [
+    418,
+    "MODE"
+   ],
+   [
+    419,
+    "SPREAD TIME"
+   ],
+   [
+    420,
+    "FEEDBACK"
+   ],
+   [
+    421,
+    "EFFECT LEVEL"
+   ],
+   [
+    422,
+    "TONE"
+   ],
+   [
+    423,
+    "DIRECT LEVEL"
+   ],
+   [
+    424,
+    "TRIGGER"
+   ],
+   [
+    425,
+    "CARRYOVER"
+   ]
+  ],
+  "22": [
+   [
+    426,
+    "RATE"
+   ],
+   [
+    427,
+    "DEPTH"
+   ],
+   [
+    428,
+    "RESONANCE"
+   ],
+   [
+    429,
+    "MANUAL"
+   ],
+   [
+    430,
+    "STEP RATE"
+   ],
+   [
+    431,
+    "LOW CUT"
+   ],
+   [
+    432,
+    "EFFECT LEVEL"
+   ],
+   [
+    433,
+    "DIRECT MIX"
+   ]
+  ],
+  "23": [
+   [
+    434,
+    "RATE"
+   ],
+   [
+    435,
+    "DEPTH"
+   ],
+   [
+    436,
+    "RESONANCE"
+   ],
+   [
+    437,
+    "MANUAL"
+   ],
+   [
+    438,
+    "STEP RATE"
+   ],
+   [
+    439,
+    "LOW CUT"
+   ],
+   [
+    440,
+    "EFFECT LEVEL"
+   ],
+   [
+    441,
+    "DIRECT MIX"
+   ]
+  ],
+  "24": [
+   [
+    442,
+    "RATE"
+   ],
+   [
+    443,
+    "DEPTH"
+   ],
+   [
+    444,
+    "RESONANCE"
+   ],
+   [
+    445,
+    "MANUAL"
+   ],
+   [
+    446,
+    "TURBO"
+   ],
+   [
+    447,
+    "WAVEFORM"
+   ],
+   [
+    448,
+    "STEP RATE"
+   ],
+   [
+    449,
+    "SEPARATION"
+   ],
+   [
+    450,
+    "EFFECT LEVEL"
+   ],
+   [
+    451,
+    "LOW DAMP"
+   ],
+   [
+    452,
+    "HIGH DAMP"
+   ],
+   [
+    453,
+    "DIRECT MIX"
+   ],
+   [
+    454,
+    "LOW CUT"
+   ],
+   [
+    455,
+    "HIGH CUT"
+   ]
+  ],
+  "25": [
+   [
+    456,
+    "RATE"
+   ],
+   [
+    457,
+    "DEPTH"
+   ],
+   [
+    458,
+    "RESONANCE"
+   ],
+   [
+    459,
+    "MANUAL"
+   ],
+   [
+    460,
+    "TURBO"
+   ],
+   [
+    461,
+    "WAVEFORM"
+   ],
+   [
+    462,
+    "STEP RATE"
+   ],
+   [
+    463,
+    "SEPARATION"
+   ],
+   [
+    464,
+    "EFFECT LEVEL"
+   ],
+   [
+    465,
+    "LOW DAMP"
+   ],
+   [
+    466,
+    "HIGH DAMP"
+   ],
+   [
+    467,
+    "DIRECT MIX"
+   ],
+   [
+    468,
+    "LOW CUT"
+   ],
+   [
+    469,
+    "HIGH CUT"
+   ]
+  ],
+  "49": [
+   [
+    470,
+    "RATE"
+   ],
+   [
+    471,
+    "DEPTH"
+   ],
+   [
+    472,
+    "WAVEFORM"
+   ],
+   [
+    473,
+    "EFFECT LEVEL"
+   ],
+   [
+    474,
+    "DIRECT MIX"
+   ]
+  ],
+  "51": [
+   [
+    475,
+    "PITCH MIN"
+   ],
+   [
+    476,
+    "PITCH MAX"
+   ],
+   [
+    477,
+    "PEDAL POSITION"
+   ],
+   [
+    478,
+    "EFFECT LEVEL"
+   ],
+   [
+    479,
+    "DIRECT MIX"
+   ]
+  ],
+  "52": [
+   [
+    480,
+    "PITCH MIN"
+   ],
+   [
+    481,
+    "PITCH MAX"
+   ],
+   [
+    482,
+    "PEDAL POSITION"
+   ],
+   [
+    483,
+    "EFFECT LEVEL"
+   ],
+   [
+    484,
+    "DIRECT MIX"
+   ]
+  ],
+  "50": [
+   [
+    485,
+    "PEDAL POSITION"
+   ],
+   [
+    486,
+    "VOLUME MIN"
+   ],
+   [
+    487,
+    "VOLUME MAX"
+   ],
+   [
+    488,
+    "CURVE"
+   ]
+  ],
+  "26": [
+   [
+    489,
+    "VOICE"
+   ],
+   [
+    490,
+    "1:HARMONY"
+   ],
+   [
+    491,
+    "1:LEVEL"
+   ],
+   [
+    492,
+    "1:PRE-DELAY"
+   ],
+   [
+    493,
+    "1:FEEDBACK"
+   ],
+   [
+    494,
+    "2:HARMONY"
+   ],
+   [
+    495,
+    "2:LEVEL"
+   ],
+   [
+    496,
+    "2:PRE-DELAY"
+   ],
+   [
+    497,
+    "DIRECT LEVEL"
+   ],
+   [
+    498,
+    "1:C"
+   ],
+   [
+    499,
+    "1:Db"
+   ],
+   [
+    500,
+    "1:D"
+   ],
+   [
+    501,
+    "1:Eb"
+   ],
+   [
+    502,
+    "1:E"
+   ],
+   [
+    503,
+    "1:F"
+   ],
+   [
+    504,
+    "1:F#"
+   ],
+   [
+    505,
+    "1:G"
+   ],
+   [
+    506,
+    "1:Ab"
+   ],
+   [
+    507,
+    "1:A"
+   ],
+   [
+    508,
+    "1:Bb"
+   ],
+   [
+    509,
+    "1:B"
+   ],
+   [
+    510,
+    "2:C"
+   ],
+   [
+    511,
+    "2:Db"
+   ],
+   [
+    512,
+    "2:D"
+   ],
+   [
+    513,
+    "2:Eb"
+   ],
+   [
+    514,
+    "2:E"
+   ],
+   [
+    515,
+    "2:F"
+   ],
+   [
+    516,
+    "2:F#"
+   ],
+   [
+    517,
+    "2:G"
+   ],
+   [
+    518,
+    "2:Ab"
+   ],
+   [
+    519,
+    "2:A"
+   ],
+   [
+    520,
+    "2:Bb"
+   ],
+   [
+    521,
+    "2:B"
+   ]
+  ],
+  "27": [
+   [
+    522,
+    "VOICE"
+   ],
+   [
+    523,
+    "1:HARMONY"
+   ],
+   [
+    524,
+    "1:LEVEL"
+   ],
+   [
+    525,
+    "1:PRE-DELAY"
+   ],
+   [
+    526,
+    "1:FEEDBACK"
+   ],
+   [
+    527,
+    "2:HARMONY"
+   ],
+   [
+    528,
+    "2:LEVEL"
+   ],
+   [
+    529,
+    "2:PRE-DELAY"
+   ],
+   [
+    530,
+    "DIRECT LEVEL"
+   ],
+   [
+    531,
+    "1:C"
+   ],
+   [
+    532,
+    "1:Db"
+   ],
+   [
+    533,
+    "1:D"
+   ],
+   [
+    534,
+    "1:Eb"
+   ],
+   [
+    535,
+    "1:E"
+   ],
+   [
+    536,
+    "1:F"
+   ],
+   [
+    537,
+    "1:F#"
+   ],
+   [
+    538,
+    "1:G"
+   ],
+   [
+    539,
+    "1:Ab"
+   ],
+   [
+    540,
+    "1:A"
+   ],
+   [
+    541,
+    "1:Bb"
+   ],
+   [
+    542,
+    "1:B"
+   ],
+   [
+    543,
+    "2:C"
+   ],
+   [
+    544,
+    "2:Db"
+   ],
+   [
+    545,
+    "2:D"
+   ],
+   [
+    546,
+    "2:Eb"
+   ],
+   [
+    547,
+    "2:E"
+   ],
+   [
+    548,
+    "2:F"
+   ],
+   [
+    549,
+    "2:F#"
+   ],
+   [
+    550,
+    "2:G"
+   ],
+   [
+    551,
+    "2:Ab"
+   ],
+   [
+    552,
+    "2:A"
+   ],
+   [
+    553,
+    "2:Bb"
+   ],
+   [
+    554,
+    "2:B"
+   ]
+  ],
+  "33": [
+   [
+    555,
+    "-2 OCT"
+   ],
+   [
+    556,
+    "-1 OCT"
+   ],
+   [
+    557,
+    "DIRECT LEVEL"
+   ]
+  ],
+  "34": [
+   [
+    558,
+    "RANGE"
+   ],
+   [
+    559,
+    "OCTAVE LEVEL"
+   ],
+   [
+    560,
+    "DIRECT LEVEL"
+   ]
+  ],
+  "35": [
+   [
+    561,
+    "-2 OCT"
+   ],
+   [
+    562,
+    "-1 OCT"
+   ],
+   [
+    563,
+    "DIRECT LEVEL"
+   ]
+  ],
+  "7": [
+   [
+    564,
+    "MODE"
+   ],
+   [
+    565,
+    "RATE"
+   ],
+   [
+    566,
+    "DEPTH"
+   ],
+   [
+    567,
+    "EFFECT LEVEL"
+   ]
+  ],
+  "55": [
+   [
+    568,
+    "STAGE"
+   ],
+   [
+    569,
+    "RATE"
+   ],
+   [
+    570,
+    "DEPTH"
+   ],
+   [
+    571,
+    "RESONANCE"
+   ],
+   [
+    572,
+    "MANUAL"
+   ],
+   [
+    573,
+    "STEP RATE"
+   ],
+   [
+    574,
+    "EFFECT LEVEL"
+   ],
+   [
+    575,
+    "DIRECT MIX"
+   ]
+  ],
+  "56": [
+   [
+    576,
+    "STAGE"
+   ],
+   [
+    577,
+    "RATE"
+   ],
+   [
+    578,
+    "DEPTH"
+   ],
+   [
+    579,
+    "RESONANCE"
+   ],
+   [
+    580,
+    "MANUAL"
+   ],
+   [
+    581,
+    "STEP RATE"
+   ],
+   [
+    582,
+    "EFFECT LEVEL"
+   ],
+   [
+    583,
+    "DIRECT MIX"
+   ]
+  ],
+  "57": [
+   [
+    584,
+    "STAGE"
+   ],
+   [
+    585,
+    "RATE"
+   ],
+   [
+    586,
+    "DEPTH"
+   ],
+   [
+    587,
+    "RESONANCE"
+   ],
+   [
+    588,
+    "MANUAL"
+   ],
+   [
+    589,
+    "WAVEFORM"
+   ],
+   [
+    590,
+    "STEP RATE"
+   ],
+   [
+    591,
+    "BI-PHASE"
+   ],
+   [
+    592,
+    "SEPARATION"
+   ],
+   [
+    593,
+    "LOW DAMP"
+   ],
+   [
+    594,
+    "HIGH DAMP"
+   ],
+   [
+    595,
+    "LOW CUT"
+   ],
+   [
+    596,
+    "HIGH CUT"
+   ],
+   [
+    597,
+    "EFFECT LEVEL"
+   ],
+   [
+    598,
+    "DIRECT MIX"
+   ]
+  ],
+  "58": [
+   [
+    599,
+    "STAGE"
+   ],
+   [
+    600,
+    "RATE"
+   ],
+   [
+    601,
+    "DEPTH"
+   ],
+   [
+    602,
+    "RESONANCE"
+   ],
+   [
+    603,
+    "MANUAL"
+   ],
+   [
+    604,
+    "WAVEFORM"
+   ],
+   [
+    605,
+    "STEP RATE"
+   ],
+   [
+    606,
+    "BI-PHASE"
+   ],
+   [
+    607,
+    "SEPARATION"
+   ],
+   [
+    608,
+    "LOW DAMP"
+   ],
+   [
+    609,
+    "HIGH DAMP"
+   ],
+   [
+    610,
+    "LOW CUT"
+   ],
+   [
+    611,
+    "HIGH CUT"
+   ],
+   [
+    612,
+    "EFFECT LEVEL"
+   ],
+   [
+    613,
+    "DIRECT MIX"
+   ]
+  ],
+  "59": [
+   [
+    614,
+    "RATE"
+   ],
+   [
+    615,
+    "DEPTH"
+   ],
+   [
+    616,
+    "EFFECT LEVEL"
+   ],
+   [
+    617,
+    "DIRECT MIX"
+   ]
+  ],
+  "60": [
+   [
+    618,
+    "VOICE"
+   ],
+   [
+    619,
+    "DIRECT LEVEL"
+   ],
+   [
+    620,
+    "1:PITCH"
+   ],
+   [
+    621,
+    "1:MODE"
+   ],
+   [
+    622,
+    "1:FINE"
+   ],
+   [
+    623,
+    "1:PRE-DELAY"
+   ],
+   [
+    624,
+    "1:LEVEL"
+   ],
+   [
+    625,
+    "1:FEEDBACK"
+   ],
+   [
+    626,
+    "2:PITCH"
+   ],
+   [
+    627,
+    "2:MODE"
+   ],
+   [
+    628,
+    "2:FINE"
+   ],
+   [
+    629,
+    "2:PRE-DELAY"
+   ],
+   [
+    630,
+    "2:LEVEL"
+   ]
+  ],
+  "61": [
+   [
+    631,
+    "VOICE"
+   ],
+   [
+    632,
+    "DIRECT LEVEL"
+   ],
+   [
+    633,
+    "1:PITCH"
+   ],
+   [
+    634,
+    "1:MODE"
+   ],
+   [
+    635,
+    "1:FINE"
+   ],
+   [
+    636,
+    "1:PRE-DELAY"
+   ],
+   [
+    637,
+    "1:LEVEL"
+   ],
+   [
+    638,
+    "1:FEEDBACK"
+   ],
+   [
+    639,
+    "2:PITCH"
+   ],
+   [
+    640,
+    "2:MODE"
+   ],
+   [
+    641,
+    "2:FINE"
+   ],
+   [
+    642,
+    "2:PRE-DELAY"
+   ],
+   [
+    643,
+    "2:LEVEL"
+   ]
+  ],
+  "66": [
+   [
+    644,
+    "INTELLIGENT"
+   ],
+   [
+    645,
+    "FREQUENCY"
+   ],
+   [
+    646,
+    "MOD RATE"
+   ],
+   [
+    647,
+    "MOD DEPTH"
+   ],
+   [
+    648,
+    "EFFECT LEVEL"
+   ],
+   [
+    649,
+    "DIRECT MIX"
+   ]
+  ],
+  "67": [
+   [
+    650,
+    "SPEED SELECT"
+   ],
+   [
+    651,
+    "SLOW RATE"
+   ],
+   [
+    652,
+    "FAST RATE"
+   ],
+   [
+    653,
+    "EFFECT LEVEL"
+   ],
+   [
+    654,
+    "RISE TIME"
+   ],
+   [
+    655,
+    "FALL TIME"
+   ],
+   [
+    656,
+    "MIC DISTANCE"
+   ],
+   [
+    657,
+    "ROTOR/HORN"
+   ],
+   [
+    658,
+    "DRIVE"
+   ],
+   [
+    659,
+    "DIRECT MIX"
+   ]
+  ],
+  "74": [
+   [
+    660,
+    "RATE"
+   ],
+   [
+    661,
+    "DEPTH"
+   ],
+   [
+    662,
+    "WAVEFORM"
+   ],
+   [
+    663,
+    "EFFECT LEVEL"
+   ],
+   [
+    664,
+    "TRIGGER"
+   ],
+   [
+    665,
+    "RISE TIME"
+   ],
+   [
+    666,
+    "DIRECT MIX"
+   ]
+  ],
+  "75": [
+   [
+    667,
+    "RATE"
+   ],
+   [
+    668,
+    "DEPTH"
+   ],
+   [
+    669,
+    "TRIGGER"
+   ],
+   [
+    670,
+    "RISE TIME"
+   ],
+   [
+    671,
+    "EFFECT LEVEL"
+   ]
+  ],
+  "76": [
+   [
+    672,
+    "RATE"
+   ],
+   [
+    673,
+    "DEPTH"
+   ],
+   [
+    674,
+    "COLOR"
+   ],
+   [
+    675,
+    "EFFECT LEVEL"
+   ],
+   [
+    676,
+    "TRIGGER"
+   ],
+   [
+    677,
+    "RISE TIME"
+   ],
+   [
+    678,
+    "DIRECT MIX"
+   ]
+  ],
+  "68": [
+   [
+    679,
+    "TRIGGER"
+   ],
+   [
+    680,
+    "PITCH"
+   ],
+   [
+    681,
+    "RISE TIME"
+   ],
+   [
+    682,
+    "FALL TIME"
+   ]
+  ],
+  "69": [
+   [
+    683,
+    "TRIGGER"
+   ],
+   [
+    684,
+    "PITCH"
+   ],
+   [
+    685,
+    "RISE TIME"
+   ],
+   [
+    686,
+    "FALL TIME"
+   ]
+  ],
+  "28": [
+   [
+    687,
+    "LOOP LEVEL"
+   ]
+  ],
+  "77": [
+   [
+    688,
+    "MODE"
+   ],
+   [
+    689,
+    "SEND LEVEL"
+   ],
+   [
+    690,
+    "RETURN LEVEL"
+   ],
+   [
+    691,
+    "ADJUST"
+   ],
+   [
+    692,
+    "INVERT"
+   ]
+  ],
+  "78": [
+   [
+    702,
+    "PATTERN"
+   ],
+   [
+    703,
+    "RATE"
+   ],
+   [
+    704,
+    "TRIGGER"
+   ],
+   [
+    705,
+    "EFFECT LEVEL"
+   ],
+   [
+    706,
+    "ATTACK"
+   ],
+   [
+    707,
+    "DUTY"
+   ],
+   [
+    708,
+    "DIRECT MIX"
+   ]
+  ],
+  "79": [
+   [
+    709,
+    "MODE"
+   ],
+   [
+    710,
+    "VOWEL1"
+   ],
+   [
+    711,
+    "VOWEL2"
+   ],
+   [
+    712,
+    "SENS"
+   ],
+   [
+    713,
+    "RATE"
+   ],
+   [
+    714,
+    "DEPTH"
+   ],
+   [
+    715,
+    "MANUAL"
+   ],
+   [
+    716,
+    "LEVEL"
+   ]
+  ],
+  "80": [
+   [
+    717,
+    "MODE"
+   ],
+   [
+    718,
+    "TRIGGER"
+   ],
+   [
+    719,
+    "DEPTH"
+   ],
+   [
+    720,
+    "RISE TIME"
+   ],
+   [
+    721,
+    "OCT RISE TIME"
+   ],
+   [
+    722,
+    "FEEDBACK"
+   ],
+   [
+    723,
+    "OCT FEEDBACK"
+   ],
+   [
+    724,
+    "VIB RATE"
+   ],
+   [
+    725,
+    "VIB DEPTH"
+   ]
+  ],
+  "81": [
+   [
+    726,
+    "SENS"
+   ],
+   [
+    727,
+    "DEPTH"
+   ],
+   [
+    728,
+    "TONE"
+   ],
+   [
+    729,
+    "EFFECT LEVEL"
+   ],
+   [
+    730,
+    "RESONANCE"
+   ],
+   [
+    731,
+    "BUZZ"
+   ],
+   [
+    732,
+    "DIRECT MIX"
+   ]
+  ],
+  "82": [
+   [
+    733,
+    "FILTER MODE"
+   ],
+   [
+    734,
+    "RATE"
+   ],
+   [
+    735,
+    "DEPTH"
+   ],
+   [
+    736,
+    "EFFECT LEVEL"
+   ],
+   [
+    737,
+    "FREQUENCY"
+   ],
+   [
+    738,
+    "RESONANCE"
+   ],
+   [
+    739,
+    "WAVEFORM"
+   ],
+   [
+    740,
+    "DIRECT MIX"
+   ]
+  ]
+ },
+ "alvosGlobais": {
+  "EFFECT(RENAMED WITH TYPE)": [
+   [
+    1,
+    "ON/OFF"
+   ]
+  ],
+  "MASTER": [
+   [
+    693,
+    "MEMORY LEVEL"
+   ],
+   [
+    694,
+    "BPM"
+   ],
+   [
+    695,
+    "KEY"
+   ],
+   [
+    696,
+    "INPUT SETTING"
+   ],
+   [
+    697,
+    "AMP CTL1"
+   ],
+   [
+    698,
+    "AMP CTL2"
+   ]
+  ],
+  "TUNER": [
+   [
+    699,
+    "ON/OFF"
+   ]
+  ],
+  "MIDI": [
+   [
+    700,
+    "MIDI CC#"
+   ],
+   [
+    701,
+    "MIDI PC#"
+   ]
+  ]
+ }
 };

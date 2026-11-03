@@ -14,9 +14,22 @@ This project is a work in progress. **Use it at your own risk.**
 - Click **Disconnect** before turning off your pedalboard or unplugging the USB cable. This helps prevent your Chromium based browsers from freezing.
 
 
-## Log
+## Change log
 
+v0.11.3 (2026-11-03)
 
+- control: rows in the pedal's own order, only the functions the GX-10 offers for each
+  footswitch, mode only on the functions that switch something on and off, and the rows
+  the current control mode is not using are greyed out
+- assign: the six pages of the pedal's own table; the block column lists the effects that
+  are in this preset by name, and the parameter column only the parameters of that effect
+  (ON/OFF included)
+- knob: same block and parameter lists as assign
+- MIDI: one row per setting with a slider, in the pedal's order
+- changes made on the pedal now show up in the open CTL/EXP dialog
+- DIV and MIX have no on/off any more (they are always on), and the chain greys out the
+  channel the divider is not sending the signal to
+- the overwrite warning is amber instead of red
 
 v0.11.2 (2026-10-08)
 - current preset number and name shown above the effect chain
