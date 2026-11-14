@@ -7,7 +7,7 @@
  * Os nomes das linhas seguem o que aparece na tela da pedaleira (GX-10); o manual
  * chama de BankDown/BankUp, Manual Num1/2, CNum, Ctl1-3, Exp1Sw, Exp1 e Exp2.
  */
-window.GX10_CTLEXP_VERSAO = "0.11.4";
+window.GX10_CTLEXP_VERSAO = "0.12.0";
 window.GX10_CTLEXP = {
  "listas": {
   "funcDownUp": [
@@ -304,7 +304,7 @@ window.GX10_CTLEXP = {
   {
    "rotulo": "CTL 1",
    "lista": "funcCtl",
-   "grupo": "sempre",
+   "grupo": "semBanknum",
    "mem": {
     "funcao": 27,
     "modo": 45
@@ -453,12 +453,12 @@ window.GX10_CTLEXP = {
     "tipo": "byte",
     "pares": [
      [
-      1,
-      "MAIN UP"
+      5,
+      "MAN UP"
      ],
      [
-      0,
-      "MAIN DOWN"
+      4,
+      "MAN DOWN"
      ],
      [
       8,
@@ -910,7 +910,8 @@ window.GX10_CTLEXP = {
     "tipo": "nibbles4",
     "min": 1,
     "max": 127,
-    "escala": 128
+    "escala": 128,
+    "brutoMax": 16383
    },
    {
     "chave": "midiCh",
@@ -1095,8 +1096,8 @@ window.GX10_CTLEXP = {
    }
   ],
   "fonteComModo": [
-   1,
-   0,
+   5,
+   4,
    8,
    11,
    13,

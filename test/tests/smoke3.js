@@ -48,7 +48,7 @@ const ok = (t,v) => console.log((v?"  ok  ":" FALHA ")+t+(v?"":"  <<<"));
     };
   });
   console.log("assign p1 fontes:", p1.fontes.length, p1.fontes.slice(0,8).join(","), "| atual:", p1.fonteAtual);
-  ok("75 fontes, sem NUM 3/4 e sem CTL 4", p1.fontes.length === 75 && !p1.fontes.includes("CTL 4") && p1.fontes[0] === "MAIN UP");
+  ok("75 fontes, sem NUM 3/4 e sem CTL 4", p1.fontes.length === 75 && !p1.fontes.includes("CTL 4") && p1.fontes[0] === "MAN UP");
   ok("category tem — none — e Master/Tuner", p1.categorias[0] === "— none —" && p1.categorias.includes("Master") && p1.categorias.includes("Tuner"));
   ok("mode ligado para CTL 1", p1.modoDesligado === false);
   // fonte EXP 1 (16) desliga o mode

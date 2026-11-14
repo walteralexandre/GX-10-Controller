@@ -112,7 +112,8 @@
         .btn { padding: 9px 14px; font-size: .85rem; font-weight: 600; border: 1px solid var(--border-color);
                border-radius: 8px; cursor: pointer; background: rgba(255,255,255,.05); color: var(--text-main); }
         .btn:hover:not(:disabled) { background: var(--btn-hover); }
-        .btn-remove { border-color: var(--accent-red); color: var(--accent-red); }
+        .modelo-wrap { position: relative; flex: none; }
+        .menu.menu-modelo { top: 42px; min-width: 130px; }
         h2 { font-size: .95rem; margin: 16px 0 10px; }
 
         .faixa-preset { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; padding: 2px 6px;
@@ -353,6 +354,7 @@
     </div>
 
     <input type="file" id="arquivo-import" accept=".gx10" style="display:none;">
+    <input type="file" id="arquivo-modelo" accept=".fxt" style="display:none;">
 
     <div id="cortina-export" class="cortina">
         <div class="escolha" style="max-width:520px;">
@@ -516,12 +518,14 @@
         // antes de tirar o cabo: o Chrome no Windows congela se o dispositivo some
         // enquanto alguma página ainda tem a sessão MIDI aberta.
         const MIDI_OFF = /[?&]midi=off(&|$)/i.test(location.search);
-        const APP_VERSAO = "0.11.4";
-        const APP_DATA = "October 8, 2026";
+        const APP_VERSAO = "0.12.0";
+        const APP_DATA = "November 14, 2026";
 
         const pedal = new GX10();
         let cadeia = null, itens = [], ordem = [], selecionado = null;
         let canalAtivo = "AB";     // "A", "B" ou "AB" (os dois), conforme o Divider
+        let modoDoDivisor = 1;     // 0 = SINGLE, 1 = DUAL (última leitura)
+        let canalDoDivisor = 0;    // 0 = A, 1 = B (última leitura do Ch Select)
 
         const $ = id => document.getElementById(id);
         const consoleLog = $("console-log"), cadeiaEl = $("cadeia"), painelEl = $("painel");
@@ -549,6 +553,7 @@
         const PARAMS_MASTER = Object.entries(MASTER.parameters);
 
         const enderecoDoItem = slot => GX10.addrAdd(END_FX_ITEM_1, slot * PASSO_FX_ITEM);
+        const OFS_CH_SELECT = 0x07;    // Divider: 2º parâmetro (Ch Select), dentro do Fx Item
 
         /** Black or white text, depending on how light the block colour is. */
         function corDoTexto(fundo) {
@@ -676,6 +681,8 @@
                 if (d.length < 8) return;
                 const modo = nibblesParaValor(d.slice(0, 4));        // 0 = SINGLE, 1 = DUAL
                 const canal = nibblesParaValor(d.slice(4, 8));       // 0 = A, 1 = B
+                modoDoDivisor = modo;
+                canalDoDivisor = canal === 1 ? 1 : 0;
                 canalAtivo = modo === 0 ? (canal === 1 ? "B" : "A") : "AB";
             } catch (e) {
                 /* sem resposta: deixa os dois acesos */
@@ -737,7 +744,8 @@
             div.style.background = cor;
             div.style.color = corDoTexto(cor);
             div.dataset.tip = (mod ? mod.name : "unknown type") + " · Fx Item " + (id + 1) +
-                              (semLigaDesliga(item ? item.typeId : -1) ? "" : " · " + (item && item.ligado ? "ON" : "OFF"));
+                              (semLigaDesliga(item ? item.typeId : -1) ? "" : " · " + (item && item.ligado ? "ON" : "OFF")) +
+                              (item && item.typeId === TIPO_DIVIDER ? " · double click switches between channel A and B" : "");
             div.draggable = true;
 
             const abrev = document.createElement("div");
@@ -767,6 +775,26 @@
                     addLog((mod ? mod.name : "block " + (id + 1)) + " = " + (novo ? "ON" : "OFF") + " (double click)", "raw");
                     desenhaCadeia();
                     if (selecionado === id && controles.has("onoff")) controles.get("onoff").aplicar(novo);
+                };
+            }
+            // O Divider está sempre ligado: nele, dois cliques trocam o Ch Select (A <-> B).
+            if (item && item.typeId === TIPO_DIVIDER) {
+                div.ondblclick = e => {
+                    e.preventDefault();
+                    const novo = canalDoDivisor === 1 ? 0 : 1;
+                    if (!pedal.sendData(GX10.addrAdd(enderecoDoItem(id), OFS_CH_SELECT), valorParaNibbles(novo))) return;
+                    canalDoDivisor = novo;
+                    if (modoDoDivisor === 0) canalAtivo = novo === 1 ? "B" : "A";
+                    addLog("Divider Ch Select = " + (novo ? "B" : "A") + " (double click)", "raw");
+                    desenhaCadeia();
+                    // Os cliques que vêm antes do duplo clique abrem o painel, e essa leitura pode
+                    // ter saído antes da troca. Por isso espera a leitura acabar e confere de novo.
+                    const confere = async () => {
+                        if (lendo > 0) { setTimeout(confere, 150); return; }
+                        await atualizaCanal();
+                        if (selecionado === id && controles.has("p:2")) controles.get("p:2").aplicar(canalDoDivisor);
+                    };
+                    setTimeout(confere, 150);
                 };
             }
             div.addEventListener("dragstart", () => { arrastando = unidadeDoBloco(id); div.classList.add("arrastando"); });
@@ -1040,7 +1068,7 @@
                 controles.clear();
                 const painel = document.createElement("div");
                 painel.className = "painel";
-                painel.append(cabecaDoPainel(mod.name, () => removerBloco(id)));
+                painel.append(cabecaDoPainel(mod.name));
 
                 if (mod.usesBpm) {
                     try { painel.appendChild(await criaControleBpm()); }
@@ -1070,22 +1098,190 @@
             }
         }
 
-        function cabecaDoPainel(titulo, aoRemover) {
+        function cabecaDoPainel(titulo) {
             const cabeca = document.createElement("div");
             cabeca.className = "cabeca";
             const h = document.createElement("h3");
             h.textContent = titulo;
             cabeca.appendChild(h);
-            if (aoRemover) {
-                const btn = document.createElement("button");
-                btn.className = "btn btn-remove";
-                btn.textContent = "Remove";
-                btn.dataset.tip = "Take this block out of the chain";
-                btn.onclick = aoRemover;
-                cabeca.appendChild(btn);
-            }
+
+            // Template: guarda em arquivo (ou traz de volta) os valores deste módulo.
+            const caixa = document.createElement("div");
+            caixa.className = "modelo-wrap";
+            const btn = document.createElement("button");
+            btn.className = "btn btn-modelo";
+            btn.textContent = "Template ▾";
+            btn.dataset.tip = "Save the settings of this module to a file, or load them back from one";
+            const lista = document.createElement("div");
+            lista.className = "menu menu-modelo";
+            const opcao = (rotulo, dica, acao) => {
+                const b = document.createElement("button");
+                b.textContent = rotulo;
+                b.dataset.tip = dica;
+                b.onclick = () => { lista.classList.remove("aberto"); acao(); };
+                lista.appendChild(b);
+            };
+            opcao("Save", "Save these settings to a " + EXT_MODELO + " file", salvaModelo);
+            opcao("Load", "Load a " + EXT_MODELO + " file made from this same kind of module", () => {
+                $("arquivo-modelo").value = "";
+                $("arquivo-modelo").click();
+            });
+            btn.onclick = e => { e.stopPropagation(); lista.classList.toggle("aberto"); };
+            caixa.append(btn, lista);
+            cabeca.appendChild(caixa);
             return cabeca;
         }
+        document.addEventListener("click", e => {
+            document.querySelectorAll(".menu-modelo.aberto").forEach(m => {
+                if (!m.parentNode.contains(e.target)) m.classList.remove("aberto");
+            });
+        });
+
+        // ================== Module templates (.fxt) ==================
+        // Um template guarda os valores de UM módulo (Overdrive, Delay, Master…), em JSON.
+        // Cada parâmetro vai pela chave da tabela, não pela posição: se a tabela mudar de
+        // ordem um dia, o arquivo continua valendo. O nome do template é o nome do arquivo.
+        const EXT_MODELO = ".fxt";
+        const FORMATO_MODELO = "gx10-module-template";
+
+        /** O módulo aberto no painel: quem é e quais controles ele tem. */
+        function moduloAberto() {
+            if (selecionado === ID_MASTER) {
+                return { id: MASTER.id || "master", typeId: null, nome: MASTER.name,
+                         params: PARAMS_MASTER.map(([chave, p]) => ({ chave, p, controle: "m:" + chave })) };
+            }
+            const item = typeof selecionado === "number" ? itens[selecionado] : null;
+            const mod = item ? moduloPorTipo.get(item.typeId) : null;
+            if (!mod) return null;
+            const id = mod.id || (Object.entries(window.GX10_MODULES).find(([, m]) => m === mod) || [""])[0];
+            return { id, typeId: mod.typeId, nome: mod.name,
+                     params: Object.entries(mod.parameters)
+                                   .filter(([, p]) => p.paramIndex)
+                                   .sort((a, b) => a[1].paramIndex - b[1].paramIndex)
+                                   .map(([chave, p]) => ({ chave, p, controle: "p:" + p.paramIndex })) };
+        }
+
+        /** Aviso que o usuário vê mesmo com o registro escondido. */
+        function alerta(titulo, texto) {
+            addLog(titulo + " " + texto, "error");
+            $("confirma-nao").style.display = "none";
+            return confirma(titulo, texto, "OK").then(r => { $("confirma-nao").style.display = ""; return r; });
+        }
+
+        async function salvaModelo() {
+            const aberto = moduloAberto();
+            if (!aberto) return;
+            const parametros = [];
+            aberto.params.forEach(({ chave, p, controle }) => {
+                const c = controles.get(controle);
+                if (!c) return;
+                const v = c.valor();
+                parametros.push({ id: chave, name: p.name, value: v, text: textoDoValor(p, v) });
+            });
+            const conteudo = JSON.stringify({
+                format: FORMATO_MODELO, version: 1,
+                app: "BOSS GX-10 Controller " + APP_VERSAO,
+                saved: new Date().toISOString(),
+                module: { id: aberto.id, typeId: aberto.typeId, name: aberto.nome },
+                parameters: parametros
+            }, null, 2);
+            const sugerido = nomeDeArquivo(aberto.nome) + EXT_MODELO;
+
+            // Com a janela "salvar como" do navegador o usuário escolhe pasta e nome;
+            // onde ela não existe, o arquivo sai como um download comum.
+            if (window.showSaveFilePicker) {
+                try {
+                    const arq = await window.showSaveFilePicker({
+                        suggestedName: sugerido,
+                        types: [{ description: "GX-10 module template", accept: { "application/json": [EXT_MODELO] } }]
+                    });
+                    const escrita = await arq.createWritable();
+                    await escrita.write(conteudo);
+                    await escrita.close();
+                    addLog("Template saved: " + arq.name + " (" + aberto.nome + ", " + parametros.length + " parameters).", "success");
+                    return;
+                } catch (e) {
+                    if (e && e.name === "AbortError") return;      // o usuário desistiu
+                    addLog("Save dialog not available (" + e.message + "): using a plain download.", "warn");
+                }
+            }
+            baixa(sugerido, conteudo, "application/json");
+            addLog("Template saved: " + sugerido + " (" + aberto.nome + ", " + parametros.length + " parameters).", "success");
+        }
+
+        /** Confere o arquivo; devolve os dados ou explica o que há de errado. */
+        function leModelo(texto, nomeArquivo) {
+            let t;
+            try { t = JSON.parse(texto); }
+            catch (e) { throw new Error("“" + nomeArquivo + "” is not a GX-10 module template."); }
+            if (!t || t.format !== FORMATO_MODELO || !t.module || !Array.isArray(t.parameters)) {
+                throw new Error("“" + nomeArquivo + "” is not a GX-10 module template.");
+            }
+            if (t.version !== 1) {
+                throw new Error("“" + nomeArquivo + "” was made by a newer version of this app (template version " + t.version + ").");
+            }
+            return t;
+        }
+
+        /** O valor serve para este parâmetro? */
+        function valorCabe(p, v) {
+            if (!Number.isInteger(v)) return false;
+            if (p.options) return p.options.some(o => o.value === v);
+            if (semFaixaUtil(p)) return v >= -DESLOC_NIBBLE && v < DESLOC_NIBBLE;
+            return v >= p.min && v <= p.max;
+        }
+
+        async function carregaModelo(arquivo) {
+            const aberto = moduloAberto();
+            if (!aberto) { await alerta("No module selected.", "Click a block in the chain first."); return; }
+            if (sorteando) return;
+
+            let t;
+            try { t = leModelo(await arquivo.text(), arquivo.name); }
+            catch (e) { await alerta("Cannot load this template.", e.message); return; }
+
+            if (t.module.id !== aberto.id) {
+                await alerta("Wrong kind of template.",
+                    "“" + arquivo.name + "” is a template for " + (t.module.name || t.module.id) +
+                    ". The selected module is " + aberto.nome + ", so it cannot be loaded here.");
+                return;
+            }
+
+            const porChave = new Map(aberto.params.map(x => [x.chave, x]));
+            const aplicar = [], pulados = [];
+            t.parameters.forEach(item => {
+                const alvo = item && porChave.get(item.id);
+                const c = alvo && controles.get(alvo.controle);
+                if (!alvo || !c || !valorCabe(alvo.p, item.value)) { pulados.push(item && (item.name || item.id)); return; }
+                aplicar.push([c, item.value]);
+            });
+
+            sorteando = true;
+            document.querySelectorAll(".sortear button, .btn-modelo").forEach(b => { b.disabled = true; });
+            try {
+                for (const [c, v] of aplicar) {
+                    c.definir(v);
+                    await new Promise(r => setTimeout(r, 20));   // uma mensagem de cada vez
+                }
+            } finally {
+                sorteando = false;
+                document.querySelectorAll(".sortear button, .btn-modelo").forEach(b => { b.disabled = false; });
+            }
+            addLog("Template “" + arquivo.name.replace(/\.fxt$/i, "") + "” loaded into " + aberto.nome + ": " +
+                   aplicar.length + " parameter(s) set.", "success");
+            if (pulados.length) {
+                await alerta("Template loaded, with gaps.",
+                    pulados.length + " setting(s) in the file do not fit this module and were left as they were: " +
+                    pulados.slice(0, 8).join(", ") + (pulados.length > 8 ? "…" : "") + ".");
+            }
+        }
+
+        $("arquivo-modelo").onchange = async e => {
+            const arquivo = e.target.files && e.target.files[0];
+            if (!arquivo) return;
+            try { await carregaModelo(arquivo); }
+            catch (err) { addLog(err.message, "error"); }
+        };
 
         // ================== Randomize ==================
         // Grupos extras: aparecem só nos módulos que tiverem todos esses parâmetros
@@ -1178,7 +1374,7 @@
                 controles.clear();
                 const painel = document.createElement("div");
                 painel.className = "painel";
-                painel.appendChild(cabecaDoPainel(MASTER.name, null));
+                painel.appendChild(cabecaDoPainel(MASTER.name));
 
                 PARAMS_MASTER.forEach(([chave, p]) => {
                     painel.appendChild(criaControle({
@@ -1255,6 +1451,7 @@
             if (chave) {
                 controles.set(chave, {
                     p,
+                    valor: () => ultimoEnviado,
                     // veio da pedaleira: só mostra na tela, não devolve nada
                     aplicar: v => { ultimoEnviado = v; mostra(v); },
                     // veio da página (sorteio): mostra e manda para a pedaleira
@@ -2042,6 +2239,13 @@
                 op.textContent = rotulo;
                 sel.appendChild(op);
             });
+            // Valor que a lista não conhece: aparece com o número, em vez de um campo vazio.
+            if (valor !== undefined && valor !== null && !pares.some(([v]) => v === valor)) {
+                const op = document.createElement("option");
+                op.value = String(valor);
+                op.textContent = "? (" + valor + ")";
+                sel.appendChild(op);
+            }
             sel.value = String(valor);
             sel.onchange = () => aoMudar(Number(sel.value));
             return sel;
@@ -2123,6 +2327,7 @@
             const emUso = grupo => grupo === "sempre"
                 || (grupo === "memory" && modo === 0)
                 || (grupo === "manual" && (modo === 1 || modo === 3))
+                || (grupo === "semBanknum" && modo !== 2)      // CTL 1: em BANK/NUM o pé vira o número
                 || (grupo === "banknum" && modo === 2);
 
             const tabela = $("tabela-control");
@@ -2516,10 +2721,9 @@
          * (0..126 na pedaleira vira 0..16128 aqui), por isso a escala.
          */
         function controleDoCampo(i, campo, dados, aoMudar) {
-            const escala = campo.escala || 1;
-            const valor = Math.round(leCampo(dados, campo) / escala);
+            const valor = valorDeTela(dados, campo);
             const troca = async v => {
-                await escreveCampo(i, dados, campo, v * escala);
+                await escreveCampo(i, dados, campo, brutoDeTela(campo, v));
                 await ajustaFaixaAtivacao(i, dados, campo, v);
                 if (aoMudar) aoMudar(v);
             };
@@ -2528,14 +2732,29 @@
             return criaNumero(campo.min, campo.max, valor, troca, campo.base1);
         }
 
+        /**
+         * Número que a pedaleira mostra para um campo com escala. Arredonda para baixo e
+         * respeita o teto: o ACT HIGH 127 fica guardado como 16383, que dividido por 128
+         * dá 127,99 — arredondar para cima mostrava 128.
+         */
+        function valorDeTela(dados, campo) {
+            const escala = campo.escala || 1;
+            if (escala === 1) return leCampo(dados, campo);
+            return Math.max(campo.min, Math.min(campo.max, Math.floor(leCampo(dados, campo) / escala)));
+        }
+        function brutoDeTela(campo, v) {
+            if (campo.brutoMax !== undefined && v >= campo.max) return campo.brutoMax;
+            return v * (campo.escala || 1);
+        }
+
         /** Na pedaleira ACT LOW é sempre menor que ACT HIGH; aqui também. */
         async function ajustaFaixaAtivacao(i, dados, campo, v) {
             if (campo.chave !== "actLo" && campo.chave !== "actHi") return;
             const lo = campoPor("actLo"), hi = campoPor("actHi");
-            const vLo = Math.round(leCampo(dados, lo) / 128);
-            const vHi = Math.round(leCampo(dados, hi) / 128);
-            if (campo.chave === "actLo" && vLo >= vHi) await escreveCampo(i, dados, hi, Math.min(127, v + 1) * 128);
-            if (campo.chave === "actHi" && vHi <= vLo) await escreveCampo(i, dados, lo, Math.max(0, v - 1) * 128);
+            const vLo = valorDeTela(dados, lo);
+            const vHi = valorDeTela(dados, hi);
+            if (campo.chave === "actLo" && vLo >= vHi) await escreveCampo(i, dados, hi, brutoDeTela(hi, Math.min(hi.max, v + 1)));
+            if (campo.chave === "actHi" && vHi <= vLo) await escreveCampo(i, dados, lo, brutoDeTela(lo, Math.max(lo.min, v - 1)));
         }
 
         // ================== Presets ==================
@@ -2631,6 +2850,15 @@
         // ================== CTL/EXP — Knob ==================
         const OFS_KNOB = 0x69, TAM_KNOB = 0x14;        // 0x69 … 0x7C
 
+        /** Primeiro parâmetro que um bloco oferece (0 = nenhum, para "— none —"). */
+        function primeiroAlvo(bloco) {
+            if (bloco === BLOCO_MASTER) return ((CTLEXP.alvosGlobais.MASTER || [])[0] || [0])[0];
+            if (bloco === BLOCO_TUNER) return ((CTLEXP.alvosGlobais.TUNER || [])[0] || [0])[0];
+            if (bloco < 0 || !itens[bloco]) return 0;
+            const lista = CTLEXP.alvosPorTipo[String(itens[bloco].typeId)] || [];
+            return lista.length ? lista[0][0] : 1;          // sem tabela: ON/OFF
+        }
+
         async function abreKnob() {
             fechaMenu();
             if (!dadosCtlExpOk()) return;
@@ -2684,7 +2912,8 @@
                 const opcoes = opcoesDeBloco(fx, alvo);
                 celula(linha, criaSelectPares(opcoes.map(b => [b.valor, b.rotulo]), grupo.valor, async v => {
                     blocoEscolhido.set("knob" + k.rotulo, v);
-                    const mudancas = [[k.alvo, valorParaNibblesSemDeslocamento(0, 4)]];
+                    // Alvo 0 deixa o knob vazio na pedaleira: entra o primeiro parâmetro do bloco.
+                    const mudancas = [[k.alvo, valorParaNibblesSemDeslocamento(primeiroAlvo(v), 4)]];
                     if (v >= 0) mudancas.unshift([k.fxItem, [v]]);
                     await grava(mudancas, k.rotulo + " block");
                     desenhaKnob();

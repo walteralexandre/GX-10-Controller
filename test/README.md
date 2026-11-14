@@ -16,6 +16,20 @@ This project is a work in progress. **Use it at your own risk.**
 
 ## Change log
 
+v0.12.0 (2026-11-14)
+
+- module templates: the new **Template** button above the parameters saves the settings of
+  the selected module to a `.fxt` file and loads them back (Save / Load). A template only
+  goes into a module of the same kind; DIV, MIX and Master have templates too. The on/off
+  switch is not part of a template
+- the **Remove** button is gone from the parameter panel: use the `x` on the block
+- double click on the DIV block switches Ch Select between channel A and B
+- control: CTL 1 is greyed out in BANK/NUM mode
+- assign: the first two sources are MAN UP and MAN DOWN, and now match the pedal;
+  act high stops at 127
+- knob: choosing a block on the page no longer leaves the knob empty on the pedal
+- a setting the page does not know shows up as `? (number)` instead of an empty field
+
 v0.11.4 (2026-11-14)
 
 - control: the GX-10 keeps its footswitches in different places than the manual (which is
