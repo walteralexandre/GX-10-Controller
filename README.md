@@ -16,6 +16,19 @@ This project is a work in progress. **Use it at your own risk.**
 
 ## Change log
 
+v0.11.4 (2026-11-14)
+
+- control: the GX-10 keeps its footswitches in different places than the manual (which is
+  shared with the GX-100), so UP/DOWN and CTL 2/CTL 3 were writing to the wrong settings
+- assign: source list trimmed to what the pedal accepts, mode greyed out for the sources
+  that are not switches, "none" added to the category column, act low/high in the pedal's
+  own numbers (0-126 / 1-127, kept in order), and target min/max now speak the language of
+  the chosen parameter
+- knob: writes reach the pedal again, and Master and Tuner joined the block list
+- the chain now follows the divider: the channel it is not sending to is greyed out
+- double click on a block turns it on or off
+- clicking the preset name opens the preset list
+
 v0.11.3 (2026-11-03)
 
 - control: rows in the pedal's own order, only the functions the GX-10 offers for each

@@ -115,7 +115,9 @@
         .btn-remove { border-color: var(--accent-red); color: var(--accent-red); }
         h2 { font-size: .95rem; margin: 16px 0 10px; }
 
-        .faixa-preset { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; padding: 0 4px; }
+        .faixa-preset { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; padding: 2px 6px;
+                        border-radius: var(--raio); cursor: pointer; width: fit-content; }
+        .faixa-preset:hover { background: rgba(255,255,255,.05); }
         .faixa-preset #preset-numero { font-family: var(--fonte-mono); font-size: 1.05rem; font-weight: 700;
                                        color: var(--accent-blue); }
         .faixa-preset #preset-nome { font-size: .95rem; font-weight: 600; letter-spacing: .03em; }
@@ -295,7 +297,7 @@
             </div>
         </header>
 
-        <div class="faixa-preset">
+        <div class="faixa-preset" id="faixa-preset" data-tip="Click to pick another preset">
             <span id="preset-numero">—</span>
             <span id="preset-nome"></span>
         </div>
@@ -514,7 +516,7 @@
         // antes de tirar o cabo: o Chrome no Windows congela se o dispositivo some
         // enquanto alguma página ainda tem a sessão MIDI aberta.
         const MIDI_OFF = /[?&]midi=off(&|$)/i.test(location.search);
-        const APP_VERSAO = "0.11.3";
+        const APP_VERSAO = "0.11.4";
         const APP_DATA = "October 8, 2026";
 
         const pedal = new GX10();
@@ -680,6 +682,13 @@
             }
         }
 
+        /** Relê o canal ativo e redesenha a cadeia (o Divider pode ter mudado). */
+        async function atualizaCanal() {
+            const antes = canalAtivo;
+            await leCanalAtivo();
+            if (antes !== canalAtivo) desenhaCadeia();
+        }
+
         function nomeDoBloco(id) {
             const item = id >= 0 && id < TOTAL_FX_ITENS ? itens[id] : null;
             const mod = item ? moduloPorTipo.get(item.typeId) : null;
@@ -748,6 +757,18 @@
             div.appendChild(fechar);
 
             div.onclick = () => abrirBloco(id);
+            // Dois cliques ligam ou desligam o efeito, menos nos que estão sempre ligados.
+            if (item && !semLigaDesliga(item.typeId)) {
+                div.ondblclick = e => {
+                    e.preventDefault();
+                    const novo = item.ligado ? 0 : 1;
+                    if (!pedal.sendData(GX10.addrAdd(enderecoDoItem(id), 0x01), [novo])) return;
+                    item.ligado = novo === 1;
+                    addLog((mod ? mod.name : "block " + (id + 1)) + " = " + (novo ? "ON" : "OFF") + " (double click)", "raw");
+                    desenhaCadeia();
+                    if (selecionado === id && controles.has("onoff")) controles.get("onoff").aplicar(novo);
+                };
+            }
             div.addEventListener("dragstart", () => { arrastando = unidadeDoBloco(id); div.classList.add("arrastando"); });
             div.addEventListener("dragend", () => {
                 arrastando = null;
@@ -1212,6 +1233,11 @@
                     itens[selecionado].ligado = v === 1;
                     desenhaCadeia();
                 }
+                // Mode e Ch Select do Divider mudam qual caminho está tocando
+                if (typeof selecionado === "number" && itens[selecionado] &&
+                    itens[selecionado].typeId === TIPO_DIVIDER && (chave === "p:1" || chave === "p:2")) {
+                    setTimeout(atualizaCanal, 120);
+                }
             };
             const enviar = v => { if (v !== ultimoEnviado) manda(v); };
 
@@ -1327,6 +1353,7 @@
                     return "on/off of block " + (slot + 1);
                 }
                 if (desloc >= 3 && (desloc - 3) % 4 === 0) {
+                    if (itens[slot] && itens[slot].typeId === TIPO_DIVIDER && desloc <= 11) setTimeout(atualizaCanal, 120);
                     if (slot !== selecionado) return "parameter of block " + (slot + 1) + " (not open)";
                     const primeiro = (desloc - 3) / 4 + 1;
                     let aplicados = 0;
@@ -2246,6 +2273,35 @@
             (CTLEXP.alvosPorTipo[String(typeId)] || []).forEach(a => lista.push(a));
             return lista;
         }
+        const P_ALVO_ONOFF = { name: "ON/OFF", min: 0, max: 1,
+                               options: [{ value: 0, label: "OFF" }, { value: 1, label: "ON" }] };
+
+        /**
+         * Acha o parâmetro do módulo que corresponde a um alvo de assign.
+         * Os nomes do manual não batem letra a letra com os nossos: "1:RATE" é o "Rate 1",
+         * "SP TYPE" é o "Speaker Type" e "1:C" é o "HR1:C" do Harmonist.
+         */
+        function parametroDoAlvo(typeId, indice) {
+            if (indice === 1) return P_ALVO_ONOFF;
+            const lista = CTLEXP.alvosPorTipo[String(typeId)] || [];
+            const achado = lista.find(a => a[0] === indice);
+            const mod = moduloPorTipo.get(typeId);
+            if (!achado || !mod) return null;
+
+            const limpa = x => x.toUpperCase().replace(/[^A-Z0-9]/g, "");
+            const nome = achado[1];
+            const variantes = [nome];
+            const m = nome.match(/^(\d):\s*(.+)$/);
+            if (m) { variantes.push(m[2] + " " + m[1]); variantes.push("HR" + m[1] + ":" + m[2]); }
+            variantes.push(nome.replace(/^SP /, "SPEAKER "));
+            const alvos = variantes.map(limpa);
+
+            const par = Object.entries(mod.parameters)
+                .filter(([, p]) => p.paramIndex)
+                .find(([chave, p]) => alvos.includes(limpa(p.name)) || alvos.includes(limpa(chave)));
+            return par ? par[1] : null;
+        }
+
         /** Nome de um alvo qualquer, para quando o valor guardado não é do bloco escolhido. */
         function nomeDoAlvo(indice) {
             if (indice === 0) return "— none —";
@@ -2265,6 +2321,65 @@
 
         let paginaAssign = 0;
         let dadosAssign = null;
+
+        // Além dos blocos da cadeia, a pedaleira oferece Master e Tuner.
+        const BLOCO_MASTER = -2, BLOCO_TUNER = -3, BLOCO_NENHUM = -1;
+
+        function opcoesDeBloco(atualFx, alvo) {
+            const lista = blocosDaCadeia().map(b => ({ valor: b.valor, typeId: b.typeId, rotulo: b.rotulo }));
+            lista.push({ valor: BLOCO_MASTER, typeId: BLOCO_MASTER, rotulo: "Master" });
+            lista.push({ valor: BLOCO_TUNER, typeId: BLOCO_TUNER, rotulo: "Tuner" });
+            lista.unshift({ valor: BLOCO_NENHUM, typeId: BLOCO_NENHUM, rotulo: "— none —" });
+            if (atualFx >= 0 && !lista.some(b => b.valor === atualFx)) {
+                lista.splice(1, 0, { valor: atualFx, typeId: -1, rotulo: "Fx Item " + (atualFx + 1) + " (not in this preset)" });
+            }
+            return lista;
+        }
+
+        // Enquanto o alvo está em "nada", o bloco escolhido vive só aqui: sem isso a
+        // lista de parâmetros ficaria vazia logo depois de escolher a categoria.
+        const blocoEscolhido = new Map();
+
+        /** A que "bloco" um alvo pertence: um Fx Item, o Master, o Tuner ou nada. */
+        function grupoDoAlvo(fxItem, alvo, lembrado) {
+            if (!alvo) {
+                if (lembrado === undefined || lembrado === BLOCO_NENHUM) return { valor: BLOCO_NENHUM, typeId: BLOCO_NENHUM };
+                if (lembrado < 0) return { valor: lembrado, typeId: lembrado };
+                return { valor: lembrado, typeId: itens[lembrado] ? itens[lembrado].typeId : -1 };
+            }
+            if ((CTLEXP.alvosGlobais.MASTER || []).some(a => a[0] === alvo)) return { valor: BLOCO_MASTER, typeId: BLOCO_MASTER };
+            if ((CTLEXP.alvosGlobais.TUNER || []).some(a => a[0] === alvo)) return { valor: BLOCO_TUNER, typeId: BLOCO_TUNER };
+            return { valor: fxItem, typeId: itens[fxItem] ? itens[fxItem].typeId : -1 };
+        }
+        const grupoDoAssign = (i, dados) => grupoDoAlvo(leCampo(dados, campoPor("fxItem")),
+                                                        leCampo(dados, campoPor("target")), blocoEscolhido.get(i));
+
+        /** Parâmetros que o bloco escolhido oferece. */
+        function paresDeParametro(grupo, atual) {
+            let pares = [[0, "— none —"]];
+            if (grupo.typeId === BLOCO_MASTER) pares = pares.concat(CTLEXP.alvosGlobais.MASTER || []);
+            else if (grupo.typeId === BLOCO_TUNER) pares = pares.concat(CTLEXP.alvosGlobais.TUNER || []);
+            else if (grupo.typeId >= 0) pares = pares.concat(alvosDoTipo(grupo.typeId));
+            if (atual !== undefined && !pares.some(x => x[0] === atual)) pares.push([atual, nomeDoAlvo(atual)]);
+            return pares;
+        }
+
+        /** Select de bloco que já sabe gravar (Fx Item) e zerar o alvo quando troca de grupo. */
+        function selectDeBloco(i, dados, aoTrocar) {
+            const campoBloco = campoPor("fxItem");
+            const campoAlvo = campoPor("target");
+            const fx = leCampo(dados, campoBloco);
+            const alvo = leCampo(dados, campoAlvo);
+            const grupo = grupoDoAssign(i, dados);
+            const opcoes = opcoesDeBloco(fx, alvo);
+            return criaSelectPares(opcoes.map(b => [b.valor, b.rotulo]), grupo.valor, async v => {
+                blocoEscolhido.set(i, v);
+                if (v >= 0) await escreveCampo(i, dados, campoBloco, v);
+                // trocar de bloco invalida o alvo antigo
+                await escreveCampo(i, dados, campoAlvo, 0);
+                if (aoTrocar) aoTrocar();
+            });
+        }
 
         async function abreAssign() {
             fechaMenu();
@@ -2342,25 +2457,7 @@
                     }
 
                     if (chave === "__bloco") {
-                        const campoBloco = campoPor("fxItem");
-                        const atual = leCampo(dados, campoBloco);
-                        const opcoes = blocos.slice();
-                        if (!opcoes.some(b => b.valor === atual)) {
-                            opcoes.unshift({ valor: atual, typeId: -1, rotulo: "Fx Item " + (atual + 1) + " (not in this preset)" });
-                        }
-                        const sel = document.createElement("select");
-                        opcoes.forEach(b => {
-                            const op = document.createElement("option");
-                            op.value = String(b.valor);
-                            op.textContent = b.rotulo;
-                            sel.appendChild(op);
-                        });
-                        sel.value = String(atual);
-                        sel.onchange = async () => {
-                            await escreveCampo(i, dados, campoBloco, Number(sel.value));
-                            desenhaAssign();                      // a lista de parâmetros muda junto
-                        };
-                        td.appendChild(sel);
+                        td.appendChild(selectDeBloco(i, dados, () => desenhaAssign()));
                         td.style.minWidth = "180px";
                         linha.appendChild(td);
                         return;
@@ -2368,22 +2465,45 @@
 
                     if (chave === "target") {
                         const campoAlvo = campoPor("target");
-                        const bloco = leCampo(dados, campoPor("fxItem"));
-                        const tipo = itens[bloco] ? itens[bloco].typeId : -1;
                         const atual = leCampo(dados, campoAlvo);
-                        const pares = [[0, "— none —"]].concat(alvosDoTipo(tipo));
-                        if (!pares.some(x => x[0] === atual)) pares.push([atual, nomeDoAlvo(atual)]);
-                        const sel = criaSelectPares(pares, atual, v => escreveCampo(i, dados, campoAlvo, v));
+                        const pares = paresDeParametro(grupoDoAssign(i, dados), atual);
+                        const sel = criaSelectPares(pares, atual, async v => {
+                            await escreveCampo(i, dados, campoAlvo, v);
+                            desenhaAssign();                      // min/max seguem o parâmetro
+                        });
                         td.appendChild(sel);
                         td.style.minWidth = "230px";
                         linha.appendChild(td);
                         return;
                     }
 
+                    // TARGET MIN/MAX falam a língua do parâmetro escolhido
+                    if (chave === "targetMin" || chave === "targetMax") {
+                        const campo = campoPor(chave);
+                        const alvo = leCampo(dados, campoPor("target"));
+                        const p = parametroDoAlvo(grupoDoAssign(i, dados).typeId, alvo);
+                        const bruto = leCampo(dados, campo);
+                        const valor = bruto - DESLOC_NIBBLE;
+                        const manda = v => escreveCampo(i, dados, campo, v + DESLOC_NIBBLE);
+                        if (p && p.options) td.appendChild(criaSelectPares(p.options.map(o => [o.value, o.label]), valor, manda));
+                        else if (p && p.min !== undefined) td.appendChild(criaNumero(p.min, p.max, valor, manda, false));
+                        else td.appendChild(criaNumero(0, 32767, valor, manda, false));
+                        linha.appendChild(td);
+                        return;
+                    }
+
                     const campo = campoPor(chave);
-                    td.appendChild(controleDoCampo(i, campo, dados, v => {
+                    const controle = controleDoCampo(i, campo, dados, v => {
                         if (chave === "sw") linha.classList.toggle("apagada", !v);
-                    }));
+                        if (chave === "source") desenhaAssign();   // o modo depende da fonte
+                        if (chave === "actLo" || chave === "actHi") desenhaAssign();
+                    });
+                    // TOGGLE/MOMENT só vale para as fontes que são chave
+                    if (chave === "mode" && !CTLEXP.assign.fonteComModo.includes(leCampo(dados, campoPor("source")))) {
+                        controle.disabled = true;
+                        td.dataset.tip = "This source is a pedal or a continuous value, so toggle/moment does not apply.";
+                    }
+                    td.appendChild(controle);
                     linha.appendChild(td);
                 });
 
@@ -2391,12 +2511,31 @@
             });
         }
 
-        /** Controle certo para o campo: lista, número. */
+        /**
+         * Controle certo para o campo. ACT LOW/HIGH são guardados em múltiplos de 128
+         * (0..126 na pedaleira vira 0..16128 aqui), por isso a escala.
+         */
         function controleDoCampo(i, campo, dados, aoMudar) {
-            const valor = leCampo(dados, campo);
-            const troca = v => { escreveCampo(i, dados, campo, v); if (aoMudar) aoMudar(v); };
+            const escala = campo.escala || 1;
+            const valor = Math.round(leCampo(dados, campo) / escala);
+            const troca = async v => {
+                await escreveCampo(i, dados, campo, v * escala);
+                await ajustaFaixaAtivacao(i, dados, campo, v);
+                if (aoMudar) aoMudar(v);
+            };
+            if (campo.pares) return criaSelectPares(campo.pares, valor, troca);
             if (campo.lista) return criaSelect(campo.lista, valor, troca, false);
             return criaNumero(campo.min, campo.max, valor, troca, campo.base1);
+        }
+
+        /** Na pedaleira ACT LOW é sempre menor que ACT HIGH; aqui também. */
+        async function ajustaFaixaAtivacao(i, dados, campo, v) {
+            if (campo.chave !== "actLo" && campo.chave !== "actHi") return;
+            const lo = campoPor("actLo"), hi = campoPor("actHi");
+            const vLo = Math.round(leCampo(dados, lo) / 128);
+            const vHi = Math.round(leCampo(dados, hi) / 128);
+            if (campo.chave === "actLo" && vLo >= vHi) await escreveCampo(i, dados, hi, Math.min(127, v + 1) * 128);
+            if (campo.chave === "actHi" && vHi <= vLo) await escreveCampo(i, dados, lo, Math.max(0, v - 1) * 128);
         }
 
         // ================== Presets ==================
@@ -2453,6 +2592,8 @@
                 addLog(e.message, "error");
             }
         }
+
+        $("faixa-preset").onclick = () => { if (pedal.isConnected()) $("btn-presets").onclick(); };
 
         $("btn-presets").onclick = async () => {
             fechaMenu();
@@ -2529,25 +2670,29 @@
                 const linha = document.createElement("tr");
                 celula(linha, k.rotulo, "nome");
 
-                const bloco = dados[k.fxItem - OFS_KNOB];
-                const alvo = nibblesParaValorSemDeslocamento(dados.slice(k.alvo - OFS_KNOB, k.alvo - OFS_KNOB + 4));
+                const iFx = k.fxItem - OFS_KNOB, iAlvo = k.alvo - OFS_KNOB;
+                const fx = dados[iFx];
+                const alvo = nibblesParaValorSemDeslocamento(dados.slice(iAlvo, iAlvo + 4));
+                const grupo = grupoDoAlvo(fx, alvo, blocoEscolhido.get("knob" + k.rotulo));
 
-                const opcoes = blocos.slice();
-                if (!opcoes.some(b => b.valor === bloco)) {
-                    opcoes.unshift({ valor: bloco, typeId: -1, rotulo: "Fx Item " + (bloco + 1) + " (not in this preset)" });
-                }
-                const selBloco = criaSelectPares(opcoes.map(b => [b.valor, b.rotulo]), bloco, async v => {
-                    await gravaEConfere(GX10.addrAdd(END_MEM_TEMP, k.fxItem), [v], k.rotulo + " block");
-                    desenhaKnob();                       // a lista de parâmetros acompanha o bloco
-                });
-                celula(linha, selBloco);
+                // A pedaleira não aceita byte avulso aqui: a área inteira dos knobs é reenviada.
+                const grava = async (mudancas, rotulo) => {
+                    mudancas.forEach(([desloc, bytes]) => bytes.forEach((b, n) => { dados[desloc - OFS_KNOB + n] = b; }));
+                    await gravaEConfere(GX10.addrAdd(END_MEM_TEMP, OFS_KNOB), dados.slice(0, TAM_KNOB), rotulo);
+                };
 
-                const tipo = itens[bloco] ? itens[bloco].typeId : -1;
-                const pares = [[0, "— none —"]].concat(alvosDoTipo(tipo));
-                if (!pares.some(x => x[0] === alvo)) pares.push([alvo, nomeDoAlvo(alvo)]);
-                const td = celula(linha, criaSelectPares(pares, alvo, v => {
-                    gravaEConfere(GX10.addrAdd(END_MEM_TEMP, k.alvo), valorParaNibblesSemDeslocamento(v, 4), k.rotulo);
+                const opcoes = opcoesDeBloco(fx, alvo);
+                celula(linha, criaSelectPares(opcoes.map(b => [b.valor, b.rotulo]), grupo.valor, async v => {
+                    blocoEscolhido.set("knob" + k.rotulo, v);
+                    const mudancas = [[k.alvo, valorParaNibblesSemDeslocamento(0, 4)]];
+                    if (v >= 0) mudancas.unshift([k.fxItem, [v]]);
+                    await grava(mudancas, k.rotulo + " block");
+                    desenhaKnob();
                 }));
+
+                const pares = paresDeParametro(grupo, alvo);
+                const td = celula(linha, criaSelectPares(pares, alvo, v =>
+                    grava([[k.alvo, valorParaNibblesSemDeslocamento(v, 4)]], k.rotulo)));
                 td.style.minWidth = "260px";
                 tabela.appendChild(linha);
             });

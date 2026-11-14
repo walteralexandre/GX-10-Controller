@@ -7,7 +7,7 @@
  * Os nomes das linhas seguem o que aparece na tela da pedaleira (GX-10); o manual
  * chama de BankDown/BankUp, Manual Num1/2, CNum, Ctl1-3, Exp1Sw, Exp1 e Exp2.
  */
-window.GX10_CTLEXP_VERSAO = "0.11.3";
+window.GX10_CTLEXP_VERSAO = "0.11.4";
 window.GX10_CTLEXP = {
  "listas": {
   "funcDownUp": [
@@ -250,13 +250,13 @@ window.GX10_CTLEXP = {
    "lista": "funcDownUp",
    "grupo": "memory",
    "mem": {
-    "funcao": 21,
-    "modo": 39
+    "funcao": 17,
+    "modo": 35
    },
    "sis": {
-    "pref": 5,
-    "funcao": 23,
-    "modo": 41
+    "pref": 1,
+    "funcao": 19,
+    "modo": 37
    }
   },
   {
@@ -264,13 +264,13 @@ window.GX10_CTLEXP = {
    "lista": "funcDownUp",
    "grupo": "memory",
    "mem": {
-    "funcao": 20,
-    "modo": 38
+    "funcao": 16,
+    "modo": 34
    },
    "sis": {
-    "pref": 4,
-    "funcao": 22,
-    "modo": 40
+    "pref": 0,
+    "funcao": 18,
+    "modo": 36
    }
   },
   {
@@ -320,20 +320,6 @@ window.GX10_CTLEXP = {
    "lista": "funcCtl",
    "grupo": "sempre",
    "mem": {
-    "funcao": 28,
-    "modo": 46
-   },
-   "sis": {
-    "pref": 12,
-    "funcao": 30,
-    "modo": 48
-   }
-  },
-  {
-   "rotulo": "CTL 3",
-   "lista": "funcCtl",
-   "grupo": "sempre",
-   "mem": {
     "funcao": 29,
     "modo": 47
    },
@@ -341,6 +327,20 @@ window.GX10_CTLEXP = {
     "pref": 13,
     "funcao": 31,
     "modo": 49
+   }
+  },
+  {
+   "rotulo": "CTL 3",
+   "lista": "funcCtl",
+   "grupo": "sempre",
+   "mem": {
+    "funcao": 30,
+    "modo": 48
+   },
+   "sis": {
+    "pref": 14,
+    "funcao": 32,
+    "modo": 50
    }
   },
   {
@@ -451,91 +451,307 @@ window.GX10_CTLEXP = {
     "rotulo": "Source",
     "desloc": 14,
     "tipo": "byte",
-    "lista": [
-     "NUM 1",
-     "NUM 2",
-     "NUM 3",
-     "NUM 4",
-     "MAN 1",
-     "MAN 2",
-     "MAN 3",
-     "MAN 4",
-     "CUR NUM",
-     "BANK DOWN",
-     "BANK UP",
-     "CTL 1",
-     "CTL 2",
-     "CTL 3",
-     "CTL 4",
-     "EXP 1 SW",
-     "EXP 1",
-     "EXP 2",
-     "INT PDL",
-     "WAVE PDL",
-     "INPUT",
-     "CC# 1",
-     "CC# 2",
-     "CC# 3",
-     "CC# 4",
-     "CC# 5",
-     "CC# 6",
-     "CC# 7",
-     "CC# 8",
-     "CC# 9",
-     "CC# 10",
-     "CC# 11",
-     "CC# 12",
-     "CC# 13",
-     "CC# 14",
-     "CC# 15",
-     "CC# 16",
-     "CC# 17",
-     "CC# 18",
-     "CC# 19",
-     "CC# 20",
-     "CC# 21",
-     "CC# 22",
-     "CC# 23",
-     "CC# 24",
-     "CC# 25",
-     "CC# 26",
-     "CC# 27",
-     "CC# 28",
-     "CC# 29",
-     "CC# 30",
-     "CC# 31",
-     "CC# 64",
-     "CC# 65",
-     "CC# 66",
-     "CC# 67",
-     "CC# 68",
-     "CC# 69",
-     "CC# 70",
-     "CC# 71",
-     "CC# 72",
-     "CC# 73",
-     "CC# 74",
-     "CC# 75",
-     "CC# 76",
-     "CC# 77",
-     "CC# 78",
-     "CC# 79",
-     "CC# 80",
-     "CC# 81",
-     "CC# 82",
-     "CC# 83",
-     "CC# 84",
-     "CC# 85",
-     "CC# 86",
-     "CC# 87",
-     "CC# 88",
-     "CC# 89",
-     "CC# 90",
-     "CC# 91",
-     "CC# 92",
-     "CC# 93",
-     "CC# 94",
-     "CC# 95"
+    "pares": [
+     [
+      1,
+      "MAIN UP"
+     ],
+     [
+      0,
+      "MAIN DOWN"
+     ],
+     [
+      8,
+      "CUR NUM"
+     ],
+     [
+      11,
+      "CTL 1"
+     ],
+     [
+      13,
+      "CTL 2"
+     ],
+     [
+      14,
+      "CTL 3"
+     ],
+     [
+      15,
+      "EXP 1 SW"
+     ],
+     [
+      16,
+      "EXP 1"
+     ],
+     [
+      17,
+      "EXP 2"
+     ],
+     [
+      18,
+      "INT PDL"
+     ],
+     [
+      19,
+      "WAVE PDL"
+     ],
+     [
+      20,
+      "INPUT"
+     ],
+     [
+      21,
+      "CC# 1"
+     ],
+     [
+      22,
+      "CC# 2"
+     ],
+     [
+      23,
+      "CC# 3"
+     ],
+     [
+      24,
+      "CC# 4"
+     ],
+     [
+      25,
+      "CC# 5"
+     ],
+     [
+      26,
+      "CC# 6"
+     ],
+     [
+      27,
+      "CC# 7"
+     ],
+     [
+      28,
+      "CC# 8"
+     ],
+     [
+      29,
+      "CC# 9"
+     ],
+     [
+      30,
+      "CC# 10"
+     ],
+     [
+      31,
+      "CC# 11"
+     ],
+     [
+      32,
+      "CC# 12"
+     ],
+     [
+      33,
+      "CC# 13"
+     ],
+     [
+      34,
+      "CC# 14"
+     ],
+     [
+      35,
+      "CC# 15"
+     ],
+     [
+      36,
+      "CC# 16"
+     ],
+     [
+      37,
+      "CC# 17"
+     ],
+     [
+      38,
+      "CC# 18"
+     ],
+     [
+      39,
+      "CC# 19"
+     ],
+     [
+      40,
+      "CC# 20"
+     ],
+     [
+      41,
+      "CC# 21"
+     ],
+     [
+      42,
+      "CC# 22"
+     ],
+     [
+      43,
+      "CC# 23"
+     ],
+     [
+      44,
+      "CC# 24"
+     ],
+     [
+      45,
+      "CC# 25"
+     ],
+     [
+      46,
+      "CC# 26"
+     ],
+     [
+      47,
+      "CC# 27"
+     ],
+     [
+      48,
+      "CC# 28"
+     ],
+     [
+      49,
+      "CC# 29"
+     ],
+     [
+      50,
+      "CC# 30"
+     ],
+     [
+      51,
+      "CC# 31"
+     ],
+     [
+      52,
+      "CC# 64"
+     ],
+     [
+      53,
+      "CC# 65"
+     ],
+     [
+      54,
+      "CC# 66"
+     ],
+     [
+      55,
+      "CC# 67"
+     ],
+     [
+      56,
+      "CC# 68"
+     ],
+     [
+      57,
+      "CC# 69"
+     ],
+     [
+      58,
+      "CC# 70"
+     ],
+     [
+      59,
+      "CC# 71"
+     ],
+     [
+      60,
+      "CC# 72"
+     ],
+     [
+      61,
+      "CC# 73"
+     ],
+     [
+      62,
+      "CC# 74"
+     ],
+     [
+      63,
+      "CC# 75"
+     ],
+     [
+      64,
+      "CC# 76"
+     ],
+     [
+      65,
+      "CC# 77"
+     ],
+     [
+      66,
+      "CC# 78"
+     ],
+     [
+      67,
+      "CC# 79"
+     ],
+     [
+      68,
+      "CC# 80"
+     ],
+     [
+      69,
+      "CC# 81"
+     ],
+     [
+      70,
+      "CC# 82"
+     ],
+     [
+      71,
+      "CC# 83"
+     ],
+     [
+      72,
+      "CC# 84"
+     ],
+     [
+      73,
+      "CC# 85"
+     ],
+     [
+      74,
+      "CC# 86"
+     ],
+     [
+      75,
+      "CC# 87"
+     ],
+     [
+      76,
+      "CC# 88"
+     ],
+     [
+      77,
+      "CC# 89"
+     ],
+     [
+      78,
+      "CC# 90"
+     ],
+     [
+      79,
+      "CC# 91"
+     ],
+     [
+      80,
+      "CC# 92"
+     ],
+     [
+      81,
+      "CC# 93"
+     ],
+     [
+      82,
+      "CC# 94"
+     ],
+     [
+      83,
+      "CC# 95"
+     ]
     ]
    },
    {
@@ -684,7 +900,8 @@ window.GX10_CTLEXP = {
     "desloc": 21,
     "tipo": "nibbles4",
     "min": 0,
-    "max": 16382
+    "max": 126,
+    "escala": 128
    },
    {
     "chave": "actHi",
@@ -692,7 +909,8 @@ window.GX10_CTLEXP = {
     "desloc": 25,
     "tipo": "nibbles4",
     "min": 1,
-    "max": 16383
+    "max": 127,
+    "escala": 128
    },
    {
     "chave": "midiCh",
@@ -875,6 +1093,79 @@ window.GX10_CTLEXP = {
      ]
     ]
    }
+  ],
+  "fonteComModo": [
+   1,
+   0,
+   8,
+   11,
+   13,
+   14,
+   15,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47,
+   48,
+   49,
+   50,
+   51,
+   52,
+   53,
+   54,
+   55,
+   56,
+   57,
+   58,
+   59,
+   60,
+   61,
+   62,
+   63,
+   64,
+   65,
+   66,
+   67,
+   68,
+   69,
+   70,
+   71,
+   72,
+   73,
+   74,
+   75,
+   76,
+   77,
+   78,
+   79,
+   80,
+   81,
+   82,
+   83
   ]
  },
  "knobs": [
@@ -4476,14 +4767,6 @@ window.GX10_CTLEXP = {
    [
     696,
     "INPUT SETTING"
-   ],
-   [
-    697,
-    "AMP CTL1"
-   ],
-   [
-    698,
-    "AMP CTL2"
    ]
   ],
   "TUNER": [
