@@ -1121,11 +1121,11 @@
                 b.onclick = () => { lista.classList.remove("aberto"); acao(); };
                 lista.appendChild(b);
             };
-            opcao("Save", "Save these settings to a " + EXT_MODELO + " file", salvaModelo);
             opcao("Load", "Load a " + EXT_MODELO + " file made from this same kind of module", () => {
                 $("arquivo-modelo").value = "";
                 $("arquivo-modelo").click();
             });
+            opcao("Save", "Save these settings to a " + EXT_MODELO + " file", salvaModelo);
             btn.onclick = e => { e.stopPropagation(); lista.classList.toggle("aberto"); };
             caixa.append(btn, lista);
             cabeca.appendChild(caixa);
